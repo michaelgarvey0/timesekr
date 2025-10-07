@@ -1,174 +1,87 @@
-import { useState } from 'react'
-import './App.css'
-
-// Mock data
-const mockGroups = [
-  { id: 1, name: 'Engineering Team', members: ['alice@company.com', 'bob@company.com', 'charlie@company.com'] },
-  { id: 2, name: 'Book Club', members: ['dana@email.com', 'eve@email.com', 'frank@email.com', 'grace@email.com'] },
-]
-
-const mockAvailableSlots = [
-  { date: '2025-10-08', time: '2:00 PM - 3:00 PM', available: 8, total: 8 },
-  { date: '2025-10-08', time: '4:00 PM - 5:00 PM', available: 7, total: 8 },
-  { date: '2025-10-09', time: '10:00 AM - 11:00 AM', available: 8, total: 8 },
-  { date: '2025-10-09', time: '1:00 PM - 2:00 PM', available: 6, total: 8 },
-  { date: '2025-10-10', time: '3:00 PM - 4:00 PM', available: 8, total: 8 },
-]
+import { Link } from 'react-router-dom'
 
 function App() {
-  const [view, setView] = useState('host') // 'host' or 'groups'
-  const [emails, setEmails] = useState('')
-  const [selectedGroup, setSelectedGroup] = useState(null)
-  const [showResults, setShowResults] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
-  const [newGroupName, setNewGroupName] = useState('')
-  const [showNewGroup, setShowNewGroup] = useState(false)
-
-  const handleFindTimes = () => {
-    setIsSearching(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsSearching(false)
-      setShowResults(true)
-    }, 1500)
-  }
-
-  const handleLoadGroup = (group) => {
-    setSelectedGroup(group)
-    setEmails(group.members.join(', '))
-    setView('host')
-  }
-
-  const handleSaveGroup = () => {
-    // Simulate saving group
-    setShowNewGroup(false)
-    setNewGroupName('')
-    alert('Group saved! (This is a demo - not actually saved)')
-  }
-
   return (
-    <div className="app">
-      <header className="header">
-        <h1>Timesēkr</h1>
-        <p className="tagline">Find meeting times across organizations, instantly</p>
-        <nav className="nav">
-          <button
-            className={view === 'host' ? 'active' : ''}
-            onClick={() => setView('host')}
-          >
-            Find Times
-          </button>
-          <button
-            className={view === 'groups' ? 'active' : ''}
-            onClick={() => setView('groups')}
-          >
-            My Groups
-          </button>
-        </nav>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-100 flex items-center justify-center p-6">
 
-      <main className="main">
-        {view === 'host' && (
-          <div className="host-view">
-            <div className="input-section">
-              <h2>Find Available Meeting Times</h2>
-              <div className="form-group">
-                <label>Enter participant emails (comma separated):</label>
-                <textarea
-                  value={emails}
-                  onChange={(e) => setEmails(e.target.value)}
-                  placeholder="alice@company.com, bob@team.org, charlie@email.com"
-                  rows="4"
-                />
+      <div className="w-full max-w-4xl">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-bold text-[#212121] mb-4">timesēkr</h1>
+          <p className="text-xl text-gray-600 mb-8">
+            Find meeting times across organizations, instantly
+          </p>
+        </div>
+
+        {/* Action Cards */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Create Organization Card */}
+          <Link to="/onboarding">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition cursor-pointer group">
+              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-teal-600 transition">
+                <svg className="w-6 h-6 text-teal-700 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                </svg>
               </div>
-
-              <div className="actions">
-                <button
-                  className="primary-btn"
-                  onClick={handleFindTimes}
-                  disabled={!emails || isSearching}
-                >
-                  {isSearching ? 'Checking Calendars...' : 'Find Available Times'}
-                </button>
-                <button
-                  className="secondary-btn"
-                  onClick={() => setShowNewGroup(!showNewGroup)}
-                >
-                  Save as Group
-                </button>
+              <h2 className="text-2xl font-semibold text-[#212121] mb-2">Create Organization</h2>
+              <p className="text-gray-600 mb-4">
+                Set up a new organization and invite your team members
+              </p>
+              <div className="text-teal-600 font-medium group-hover:translate-x-2 transition inline-flex items-center">
+                Get started
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-
-              {showNewGroup && (
-                <div className="new-group-form">
-                  <input
-                    type="text"
-                    value={newGroupName}
-                    onChange={(e) => setNewGroupName(e.target.value)}
-                    placeholder="Group name (e.g., 'Weekly Standup Team')"
-                  />
-                  <button onClick={handleSaveGroup} disabled={!newGroupName}>
-                    Save Group
-                  </button>
-                </div>
-              )}
             </div>
+          </Link>
 
-            {showResults && (
-              <div className="results-section">
-                <h3>Available Time Slots</h3>
-                <p className="results-info">
-                  Showing times when all {emails.split(',').length} participants are available
-                </p>
-                <div className="time-slots">
-                  {mockAvailableSlots.map((slot, index) => (
-                    <div
-                      key={index}
-                      className={`time-slot ${slot.available === slot.total ? 'full-availability' : ''}`}
-                    >
-                      <div className="slot-date">{slot.date}</div>
-                      <div className="slot-time">{slot.time}</div>
-                      <div className="slot-availability">
-                        {slot.available}/{slot.total} available
-                      </div>
-                      <button className="select-btn">Select This Time</button>
-                    </div>
-                  ))}
-                </div>
+          {/* Login Card */}
+          <Link to="/login">
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition cursor-pointer group">
+              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald-600 transition">
+                <svg className="w-6 h-6 text-emerald-700 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
               </div>
-            )}
-          </div>
-        )}
+              <h2 className="text-2xl font-semibold text-[#212121] mb-2">Login</h2>
+              <p className="text-gray-600 mb-4">
+                Access your existing organization and schedule meetings
+              </p>
+              <div className="text-emerald-600 font-medium group-hover:translate-x-2 transition inline-flex items-center">
+                Sign in
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+        </div>
 
-        {view === 'groups' && (
-          <div className="groups-view">
-            <h2>Saved Groups</h2>
-            <p className="groups-info">Quickly reuse groups for recurring meetings</p>
-            <div className="groups-list">
-              {mockGroups.map((group) => (
-                <div key={group.id} className="group-card">
-                  <h3>{group.name}</h3>
-                  <p className="member-count">{group.members.length} members</p>
-                  <div className="members">
-                    {group.members.map((member, idx) => (
-                      <span key={idx} className="member-tag">{member}</span>
-                    ))}
-                  </div>
-                  <button
-                    className="load-btn"
-                    onClick={() => handleLoadGroup(group)}
-                  >
-                    Use This Group
-                  </button>
-                </div>
-              ))}
+        {/* Features */}
+        <div className="mt-16 text-center">
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-6">
+            Why timesēkr?
+          </h3>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <div className="text-3xl mb-2">📅</div>
+              <h4 className="font-semibold text-[#212121] mb-1">Cross-Platform</h4>
+              <p className="text-sm text-gray-600">Works with Google, Outlook, and more</p>
+            </div>
+            <div>
+              <div className="text-3xl mb-2">⚡</div>
+              <h4 className="font-semibold text-[#212121] mb-1">Instant Results</h4>
+              <p className="text-sm text-gray-600">Find available times in seconds</p>
+            </div>
+            <div>
+              <div className="text-3xl mb-2">👥</div>
+              <h4 className="font-semibold text-[#212121] mb-1">Scale to 500+</h4>
+              <p className="text-sm text-gray-600">Perfect for large organizations</p>
             </div>
           </div>
-        )}
-      </main>
-
-      <footer className="footer">
-        <div className="demo-badge">DEMO MODE - All data is simulated</div>
-      </footer>
+        </div>
+      </div>
     </div>
   )
 }
