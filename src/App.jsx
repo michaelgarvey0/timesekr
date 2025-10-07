@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
+import FeedbackButton from './components/FeedbackButton'
 
 function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-emerald-100 flex items-center justify-center p-6">
+      <FeedbackButton />
 
       <div className="w-full max-w-4xl">
         {/* Hero Section */}

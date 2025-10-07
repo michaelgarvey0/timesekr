@@ -6,6 +6,7 @@ import FindAvailability from '../components/dashboard/FindAvailability'
 import MyAvailability from '../components/dashboard/MyAvailability'
 import CalendarIntegration from '../components/dashboard/CalendarIntegration'
 import OrgSettings from '../components/dashboard/OrgSettings'
+import FeedbackButton from '../components/FeedbackButton'
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState('find')
@@ -17,6 +18,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      <FeedbackButton />
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-6 border-b border-gray-200">
