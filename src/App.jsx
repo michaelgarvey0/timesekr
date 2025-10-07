@@ -11,6 +11,11 @@ function App() {
           <p className="text-xl text-gray-600 mb-8">
             Find meeting times across organizations, instantly
           </p>
+          <Link to="/dashboard">
+            <button className="text-sm text-teal-600 hover:text-teal-700 font-medium">
+              Skip to Dashboard →
+            </button>
+          </Link>
         </div>
 
         {/* Action Cards */}

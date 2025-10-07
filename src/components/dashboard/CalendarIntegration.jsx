@@ -2,8 +2,8 @@ function CalendarIntegration() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-[#212121] mb-2">Organization Calendar Integration</h3>
-        <p className="text-sm text-gray-600 mb-6">Connect your organization's calendar system to sync availability across all members</p>
+        <h3 className="text-lg font-semibold text-[#212121] mb-2">My Calendars</h3>
+        <p className="text-sm text-gray-600 mb-6">Connect your personal calendars to sync your availability</p>
 
         <div className="grid md:grid-cols-2 gap-4">
           <button className="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-lg hover:border-teal-600 hover:bg-teal-50 transition">
@@ -13,8 +13,8 @@ function CalendarIntegration() {
               </svg>
             </div>
             <div className="text-left">
-              <p className="font-semibold text-[#212121]">Google Workspace</p>
-              <p className="text-sm text-gray-500">Connect Google Calendar</p>
+              <p className="font-semibold text-[#212121]">Google Calendar</p>
+              <p className="text-sm text-gray-500">Connect your Google Calendar</p>
             </div>
           </button>
 
@@ -25,8 +25,8 @@ function CalendarIntegration() {
               </svg>
             </div>
             <div className="text-left">
-              <p className="font-semibold text-[#212121]">Microsoft 365</p>
-              <p className="text-sm text-gray-500">Connect Outlook Calendar</p>
+              <p className="font-semibold text-[#212121]">Outlook Calendar</p>
+              <p className="text-sm text-gray-500">Connect your Outlook Calendar</p>
             </div>
           </button>
         </div>
