@@ -3,10 +3,12 @@ import GoogleWorkspaceIcon from '../assets/google-workspace.svg'
 import MicrosoftExchangeIcon from '../assets/microsoft-exchange.svg'
 
 function PersonalCalendarConnectionFlow({ provider, onConnectionComplete, onCancel }) {
-  const [step, setStep] = useState(1) // 1: Enter email, 2: Instructions + password
+  const [step, setStep] = useState(1) // 1: Auth/Email, 2: Instructions + password (Apple), 3: Calendar selection
   const [appleEmail, setAppleEmail] = useState('')
   const [applePassword, setApplePassword] = useState('')
   const [showOAuthSimulation, setShowOAuthSimulation] = useState(false)
+  const [availableCalendars, setAvailableCalendars] = useState([])
+  const [selectedCalendars, setSelectedCalendars] = useState([])
 
   const handleGoogleConnect = () => {
     setShowOAuthSimulation(true)
@@ -17,12 +19,49 @@ function PersonalCalendarConnectionFlow({ provider, onConnectionComplete, onCanc
   }
 
   const handleOAuthApprove = () => {
-    onConnectionComplete?.(provider)
+    // Mock calendars for each provider
+    const mockCalendars = {
+      google: [
+        { id: '1', name: 'Personal', email: 'you@gmail.com', primary: true },
+        { id: '2', name: 'Work Projects', email: 'you@gmail.com', primary: false },
+        { id: '3', name: 'Family', email: 'you@gmail.com', primary: false },
+      ],
+      outlook: [
+        { id: '1', name: 'Calendar', email: 'you@outlook.com', primary: true },
+        { id: '2', name: 'Birthdays', email: 'you@outlook.com', primary: false },
+        { id: '3', name: 'Projects', email: 'you@outlook.com', primary: false },
+      ],
+    }
+
+    setAvailableCalendars(mockCalendars[provider] || [])
+    setSelectedCalendars(mockCalendars[provider]?.filter(c => c.primary).map(c => c.id) || [])
+    setShowOAuthSimulation(false)
+    setStep(3)
   }
 
   const handleAppleSubmit = (e) => {
     e.preventDefault()
-    onConnectionComplete?.(provider)
+    // Mock Apple calendars
+    const appleCalendars = [
+      { id: '1', name: 'Home', email: appleEmail, primary: true },
+      { id: '2', name: 'Work', email: appleEmail, primary: false },
+      { id: '3', name: 'Family', email: appleEmail, primary: false },
+    ]
+    setAvailableCalendars(appleCalendars)
+    setSelectedCalendars(appleCalendars.filter(c => c.primary).map(c => c.id))
+    setStep(3)
+  }
+
+  const handleToggleCalendar = (calendarId) => {
+    setSelectedCalendars(prev =>
+      prev.includes(calendarId)
+        ? prev.filter(id => id !== calendarId)
+        : [...prev, calendarId]
+    )
+  }
+
+  const handleConfirmSelection = () => {
+    onConnectionComplete?.(provider, selectedCalendars)
   }
 
   // Google OAuth Simulation
@@ -156,7 +195,7 @@ function PersonalCalendarConnectionFlow({ provider, onConnectionComplete, onCanc
   }
 
   // Google connection flow
-  if (provider === 'google') {
+  if (provider === 'google' && step !== 3) {
     return (
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
         <div className="max-w-xl w-full bg-white rounded-xl p-6">
@@ -187,7 +226,7 @@ function PersonalCalendarConnectionFlow({ provider, onConnectionComplete, onCanc
   }
 
   // Outlook connection flow
-  if (provider === 'outlook') {
+  if (provider === 'outlook' && step !== 3) {
     return (
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
         <div className="max-w-xl w-full bg-white rounded-xl p-6">
@@ -357,6 +396,58 @@ function PersonalCalendarConnectionFlow({ provider, onConnectionComplete, onCanc
       )
     }
 
+  }
+
+  // Calendar selection step (common for all providers)
+  if (step === 3) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+        <div className="max-w-lg w-full bg-white rounded-xl p-6">
+          <h3 className="text-xl font-semibold text-[#212121] mb-2">Select Calendars</h3>
+          <p className="text-sm text-gray-600 mb-6">Choose which calendars to sync with timesēkr</p>
+
+          <div className="space-y-2 mb-6">
+            {availableCalendars.map((calendar) => (
+              <label
+                key={calendar.id}
+                className="flex items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCalendars.includes(calendar.id)}
+                  onChange={() => handleToggleCalendar(calendar.id)}
+                  className="w-5 h-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                />
+                <div className="flex-1">
+                  <p className="font-semibold text-[#212121]">{calendar.name}</p>
+                  {calendar.primary && (
+                    <p className="text-xs text-teal-600 font-semibold">Primary Calendar</p>
+                  )}
+                </div>
+              </label>
+            ))}
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirmSelection}
+              disabled={selectedCalendars.length === 0}
+              className="flex-1 bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              Connect {selectedCalendars.length > 0 && `(${selectedCalendars.length})`}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return null

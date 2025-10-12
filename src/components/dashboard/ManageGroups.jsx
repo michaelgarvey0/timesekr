@@ -12,7 +12,7 @@ function ManageGroups() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-semibold text-[#212121]">Groups</h3>
-            <p className="text-sm text-gray-500 mt-1">Create and manage groups for recurring meetings</p>
+            <p className="text-sm text-gray-500 mt-1">Create and manage groups for convenient scheduling queries</p>
           </div>
           <button className="bg-teal-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-teal-700 transition">
             + Create Group

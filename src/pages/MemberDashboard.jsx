@@ -150,8 +150,10 @@ function MemberDashboard() {
                 {/* Personal Calendars */}
                 <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-200">
-                      <span className="text-gray-600 font-bold">+</span>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-teal-100">
+                      <svg className="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-[#212121] mb-1">Add personal calendars</h3>
@@ -193,37 +195,102 @@ function MemberDashboard() {
 
         {activeView === 'availability' && (
           <div className="flex-1 p-8">
-            <div className="max-w-3xl mx-auto">
-              <h1 className="text-3xl font-bold text-[#212121] mb-6">My Availability</h1>
+            <div className="max-w-7xl mx-auto">
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-[#212121] mb-2">My Availability</h1>
+                <p className="text-gray-600">Set your available time blocks for meetings</p>
+              </div>
 
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-[#212121] mb-4">Working Hours</h2>
-                <p className="text-sm text-gray-600 mb-4">Set your typical working hours for scheduling</p>
-
-                <div className="grid md:grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
-                    <input
-                      type="time"
-                      value={workingHoursStart}
-                      onChange={(e) => setWorkingHoursStart(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
-                    />
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                {/* Calendar Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <h2 className="text-xl font-bold text-gray-900">Week of January 15, 2024</h2>
+                      <button className="p-2 hover:bg-gray-100 rounded-lg transition">
+                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                    <button className="bg-teal-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-teal-700 transition text-sm">
+                      Save Changes
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
-                    <input
-                      type="time"
-                      value={workingHoursEnd}
-                      onChange={(e) => setWorkingHoursEnd(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition"
-                    />
+                  <p className="text-sm text-gray-600">Click and drag to add available time blocks</p>
+                </div>
+
+                {/* Weekly Calendar Grid */}
+                <div className="overflow-x-auto">
+                  <div className="min-w-[800px]">
+                    {/* Day Headers */}
+                    <div className="grid grid-cols-8 border-b border-gray-200 bg-gray-50">
+                      <div className="p-4 text-sm font-semibold text-gray-600"></div>
+                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, idx) => (
+                        <div key={day} className="p-4 text-center border-l border-gray-200">
+                          <p className="text-sm font-semibold text-gray-900">{day}</p>
+                          <p className="text-xs text-gray-500">Jan {15 + idx}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Time Slots */}
+                    <div className="relative">
+                      {Array.from({ length: 24 }, (_, hour) => {
+                        const timeLabel = hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`
+                        return (
+                          <div key={hour} className="grid grid-cols-8 border-b border-gray-100 hover:bg-gray-50 transition">
+                            {/* Time Label */}
+                            <div className="p-2 text-xs text-gray-500 font-medium text-right pr-4 border-r border-gray-200">
+                              {timeLabel}
+                            </div>
+
+                            {/* Day Cells */}
+                            {[0, 1, 2, 3, 4, 5, 6].map((day) => {
+                              // Mock availability blocks
+                              const isAvailable = (day < 5 && hour >= 9 && hour < 17) // Mon-Fri 9 AM - 5 PM
+
+                              return (
+                                <div
+                                  key={day}
+                                  className={`p-2 border-l border-gray-100 min-h-[40px] cursor-pointer transition group relative ${
+                                    isAvailable ? 'bg-teal-100 hover:bg-teal-200' : 'hover:bg-gray-100'
+                                  }`}
+                                >
+                                  {isAvailable && (
+                                    <div className="absolute inset-0 bg-teal-500 opacity-20 group-hover:opacity-30"></div>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
 
-                <button className="bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition">
-                  Save Preferences
-                </button>
+                {/* Legend */}
+                <div className="p-4 border-t border-gray-200 bg-gray-50">
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-teal-500 rounded"></div>
+                      <span className="text-sm text-gray-700">Available</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded"></div>
+                      <span className="text-sm text-gray-700">Unavailable</span>
+                    </div>
+                    <div className="ml-auto text-sm text-gray-600">
+                      40 hours available this week
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

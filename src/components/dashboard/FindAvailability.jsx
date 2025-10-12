@@ -212,7 +212,7 @@ function FindAvailability() {
                   >
                     <span className="font-medium text-gray-900">{option.name}</span>
                     <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                      {option.type === 'group' ? `Group (${option.members})` : 'User'}
+                      {option.type === 'group' ? `Group (${option.members})` : 'Member'}
                     </span>
                   </button>
                 ))}
