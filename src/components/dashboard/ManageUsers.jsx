@@ -51,11 +51,11 @@ function ManageUsers() {
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-[#212121]">Organization Members</h3>
-              <p className="text-sm text-gray-500 mt-1">Manage users and their permissions</p>
+              <h3 className="text-lg font-semibold text-[#212121]">Circle Members</h3>
+              <p className="text-sm text-gray-500 mt-1">Manage members and their permissions</p>
             </div>
             <button className="bg-teal-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-teal-700 transition">
-              + Invite Members
+              + Invite Circle Members
             </button>
           </div>
 
@@ -63,7 +63,7 @@ function ManageUsers() {
             <div className="flex-1">
               <input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="Search members by name or email..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value)
@@ -110,7 +110,7 @@ function ManageUsers() {
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                Member
+                Members
               </button>
             </div>
           </div>
@@ -121,7 +121,7 @@ function ManageUsers() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600"><span style={{ paddingLeft: '8px' }}>User</span></th>
+                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600"><span style={{ paddingLeft: '8px' }}>Member</span></th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600"><span style={{ paddingLeft: '8px' }}>Role</span></th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600"><span style={{ paddingLeft: '8px' }}>Groups</span></th>
                 <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600"><span style={{ paddingLeft: '8px' }}>Status</span></th>

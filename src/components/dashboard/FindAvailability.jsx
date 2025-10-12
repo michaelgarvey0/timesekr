@@ -3,7 +3,6 @@ import { useState, useRef } from 'react'
 function FindAvailability() {
   const [selectedParticipants, setSelectedParticipants] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [viewMode, setViewMode] = useState('list') // 'list', 'calendar', 'compact', 'timeline', 'continuous'
   const [expandedGroups, setExpandedGroups] = useState({}) // Track which groups are expanded
   const timelineScrollRef = useRef(null)
 
@@ -90,15 +89,6 @@ function FindAvailability() {
     setSelectedParticipants(selectedParticipants.filter(p => p.id !== id))
   }
 
-  // Mock available time slots
-  const mockTimeSlots = selectedParticipants.length > 0 ? [
-    { date: 'Mon, Jan 15', time: '10:00 AM - 10:30 AM', available: selectedParticipants.length },
-    { date: 'Mon, Jan 15', time: '2:00 PM - 2:30 PM', available: selectedParticipants.length },
-    { date: 'Tue, Jan 16', time: '9:00 AM - 9:30 AM', available: selectedParticipants.length },
-    { date: 'Tue, Jan 16', time: '3:00 PM - 3:30 PM', available: selectedParticipants.length },
-    { date: 'Wed, Jan 17', time: '11:00 AM - 11:30 AM', available: selectedParticipants.length },
-  ] : []
-
   // Mock timeline data for each participant (half-hour slots)
   const timeSlots = Array.from({ length: 24 }, (_, i) => {
     const hour = Math.floor(i / 2) + 8
@@ -157,30 +147,6 @@ function FindAvailability() {
       }
     }, 0)
   }
-
-  // Mock continuous availability data (for continuous view)
-  // Each participant has blocks of time they're available/busy
-  const mockContinuousData = selectedParticipants.map(participant => {
-    const blocks = []
-    let currentTime = 8 * 60 // Start at 8:00 AM in minutes
-    const endTime = 19.5 * 60 // End at 7:30 PM in minutes
-
-    while (currentTime < endTime) {
-      const isAvailable = Math.random() > 0.3
-      const duration = Math.floor(Math.random() * 90) + 30 // 30-120 minute blocks
-      blocks.push({
-        start: currentTime,
-        end: Math.min(currentTime + duration, endTime),
-        available: isAvailable
-      })
-      currentTime += duration
-    }
-
-    return {
-      ...participant,
-      blocks
-    }
-  })
 
   // Helper to find suggested times for Timeline view
   const getSuggestedTimeSlots = () => {
@@ -246,7 +212,7 @@ function FindAvailability() {
                   >
                     <span className="font-medium text-gray-900">{option.name}</span>
                     <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                      {option.type === 'group' ? `Group (${option.members})` : 'User'}
+                      {option.type === 'group' ? `Group (${option.members})` : 'Member'}
                     </span>
                   </button>
                 ))}
@@ -313,243 +279,15 @@ function FindAvailability() {
         </div>
       </div>
 
-      {/* Results */}
+      {/* Results - Timeline View */}
       {selectedParticipants.length > 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-semibold text-[#212121]">Available Time Slots</h4>
-
-            {/* DEV VIEW TOGGLE */}
-            <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-3 py-1 rounded text-sm font-medium transition ${
-                  viewMode === 'list'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                List
-              </button>
-              <button
-                onClick={() => setViewMode('calendar')}
-                className={`px-3 py-1 rounded text-sm font-medium transition ${
-                  viewMode === 'calendar'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Calendar
-              </button>
-              <button
-                onClick={() => setViewMode('compact')}
-                className={`px-3 py-1 rounded text-sm font-medium transition ${
-                  viewMode === 'compact'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Compact
-              </button>
-              <button
-                onClick={() => setViewMode('timeline')}
-                className={`px-3 py-1 rounded text-sm font-medium transition ${
-                  viewMode === 'timeline'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Timeline
-              </button>
-              <button
-                onClick={() => setViewMode('continuous')}
-                className={`px-3 py-1 rounded text-sm font-medium transition ${
-                  viewMode === 'continuous'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Continuous
-              </button>
-            </div>
           </div>
 
-          {/* List View */}
-          {viewMode === 'list' && (
-            <div className="space-y-2">
-              {mockTimeSlots.map((slot, idx) => (
-                <button
-                  key={idx}
-                  className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:border-teal-600 hover:bg-teal-50 transition flex items-center justify-between"
-                >
-                  <div>
-                    <p className="font-medium text-gray-900">{slot.time}</p>
-                    <p className="text-sm text-gray-500">{slot.date}</p>
-                  </div>
-                  <div className="text-sm text-green-600 font-medium">
-                    {slot.available} available
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Calendar View */}
-          {viewMode === 'calendar' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-5 gap-2">
-                {mockTimeSlots.map((slot, idx) => (
-                  <button
-                    key={idx}
-                    className="p-3 border border-gray-200 rounded-lg hover:border-teal-600 hover:bg-teal-50 transition text-center"
-                  >
-                    <p className="text-xs text-gray-500 mb-1">{slot.date.split(',')[0]}</p>
-                    <p className="text-sm font-medium text-gray-900">{slot.time.split(' - ')[0]}</p>
-                    <p className="text-xs text-green-600 mt-1">✓ Available</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Compact View */}
-          {viewMode === 'compact' && (
-            <div className="space-y-3">
-              {['Mon, Jan 15', 'Tue, Jan 16', 'Wed, Jan 17'].map((date, dateIdx) => (
-                <div key={dateIdx} className="border border-gray-200 rounded-lg p-4">
-                  <p className="font-semibold text-gray-900 mb-2">{date}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {mockTimeSlots
-                      .filter(slot => slot.date === date)
-                      .map((slot, idx) => (
-                        <button
-                          key={idx}
-                          className="px-3 py-1 bg-teal-50 text-teal-700 rounded-full text-sm font-medium hover:bg-teal-100 transition"
-                        >
-                          {slot.time.split(' - ')[0]}
-                        </button>
-                      ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Continuous View */}
-          {viewMode === 'continuous' && (
-            <div className="relative">
-              <div className="overflow-x-auto">
-                <div className="min-w-max">
-                  {/* Time ruler */}
-                  <div className="flex border-b border-gray-200 mb-2">
-                    <div className="w-40 flex-shrink-0 py-3 px-4 font-semibold text-gray-700 text-sm bg-white sticky left-0 z-10 border-r border-gray-200">
-                      Time
-                    </div>
-                    <div className="flex-1 relative" style={{ width: '1392px' }}> {/* 24 slots * 58px */}
-                      {Array.from({ length: 12 }, (_, i) => i + 8).map((hour, idx) => (
-                        <div key={hour} className="absolute text-xs text-gray-500" style={{ left: `${idx * 116}px`, top: '12px' }}>
-                          {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* All Available Summary */}
-                  <div className="flex border-b-2 border-gray-300 bg-gray-50 mb-2">
-                    <div className="w-40 flex-shrink-0 py-4 px-4 font-semibold text-gray-700 text-sm bg-gray-50 sticky left-0 z-10 border-r border-gray-200">
-                      All Available
-                    </div>
-                    <div className="flex-1 relative py-4" style={{ width: '1392px' }}>
-                      {/* Calculate overlapping available times */}
-                      {mockContinuousData.length > 0 && (() => {
-                        // Find times when ALL participants are available
-                        const allAvailableBlocks = []
-                        let currentMinute = 8 * 60
-                        const endMinute = 19.5 * 60
-
-                        while (currentMinute < endMinute) {
-                          const allAvailable = mockContinuousData.every(participant =>
-                            participant.blocks.some(block =>
-                              block.available && block.start <= currentMinute && block.end > currentMinute
-                            )
-                          )
-
-                          if (allAvailable) {
-                            const blockStart = currentMinute
-                            while (currentMinute < endMinute && mockContinuousData.every(participant =>
-                              participant.blocks.some(block =>
-                                block.available && block.start <= currentMinute && block.end > currentMinute
-                              )
-                            )) {
-                              currentMinute += 5
-                            }
-                            allAvailableBlocks.push({ start: blockStart, end: currentMinute })
-                          } else {
-                            currentMinute += 5
-                          }
-                        }
-
-                        return allAvailableBlocks.map((block, idx) => {
-                          const startOffset = ((block.start - 8 * 60) / (11.5 * 60)) * 100
-                          const width = ((block.end - block.start) / (11.5 * 60)) * 100
-                          return (
-                            <div
-                              key={idx}
-                              className="absolute h-8 bg-teal-200 rounded cursor-pointer hover:bg-teal-300 border border-teal-400"
-                              style={{
-                                left: `${startOffset}%`,
-                                width: `${width}%`,
-                                top: '0'
-                              }}
-                              title={`${Math.floor(block.start / 60)}:${String(block.start % 60).padStart(2, '0')} - ${Math.floor(block.end / 60)}:${String(block.end % 60).padStart(2, '0')}`}
-                            />
-                          )
-                        })
-                      })()}
-                    </div>
-                  </div>
-
-                  {/* Participant rows */}
-                  {mockContinuousData.map((participant) => (
-                    <div key={participant.id} className="flex border-b border-gray-100 hover:bg-gray-50">
-                      <div className="w-40 flex-shrink-0 py-4 px-4 flex items-center gap-2 bg-white sticky left-0 z-10 border-r border-gray-200">
-                        <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-semibold">
-                          {participant.name.charAt(0)}
-                        </div>
-                        <span className="text-sm font-medium text-gray-900 truncate">{participant.name}</span>
-                      </div>
-                      <div className="flex-1 relative py-4" style={{ width: '1392px' }}>
-                        {participant.blocks.map((block, idx) => {
-                          const startOffset = ((block.start - 8 * 60) / (11.5 * 60)) * 100
-                          const width = ((block.end - block.start) / (11.5 * 60)) * 100
-                          return (
-                            <div
-                              key={idx}
-                              className={`absolute h-8 rounded cursor-pointer border ${
-                                block.available
-                                  ? 'bg-green-200 hover:bg-green-300 border-green-400'
-                                  : 'bg-red-200 border-red-300'
-                              }`}
-                              style={{
-                                left: `${startOffset}%`,
-                                width: `${width}%`,
-                                top: '0'
-                              }}
-                              title={`${Math.floor(block.start / 60)}:${String(block.start % 60).padStart(2, '0')} - ${Math.floor(block.end / 60)}:${String(block.end % 60).padStart(2, '0')}`}
-                            />
-                          )
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Timeline View */}
-          {viewMode === 'timeline' && (
-            <div className="relative">
+          <div className="relative">
               {/* Suggested Times - Compact Shortcuts */}
               {getSuggestedTimeSlots().length > 0 && (
                 <div className="mb-4 pb-4 border-b border-gray-200">
@@ -771,8 +509,7 @@ function FindAvailability() {
                   })}
                 </div>
               </div>
-            </div>
-          )}
+          </div>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm p-6">

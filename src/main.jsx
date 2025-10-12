@@ -7,18 +7,23 @@ import '@fontsource/ibm-plex-sans/500.css'
 import '@fontsource/ibm-plex-sans/600.css'
 import '@fontsource/ibm-plex-sans/700.css'
 import './index.css'
-import App from './App.jsx'
+import DemoSelector from './pages/DemoSelector.jsx'
+import MockEmail from './pages/MockEmail.jsx'
 import OrgOnboarding from './pages/OrgOnboarding.jsx'
 import Dashboard from './pages/Dashboard.jsx'
+import MemberDashboard from './pages/MemberDashboard.jsx'
+import MemberSignup from './pages/MemberSignup.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<App />} />
+        <Route path="/" element={<DemoSelector />} />
+        <Route path="/mock-email" element={<MockEmail />} />
         <Route path="/onboarding" element={<OrgOnboarding />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/login" element={<div className="min-h-screen flex items-center justify-center"><h1 className="text-3xl">Login page coming soon...</h1></div>} />
+        <Route path="/member-dashboard" element={<MemberDashboard />} />
+        <Route path="/join/:inviteCode" element={<MemberSignup />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

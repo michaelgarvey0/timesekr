@@ -1,54 +1,82 @@
 function MyAvailability() {
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-[#212121] mb-4">My Availability Settings</h3>
-        <p className="text-sm text-gray-600 mb-6">Manage your calendar connection and availability preferences</p>
-
-        {/* Calendar Connection Status */}
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div>
-              <p className="font-medium text-yellow-800">Calendar Not Connected</p>
-              <p className="text-sm text-yellow-700 mt-1">Connect your calendar to allow others to see your availability</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Connect Calendar */}
+      {/* Calendar Connection */}
+      <div className="bg-white rounded-xl shadow-sm border-2 border-teal-100 p-8">
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Connect Your Calendar
-          </label>
-          <div className="grid md:grid-cols-2 gap-4">
-            <button className="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-lg hover:border-teal-600 hover:bg-teal-50 transition">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/>
-                </svg>
-              </div>
-              <div className="text-left">
-                <p className="font-semibold text-[#212121]">Google Calendar</p>
-                <p className="text-sm text-gray-500">Connect your personal calendar</p>
-              </div>
-            </button>
-
-            <button className="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-lg hover:border-teal-600 hover:bg-teal-50 transition">
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                </svg>
-              </div>
-              <div className="text-left">
-                <p className="font-semibold text-[#212121]">Outlook Calendar</p>
-                <p className="text-sm text-gray-500">Connect your Microsoft calendar</p>
-              </div>
-            </button>
-          </div>
+          <h3 className="text-2xl font-bold text-[#212121] mb-2">Connect Your Calendar</h3>
+          <p className="text-gray-600">
+            Let others see when you're available without sharing meeting details
+          </p>
         </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <button className="flex items-center gap-4 p-5 border-2 border-gray-200 rounded-lg hover:border-teal-600 hover:bg-teal-50 transition group">
+            <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
+              <svg className="w-8 h-8 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/>
+              </svg>
+            </div>
+            <div className="text-left flex-1">
+              <p className="font-bold text-[#212121] text-lg">Google Calendar</p>
+              <p className="text-sm text-gray-600">Most popular choice</p>
+            </div>
+            <svg className="w-6 h-6 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <button className="flex items-center gap-4 p-5 border-2 border-gray-200 rounded-lg hover:border-teal-600 hover:bg-teal-50 transition group">
+            <div className="w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
+              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+              </svg>
+            </div>
+            <div className="text-left flex-1">
+              <p className="font-bold text-[#212121] text-lg">Outlook Calendar</p>
+              <p className="text-sm text-gray-600">Microsoft 365</p>
+            </div>
+            <svg className="w-6 h-6 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <button className="flex items-center gap-4 p-5 border-2 border-gray-200 rounded-lg hover:border-teal-600 hover:bg-teal-50 transition group">
+            <div className="w-14 h-14 bg-gray-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
+              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/>
+              </svg>
+            </div>
+            <div className="text-left flex-1">
+              <p className="font-bold text-[#212121] text-lg">Apple Calendar</p>
+              <p className="text-sm text-gray-600">iCloud sync</p>
+            </div>
+            <svg className="w-6 h-6 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <button className="flex items-center gap-4 p-5 border-2 border-gray-200 rounded-lg hover:border-teal-600 hover:bg-teal-50 transition group">
+            <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition">
+              <svg className="w-8 h-8 text-gray-600" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/>
+              </svg>
+            </div>
+            <div className="text-left flex-1">
+              <p className="font-bold text-[#212121] text-lg">Other Calendar</p>
+              <p className="text-sm text-gray-600">Yahoo, CalDAV</p>
+            </div>
+            <svg className="w-6 h-6 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Availability Preferences */}
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-[#212121] mb-4">Availability Preferences</h3>
+        <p className="text-sm text-gray-600 mb-6">Set your default working hours and preferences</p>
 
         {/* Working Hours */}
         <div>
