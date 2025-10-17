@@ -7,23 +7,23 @@ import '@fontsource/ibm-plex-sans/500.css'
 import '@fontsource/ibm-plex-sans/600.css'
 import '@fontsource/ibm-plex-sans/700.css'
 import './index.css'
-import DemoSelector from './pages/DemoSelector.jsx'
-import MockEmail from './pages/MockEmail.jsx'
-import OrgOnboarding from './pages/OrgOnboarding.jsx'
+import App from './App.jsx'
+import Signup from './pages/Signup.jsx'
+import Onboarding from './pages/Onboarding.jsx'
 import Dashboard from './pages/Dashboard.jsx'
-import MemberDashboard from './pages/MemberDashboard.jsx'
-import MemberSignup from './pages/MemberSignup.jsx'
+import InviteAccept from './pages/InviteAccept.jsx'
+import InviteEmail from './pages/InviteEmail.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<DemoSelector />} />
-        <Route path="/mock-email" element={<MockEmail />} />
-        <Route path="/onboarding" element={<OrgOnboarding />} />
+        <Route path="/" element={<App />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/member-dashboard" element={<MemberDashboard />} />
-        <Route path="/join/:inviteCode" element={<MemberSignup />} />
+        <Route path="/invite" element={<InviteAccept />} />
+        <Route path="/invite-email" element={<InviteEmail />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
