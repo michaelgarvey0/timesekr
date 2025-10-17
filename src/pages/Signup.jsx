@@ -8,8 +8,8 @@ function Signup() {
 
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     email: '',
-    phone: '',
     password: ''
   })
 
@@ -33,7 +33,8 @@ function Signup() {
       // Redirect to dashboard with invite pending
       navigate('/dashboard?flow=invite-pending&token=' + inviteToken)
     } else {
-      navigate('/dashboard')
+      // Redirect to onboarding to create/join first circle
+      navigate('/onboarding')
     }
   }
 
@@ -62,6 +63,20 @@ function Signup() {
           </div>
 
           <div>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">@</span>
+              <input
+                type="text"
+                required
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="username"
+              />
+            </div>
+          </div>
+
+          <div>
             <input
               type="email"
               required
@@ -69,16 +84,6 @@ function Signup() {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
               placeholder="john@example.com"
-            />
-          </div>
-
-          <div>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              placeholder="Phone (optional)"
             />
           </div>
 

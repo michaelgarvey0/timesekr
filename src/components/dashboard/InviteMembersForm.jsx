@@ -6,7 +6,7 @@ function InviteMembersForm({ circle, onCancel, onSuccess }) {
   const [invites, setInvites] = useState([])
   const [selectedInvites, setSelectedInvites] = useState(new Set())
   const [invitationMessage, setInvitationMessage] = useState(
-    `You're invited to join ${circle.name} on timesēkr! We use this platform to coordinate our schedules and find meeting times that work for everyone.`
+    `You're invited to join ${circle?.name || 'our circle'} on timesēkr! We use this platform to coordinate our schedules and find meeting times that work for everyone.`
   )
 
   const parseBulkText = (text) => {

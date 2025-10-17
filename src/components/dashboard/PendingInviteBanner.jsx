@@ -11,7 +11,7 @@ function PendingInviteBanner({ invite, onAccept, onDecline }) {
             </span>
           </div>
           <p className="text-gray-600 text-sm mt-1">
-            Invited by {invite.inviterName}
+            Invited by {invite.inviterName} · as {invite.invitedEmail}
           </p>
         </div>
         <div className="flex gap-2">
