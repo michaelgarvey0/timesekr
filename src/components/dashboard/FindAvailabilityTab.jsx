@@ -202,54 +202,59 @@ function FindAvailabilityTab({ circle }) {
 
           <div className="space-y-4">
           {/* Date Range */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Start Date
-              </label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Date Range
+            </label>
+            <div className="flex items-center gap-2 p-3 border-2 border-gray-300 rounded-lg hover:border-teal-500 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-500/20 transition bg-white">
               <input
                 type="date"
                 value={dateRange.start}
                 onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                className="flex-1 text-sm focus:outline-none"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                End Date
-              </label>
+              <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
               <input
                 type="date"
                 value={dateRange.end}
                 onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                className="flex-1 text-sm focus:outline-none"
               />
             </div>
           </div>
 
-          {/* Duration */}
+          {/* Duration Slider */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Meeting Duration
-            </label>
+            <div className="flex items-baseline justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Meeting Duration
+              </label>
+              <span className="text-sm font-semibold text-teal-600">
+                {parseInt(duration) >= 60
+                  ? `${Math.floor(parseInt(duration) / 60)}h ${parseInt(duration) % 60 > 0 ? `${parseInt(duration) % 60}m` : ''}`
+                  : `${duration} min`}
+              </span>
+            </div>
             <div className="relative">
-              <select
+              <input
+                type="range"
+                min="15"
+                max="180"
+                step="15"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="appearance-none w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm bg-white cursor-pointer"
-              >
-                <option value="15">15 minutes</option>
-                <option value="30">30 minutes</option>
-                <option value="45">45 minutes</option>
-                <option value="60">1 hour</option>
-                <option value="90">1.5 hours</option>
-                <option value="120">2 hours</option>
-                <option value="180">3 hours</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
+                className="w-full h-2 bg-gradient-to-r from-teal-200 to-teal-500 rounded-lg appearance-none cursor-pointer slider"
+                style={{
+                  background: `linear-gradient(to right, #5eead4 0%, #14b8a6 ${((parseInt(duration) - 15) / 165) * 100}%, #e5e7eb ${((parseInt(duration) - 15) / 165) * 100}%, #e5e7eb 100%)`
+                }}
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1 px-1">
+                <span>15m</span>
+                <span>1h</span>
+                <span>2h</span>
+                <span>3h</span>
               </div>
             </div>
           </div>

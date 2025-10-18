@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 function AvailabilityTab({ showBanner }) {
   const [connectedCalendars, setConnectedCalendars] = useState([])
+  const [activeTab, setActiveTab] = useState('calendar') // 'calendar' or 'connections'
 
   const handleConnectCalendar = (provider) => {
     // TODO: OAuth flow
@@ -32,7 +33,140 @@ function AvailabilityTab({ showBanner }) {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      {/* Tab buttons */}
+      <div className="flex gap-2 mb-6 border-b border-gray-200">
+        <button
+          onClick={() => setActiveTab('calendar')}
+          className={`px-4 py-2 font-medium text-sm transition ${
+            activeTab === 'calendar'
+              ? 'text-teal-600 border-b-2 border-teal-600'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Calendar
+        </button>
+        <button
+          onClick={() => setActiveTab('connections')}
+          className={`px-4 py-2 font-medium text-sm transition ${
+            activeTab === 'connections'
+              ? 'text-teal-600 border-b-2 border-teal-600'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Connections
+        </button>
+      </div>
+
+      {/* Calendar Tab */}
+      {activeTab === 'calendar' && (
+        <div className="bg-white rounded-xl shadow-lg p-6 relative">
+          {connectedCalendars.length === 0 ? (
+            /* Overlay when no calendars connected */
+            <div className="flex items-center justify-center py-24">
+              <div className="text-center max-w-md">
+                <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Calendars Connected</h3>
+                <p className="text-gray-600 mb-6">
+                  Connect your calendar to view and manage your availability
+                </p>
+                <button
+                  onClick={() => setActiveTab('connections')}
+                  className="bg-teal-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-teal-700 transition"
+                >
+                  Connect Calendar
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Calendar view */
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Week of Oct 21 - Oct 27, 2024</h3>
+                <div className="flex gap-2">
+                  <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    ← Previous
+                  </button>
+                  <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    Today
+                  </button>
+                  <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    Next →
+                  </button>
+                </div>
+              </div>
+
+              {/* Weekly calendar grid */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                {/* Header with days */}
+                <div className="grid grid-cols-8 bg-gray-50 border-b border-gray-200">
+                  <div className="p-3 text-xs font-semibold text-gray-600 border-r border-gray-200">Time</div>
+                  {['Mon 21', 'Tue 22', 'Wed 23', 'Thu 24', 'Fri 25', 'Sat 26', 'Sun 27'].map((day) => (
+                    <div key={day} className="p-3 text-xs font-semibold text-gray-900 text-center border-r border-gray-200 last:border-r-0">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Time slots */}
+                <div className="relative">
+                  {[
+                    '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM'
+                  ].map((time, timeIdx) => (
+                    <div key={time} className="grid grid-cols-8 border-b border-gray-200 last:border-b-0">
+                      <div className="p-3 text-xs text-gray-600 border-r border-gray-200 bg-gray-50">
+                        {time}
+                      </div>
+                      {[0, 1, 2, 3, 4, 5, 6].map((dayIdx) => {
+                        // Mock some events
+                        const hasEvent = (timeIdx === 2 && dayIdx === 1) ||
+                                        (timeIdx === 4 && dayIdx === 3) ||
+                                        (timeIdx === 6 && dayIdx === 2) ||
+                                        (timeIdx === 3 && dayIdx === 4)
+
+                        return (
+                          <div
+                            key={dayIdx}
+                            className={`relative min-h-[60px] p-2 border-r border-gray-200 last:border-r-0 hover:bg-teal-50 transition ${
+                              hasEvent ? 'bg-gradient-to-br from-teal-100 to-teal-50' : ''
+                            }`}
+                          >
+                            {hasEvent && (
+                              <div className="absolute inset-2 bg-teal-500 rounded p-2 text-white text-xs">
+                                <div className="font-semibold">Team Meeting</div>
+                                <div className="text-teal-100">{time} - {parseInt(time) + 1} {time.includes('AM') ? 'AM' : 'PM'}</div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-teal-500 rounded"></div>
+                  <span>Busy</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-white border border-gray-300 rounded"></div>
+                  <span>Available</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Connections Tab */}
+      {activeTab === 'connections' && (
+        <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-6">Connect Calendars</h3>
 
         {connectedCalendars.length > 0 && (
@@ -63,7 +197,7 @@ function AvailabilityTab({ showBanner }) {
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           <button
             onClick={() => handleConnectCalendar('google')}
             className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-lg hover:border-teal-500 hover:bg-teal-50 transition"
@@ -105,8 +239,22 @@ function AvailabilityTab({ showBanner }) {
             </div>
             <div className="text-sm font-medium text-gray-900">Apple</div>
           </button>
+
+          <button
+            onClick={() => handleConnectCalendar('yahoo')}
+            className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-lg hover:border-teal-500 hover:bg-teal-50 transition"
+          >
+            <div className="w-12 h-12 bg-white rounded shadow flex items-center justify-center mb-3">
+              <svg className="w-7 h-7" viewBox="0 0 24 24">
+                <path fill="#6001D2" d="M13.007 3.75L8.745 12l-2.906 5.25H2.25L7.753 8.5 3 0h3.656l4.351 8.25zm.75 8.25l4.262 8.25h-3.588l-4.262-8.25 4.262-8.25H18.019z"/>
+                <path fill="#5F01D1" d="M22.5 3.75h-3.656l-4.262 8.25 2.906 5.25H21.75z"/>
+              </svg>
+            </div>
+            <div className="text-sm font-medium text-gray-900">Yahoo</div>
+          </button>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   )
 }
