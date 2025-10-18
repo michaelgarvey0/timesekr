@@ -1,0 +1,42 @@
+{
+  "name": "ui-foundations-kit",
+  "version": "2.0.5",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "latest",
+    "@emotion/styled": "latest",
+    "@mui/icons-material": "latest",
+    "@mui/lab": "latest",
+    "@mui/material": "latest",
+    "@mui/x-charts": "latest",
+    "@mui/x-data-grid": "latest",
+    "@mui/x-date-pickers": "latest",
+    "@mui/x-date-pickers-pro": "latest",
+    "@reactour/tour": "^3.7.0",
+    "cmdk": "^1.0.0",
+    "dayjs": "^1.11.11",
+    "framer-motion": "^11.2.13",
+    "next": "14.2.4",
+    "prism-react-renderer": "^2.3.1",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-icons": "^5.2.1",
+    "sonner": "^1.5.0",
+    "ts-pattern": "^5.2.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.4",
+    "typescript": "latest"
+  }
+}
