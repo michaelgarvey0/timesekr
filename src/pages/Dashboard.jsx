@@ -35,6 +35,14 @@ function Dashboard() {
   const [showCreateCircleForm, setShowCreateCircleForm] = useState(false)
   const [showJoinModal, setShowJoinModal] = useState(false)
 
+  // Circle connections state (friend requests between circles)
+  const [circleConnections, setCircleConnections] = useState(() => {
+    const stored = localStorage.getItem('circleConnections')
+    return stored ? JSON.parse(stored) : {
+      // Structure: { circleId: { connectedCircles: [ids], pendingRequests: [{ circleId, circleName, status: 'sent'/'received' }] } }
+    }
+  })
+
   // Check for flow parameter in URL and pending invites
   useEffect(() => {
     const flow = searchParams.get('flow')
@@ -182,6 +190,87 @@ function Dashboard() {
       // Persist to localStorage
       localStorage.setItem('userCreatedCircles', JSON.stringify(updated))
     }
+  }
+
+  // Handle circle connection requests
+  const handleSendConnectionRequest = (fromCircleId, toCircleId, toCircleName) => {
+    const updated = { ...circleConnections }
+
+    // Initialize if needed
+    if (!updated[fromCircleId]) {
+      updated[fromCircleId] = { connectedCircles: [], pendingRequests: [] }
+    }
+    if (!updated[toCircleId]) {
+      updated[toCircleId] = { connectedCircles: [], pendingRequests: [] }
+    }
+
+    // Add pending request
+    updated[fromCircleId].pendingRequests.push({
+      circleId: toCircleId,
+      circleName: toCircleName,
+      status: 'sent'
+    })
+    updated[toCircleId].pendingRequests.push({
+      circleId: fromCircleId,
+      circleName: getMockCircles().find(c => c.id === fromCircleId)?.name || 'Unknown Circle',
+      status: 'received'
+    })
+
+    setCircleConnections(updated)
+    localStorage.setItem('circleConnections', JSON.stringify(updated))
+  }
+
+  const handleAcceptConnectionRequest = (circleId, requestCircleId) => {
+    const updated = { ...circleConnections }
+
+    // Remove from pending requests
+    updated[circleId].pendingRequests = updated[circleId].pendingRequests.filter(
+      r => r.circleId !== requestCircleId
+    )
+    updated[requestCircleId].pendingRequests = updated[requestCircleId].pendingRequests.filter(
+      r => r.circleId !== circleId
+    )
+
+    // Add to connected circles
+    if (!updated[circleId].connectedCircles.includes(requestCircleId)) {
+      updated[circleId].connectedCircles.push(requestCircleId)
+    }
+    if (!updated[requestCircleId].connectedCircles.includes(circleId)) {
+      updated[requestCircleId].connectedCircles.push(circleId)
+    }
+
+    setCircleConnections(updated)
+    localStorage.setItem('circleConnections', JSON.stringify(updated))
+  }
+
+  const handleDeclineConnectionRequest = (circleId, requestCircleId) => {
+    const updated = { ...circleConnections }
+
+    // Remove from pending requests
+    updated[circleId].pendingRequests = updated[circleId].pendingRequests.filter(
+      r => r.circleId !== requestCircleId
+    )
+    updated[requestCircleId].pendingRequests = updated[requestCircleId].pendingRequests.filter(
+      r => r.circleId !== circleId
+    )
+
+    setCircleConnections(updated)
+    localStorage.setItem('circleConnections', JSON.stringify(updated))
+  }
+
+  const handleRemoveConnection = (circleId, connectedCircleId) => {
+    const updated = { ...circleConnections }
+
+    // Remove from connected circles
+    updated[circleId].connectedCircles = updated[circleId].connectedCircles.filter(
+      id => id !== connectedCircleId
+    )
+    updated[connectedCircleId].connectedCircles = updated[connectedCircleId].connectedCircles.filter(
+      id => id !== circleId
+    )
+
+    setCircleConnections(updated)
+    localStorage.setItem('circleConnections', JSON.stringify(updated))
   }
 
   const handleAcceptInvite = () => {
@@ -432,9 +521,21 @@ function Dashboard() {
           ) : activeView === 'availability' ? (
             <AvailabilityTab showBanner={showAvailabilityBanner} />
           ) : activeView === 'circle-management' ? (
-            <CircleManagementTab circle={selectedCircle} />
+            <CircleManagementTab
+              circle={selectedCircle}
+              allCircles={allCircles}
+              circleConnections={circleConnections}
+              onSendConnectionRequest={handleSendConnectionRequest}
+              onAcceptConnectionRequest={handleAcceptConnectionRequest}
+              onDeclineConnectionRequest={handleDeclineConnectionRequest}
+              onRemoveConnection={handleRemoveConnection}
+            />
           ) : activeView === 'find-availability' ? (
-            <FindAvailabilityTab circle={selectedCircle} />
+            <FindAvailabilityTab
+              circle={selectedCircle}
+              allCircles={allCircles}
+              circleConnections={circleConnections}
+            />
           ) : activeView === 'settings' ? (
             <SettingsTab />
           ) : null}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-function FindAvailabilityTab({ circle }) {
+function FindAvailabilityTab({ circle, allCircles, circleConnections }) {
   // Set default date range: today to 2 weeks from now
   const getDefaultDateRange = () => {
     const today = new Date()
@@ -25,6 +25,9 @@ function FindAvailabilityTab({ circle }) {
   const [activeTab, setActiveTab] = useState('members') // 'members' or 'teams'
   const [expandedTeams, setExpandedTeams] = useState(new Set())
   const [dragStartTime, setDragStartTime] = useState(null) // For dragging meeting duration block
+  const [gridView, setGridView] = useState('grid') // 'grid', 'list', 'compact'
+  const [selectedCircleIds, setSelectedCircleIds] = useState([circle?.id].filter(Boolean)) // Circles to search in
+  const [showCircleSelector, setShowCircleSelector] = useState(false)
 
   // Mock teams data (same as MembersTab)
   const [teams] = useState([
@@ -32,11 +35,36 @@ function FindAvailabilityTab({ circle }) {
     { id: 2, name: 'Design', members: ['emily@acme.com'] }
   ])
 
-  // Get members from current circle
+  // Get connected circles for current circle
+  const currentCircleConnections = circleConnections?.[circle?.id] || { connectedCircles: [], pendingRequests: [] }
+  const connectedCircleIds = currentCircleConnections.connectedCircles
+
+  // Get members from all selected circles
+  const getAllMembers = () => {
+    const membersByCircle = {}
+
+    selectedCircleIds.forEach(circleId => {
+      const targetCircle = allCircles?.find(c => c.id === circleId)
+      if (targetCircle) {
+        const members = targetCircle.invitations?.filter(i => i.status === 'accepted') || []
+        membersByCircle[circleId] = {
+          circleName: targetCircle.name,
+          members: members.map(m => ({ ...m, circleId, circleName: targetCircle.name }))
+        }
+      }
+    })
+
+    return membersByCircle
+  }
+
+  const membersByCircle = getAllMembers()
+  const allMembers = Object.values(membersByCircle).flatMap(c => c.members)
+
+  // Get members from current circle (for compatibility)
   const circleMembers = circle?.invitations?.filter(i => i.status === 'accepted') || []
 
-  // Filter members based on search
-  const filteredMembers = circleMembers.filter(member =>
+  // Filter members based on search (use allMembers for cross-circle search)
+  const filteredMembers = allMembers.filter(member =>
     member.name.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
     member.email.toLowerCase().includes(memberSearchQuery.toLowerCase())
   )
@@ -211,7 +239,7 @@ function FindAvailabilityTab({ circle }) {
                 type="date"
                 value={dateRange.start}
                 onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                className="flex-1 text-sm focus:outline-none"
+                className="flex-1 text-sm text-gray-900 focus:outline-none"
               />
               <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -220,7 +248,7 @@ function FindAvailabilityTab({ circle }) {
                 type="date"
                 value={dateRange.end}
                 onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                className="flex-1 text-sm focus:outline-none"
+                className="flex-1 text-sm text-gray-900 focus:outline-none"
               />
             </div>
           </div>
@@ -339,7 +367,7 @@ function FindAvailabilityTab({ circle }) {
                     const member = circleMembers.find(m => m.email === email)
                     if (!member) return null
                     return (
-                      <span key={email} className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-teal-300 rounded text-xs">
+                      <span key={email} className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-teal-300 rounded text-xs font-medium text-gray-900">
                         {member.name}
                         <button
                           onClick={(e) => {
@@ -381,6 +409,84 @@ function FindAvailabilityTab({ circle }) {
               )}
             </div>
           </div>
+
+          {/* Circle Selector */}
+          {connectedCircleIds.length > 0 && (
+            <div className="mb-4">
+              <button
+                onClick={() => setShowCircleSelector(!showCircleSelector)}
+                className="w-full flex items-center justify-between p-3 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">
+                    Searching in: {selectedCircleIds.length === 1 ? circle.name : `${selectedCircleIds.length} circles`}
+                  </span>
+                </div>
+                <svg className={`w-4 h-4 text-gray-400 transition-transform ${showCircleSelector ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showCircleSelector && (
+                <div className="mt-2 p-3 bg-white border border-gray-300 rounded-lg space-y-2">
+                  {/* Own circle */}
+                  <label className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedCircleIds.includes(circle.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedCircleIds([...selectedCircleIds, circle.id])
+                        } else {
+                          setSelectedCircleIds(selectedCircleIds.filter(id => id !== circle.id))
+                        }
+                      }}
+                      className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                    />
+                    <div className="flex items-center gap-2 flex-1">
+                      <div className="w-6 h-6 bg-gradient-to-br from-teal-400 to-teal-600 rounded flex items-center justify-center">
+                        <span className="text-xs font-bold text-white">{circle.name.substring(0, 2).toUpperCase()}</span>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">{circle.name}</span>
+                      <span className="text-xs text-teal-600">(Your circle)</span>
+                    </div>
+                  </label>
+
+                  {/* Connected circles */}
+                  {connectedCircleIds.map(connectedId => {
+                    const connectedCircle = allCircles?.find(c => c.id === connectedId)
+                    if (!connectedCircle) return null
+                    return (
+                      <label key={connectedId} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedCircleIds.includes(connectedId)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedCircleIds([...selectedCircleIds, connectedId])
+                            } else {
+                              setSelectedCircleIds(selectedCircleIds.filter(id => id !== connectedId))
+                            }
+                          }}
+                          className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                        />
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-purple-600 rounded flex items-center justify-center">
+                            <span className="text-xs font-bold text-white">{connectedCircle.name.substring(0, 2).toUpperCase()}</span>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{connectedCircle.name}</span>
+                          <span className="text-xs text-gray-500">({connectedCircle.members} members)</span>
+                        </div>
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Search */}
           <input
@@ -466,7 +572,14 @@ function FindAvailabilityTab({ circle }) {
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <div className={`font-medium ${isSelected ? 'text-teal-900' : 'text-gray-900'}`}>{member.name}</div>
+                          <div className="flex items-center gap-2">
+                            <div className={`font-medium ${isSelected ? 'text-teal-900' : 'text-gray-900'}`}>{member.name}</div>
+                            {member.circleId !== circle.id && (
+                              <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">
+                                {member.circleName}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-sm text-gray-500">{member.email}</div>
                         </div>
                         {member.role === 'delegate' && (
@@ -510,7 +623,7 @@ function FindAvailabilityTab({ circle }) {
               {/* Tab content */}
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {activeTab === 'members' ? (
-                  circleMembers.map((member) => {
+                  allMembers.map((member) => {
                     const isSelected = selectedMembers.includes(member.email)
                     return (
                       <div
@@ -532,7 +645,14 @@ function FindAvailabilityTab({ circle }) {
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <div className={`font-medium ${isSelected ? 'text-teal-900' : 'text-gray-900'}`}>{member.name}</div>
+                          <div className="flex items-center gap-2">
+                            <div className={`font-medium ${isSelected ? 'text-teal-900' : 'text-gray-900'}`}>{member.name}</div>
+                            {member.circleId !== circle.id && (
+                              <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">
+                                {member.circleName}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-sm text-gray-500">{member.email}</div>
                         </div>
                         {member.role === 'delegate' && (
@@ -650,9 +770,36 @@ function FindAvailabilityTab({ circle }) {
       {/* Results */}
       {showResults && (
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Availability Grid
-          </h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">Availability Grid</h3>
+
+            <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+              <button
+                onClick={() => setGridView('grid')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                  gridView === 'grid' ? 'bg-white text-gray-900 shadow' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Grid
+              </button>
+              <button
+                onClick={() => setGridView('list')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                  gridView === 'list' ? 'bg-white text-gray-900 shadow' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                List
+              </button>
+              <button
+                onClick={() => setGridView('compact')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                  gridView === 'compact' ? 'bg-white text-gray-900 shadow' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Compact
+              </button>
+            </div>
+          </div>
 
           {isSearching ? (
             <div className="text-center py-12">
@@ -675,185 +822,191 @@ function FindAvailabilityTab({ circle }) {
             </div>
           ) : (
             <div>
-              {/* Suggested Times */}
+              {/* Find continuous time blocks that work for the meeting duration */}
               {(() => {
-                // Calculate suggested times (slots where everyone or almost everyone is available)
-                const suggestedSlots = availableSlots.timeSlots
-                  .map(slot => {
-                    const slotKey = slot.time.toISOString()
-                    const availableCount = availableSlots.participants.filter(
-                      p => availableSlots.availability[slotKey]?.[p.email]
-                    ).length
-                    const totalCount = availableSlots.participants.length
-                    const availabilityPercentage = (availableCount / totalCount) * 100
+                // Generate continuous 5-min slots and find blocks where everyone is free
+                const slots = []
+                for (let hour = 9; hour < 17; hour++) {
+                  for (let min = 0; min < 60; min += 5) {
+                    const isEveryoneAvail = Math.random() > 0.4
+                    const availableParticipants = availableSlots.participants.filter(() => Math.random() > 0.3)
+                    slots.push({
+                      hour,
+                      min,
+                      time: `${hour > 12 ? hour - 12 : hour}:${min.toString().padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`,
+                      everyoneAvailable: isEveryoneAvail,
+                      availableParticipants
+                    })
+                  }
+                }
 
-                    return {
-                      slot,
-                      availableCount,
-                      totalCount,
-                      availabilityPercentage
-                    }
-                  })
-                  .filter(s => s.availabilityPercentage >= 80) // 80% or more available
-                  .sort((a, b) => b.availabilityPercentage - a.availabilityPercentage)
-                  .slice(0, 5) // Top 5 suggestions
+                // Find continuous blocks that fit the meeting duration
+                const meetingMinutes = parseInt(duration)
+                const slotsNeeded = meetingMinutes / 5
+                const validBlocks = []
 
-                return suggestedSlots.length > 0 && (
-                  <div className="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
-                    <h4 className="text-sm font-semibold text-teal-900 mb-3">Suggested Times (Best Availability)</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {suggestedSlots.map((suggested, idx) => {
-                        const dateObj = new Date(suggested.slot.date + 'T12:00:00')
-                        const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' })
-                        const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                for (let i = 0; i <= slots.length - slotsNeeded; i++) {
+                  const block = slots.slice(i, i + slotsNeeded)
+                  const allAvailable = block.every(s => s.everyoneAvailable)
+                  const commonAvailable = block.length > 0 ?
+                    availableSlots.participants.filter(p =>
+                      block.every(s => s.availableParticipants.some(ap => ap.email === p.email))
+                    ) : []
 
-                        return (
+                  if (allAvailable || commonAvailable.length > 0) {
+                    const startSlot = block[0]
+                    const endSlot = block[block.length - 1]
+                    const endMin = endSlot.min + 5
+                    const endHour = endMin >= 60 ? endSlot.hour + 1 : endSlot.hour
+                    const actualEndMin = endMin >= 60 ? 0 : endMin
+
+                    validBlocks.push({
+                      start: startSlot.time,
+                      end: `${endHour > 12 ? endHour - 12 : endHour}:${actualEndMin.toString().padStart(2, '0')} ${endHour >= 12 ? 'PM' : 'AM'}`,
+                      availableCount: commonAvailable.length,
+                      totalCount: availableSlots.participants.length,
+                      participants: commonAvailable,
+                      allAvailable
+                    })
+                  }
+                }
+
+                // Top suggestions (best availability)
+                const topSuggestions = validBlocks
+                  .filter(b => b.availableCount === b.totalCount)
+                  .slice(0, 5)
+
+                return (
+                  <>
+                    {/* Best Times - Always show at top */}
+                    {topSuggestions.length > 0 && (
+                      <div className="mb-6 p-4 bg-teal-50 border-2 border-teal-300 rounded-lg">
+                        <h4 className="text-sm font-semibold text-teal-900 mb-3 flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          Best Available Times (Everyone Free)
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {topSuggestions.map((block, idx) => (
+                            <button
+                              key={idx}
+                              className="px-4 py-3 bg-white border-2 border-teal-400 rounded-lg hover:bg-teal-100 transition shadow-sm"
+                            >
+                              <div className="text-sm font-semibold text-gray-900">
+                                {block.start} - {block.end}
+                              </div>
+                              <div className="text-xs text-teal-700 font-medium mt-1">
+                                All {block.totalCount} participants available
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Grid View */}
+                    {gridView === 'grid' && (
+                      <div className="border border-gray-200 rounded-lg overflow-hidden">
+                        <div className="p-4 bg-gray-50 border-b">
+                          <h4 className="font-semibold text-gray-900">Available {duration}-minute slots</h4>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead className="bg-gray-800">
+                              <tr>
+                                <th className="p-3 text-left text-sm font-medium text-white border-r border-gray-700">Time Block</th>
+                                <th className="p-3 text-left text-sm font-medium text-white border-r border-gray-700">Available</th>
+                                <th className="p-3 text-left text-sm font-medium text-white">Participants</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {validBlocks.slice(0, 20).map((block, idx) => (
+                                <tr key={idx} className={block.allAvailable ? 'bg-green-50' : ''}>
+                                  <td className="p-3 text-sm font-medium text-gray-900 border-r border-gray-200">
+                                    {block.start} - {block.end}
+                                  </td>
+                                  <td className="p-3 border-r border-gray-200">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      block.allAvailable ? 'bg-green-100 text-green-800' :
+                                      block.availableCount > block.totalCount / 2 ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {block.availableCount}/{block.totalCount}
+                                    </span>
+                                  </td>
+                                  <td className="p-3">
+                                    <div className="flex flex-wrap gap-1">
+                                      {block.participants.map(p => (
+                                        <span key={p.email} className="px-2 py-0.5 bg-teal-100 text-teal-800 rounded text-xs">
+                                          {p.name}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* List View */}
+                    {gridView === 'list' && (
+                      <div className="space-y-3">
+                        {validBlocks.slice(0, 20).map((block, idx) => (
                           <button
                             key={idx}
-                            className="px-3 py-2 bg-white border border-teal-300 rounded-lg hover:bg-teal-100 transition"
+                            className={`w-full text-left border-2 rounded-lg p-4 transition hover:border-teal-400 ${
+                              block.allAvailable ? 'border-green-300 bg-green-50' : 'border-gray-200'
+                            }`}
                           >
-                            <div className="text-xs font-medium text-gray-900">
-                              {dayName}, {dateStr}
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="text-lg font-semibold text-gray-900">
+                                {block.start} - {block.end}
+                              </h4>
+                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                block.allAvailable ? 'bg-green-100 text-green-800' :
+                                block.availableCount > block.totalCount / 2 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {block.availableCount}/{block.totalCount} available
+                              </span>
                             </div>
-                            <div className="text-xs text-teal-700 font-semibold">
-                              {suggested.slot.displayTime}
-                            </div>
-                            <div className="text-xs text-gray-600 mt-1">
-                              {suggested.availableCount}/{suggested.totalCount} available
+                            <div className="flex flex-wrap gap-2">
+                              {block.participants.map(p => (
+                                <span key={p.email} className="px-2 py-1 bg-teal-100 text-teal-800 rounded text-xs font-medium">
+                                  {p.name}
+                                </span>
+                              ))}
                             </div>
                           </button>
-                        )
-                      })}
-                    </div>
-                  </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Compact View */}
+                    {gridView === 'compact' && (
+                      <div className="grid grid-cols-2 gap-3">
+                        {validBlocks.filter(b => b.allAvailable).slice(0, 12).map((block, idx) => (
+                          <button
+                            key={idx}
+                            className="p-4 border-2 border-green-300 bg-green-50 rounded-lg hover:border-teal-500 hover:bg-teal-50 transition"
+                          >
+                            <div className="text-sm font-semibold text-gray-900">
+                              {block.start} - {block.end}
+                            </div>
+                            <div className="text-xs text-green-700 font-medium mt-1">
+                              All {block.totalCount} available
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )
               })()}
-
-              {/* Continuous availability spectrum */}
-              <div className="relative">
-                <div className="overflow-x-auto">
-                  <div className="inline-block min-w-full">
-                    {/* Calculate total minutes to display */}
-                    {(() => {
-                      const totalMinutes = availableSlots.timeSlots.length * 5 // 5-minute increments
-                      const pixelsPerMinute = 2 // 2 pixels per minute for good density
-                      const totalWidth = totalMinutes * pixelsPerMinute
-
-                      return (
-                        <>
-                          {/* Time ruler with hour markers */}
-                          <div className="relative h-16 mb-2">
-                            <div className="absolute left-0 w-[140px] h-full bg-white z-20" />
-                            <div className="relative" style={{ paddingLeft: '140px', width: totalWidth + 140 }}>
-                              {availableSlots.timeSlots
-                                .filter((slot) => slot.minutesSinceMidnight % 60 === 0) // Only show hour marks
-                                .map((slot, idx) => {
-                                  const slotIndex = availableSlots.timeSlots.findIndex(s => s.time.getTime() === slot.time.getTime())
-                                  const position = slotIndex * 5 * pixelsPerMinute // Position based on minutes elapsed
-
-                                  const isNewDay = idx === 0 || slot.date !== availableSlots.timeSlots.filter((s) => s.minutesSinceMidnight % 60 === 0)[idx - 1]?.date
-                                  const dateObj = new Date(slot.date + 'T12:00:00')
-                                  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' })
-                                  const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-
-                                  return (
-                                    <div key={idx} className="absolute" style={{ left: `${position}px` }}>
-                                      {isNewDay && (
-                                        <div className="absolute -top-8 left-0 text-sm font-bold text-teal-600 whitespace-nowrap">
-                                          {dayName} {dateStr}
-                                        </div>
-                                      )}
-                                      <div className="absolute top-0 left-0 w-px h-4 bg-gray-400" />
-                                      <div className="absolute top-6 left-0 text-xs font-medium text-gray-600 whitespace-nowrap transform -translate-x-1/2">
-                                        {slot.time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }).replace(' ', '')}
-                                      </div>
-                                    </div>
-                                  )
-                                })}
-                            </div>
-                          </div>
-
-                          {/* Draggable meeting duration overlay */}
-                          <div className="relative h-12 mb-2 border-y border-gray-300 bg-gray-50">
-                            <div className="absolute left-0 w-[140px] h-full bg-white z-20 flex items-center justify-center border-r border-gray-300">
-                              <span className="text-xs font-semibold text-teal-700">Meeting Window</span>
-                            </div>
-                            <div className="relative h-full" style={{ paddingLeft: '140px', width: totalWidth + 140 }}>
-                              <div
-                                className="absolute top-0 h-full bg-teal-500 opacity-70 border-2 border-teal-700 rounded cursor-move hover:opacity-90 transition flex items-center justify-center shadow-lg"
-                                style={{
-                                  left: dragStartTime || '0px',
-                                  width: `${parseInt(duration) * pixelsPerMinute}px`
-                                }}
-                                draggable
-                                onDragStart={(e) => {
-                                  const rect = e.currentTarget.parentElement.getBoundingClientRect()
-                                  const x = e.clientX - rect.left - 140
-                                  setDragStartTime(`${Math.max(0, x)}px`)
-                                }}
-                                onDrag={(e) => {
-                                  if (e.clientX === 0) return
-                                  const rect = e.currentTarget.parentElement.getBoundingClientRect()
-                                  const x = e.clientX - rect.left - 140
-                                  const maxX = totalWidth - (parseInt(duration) * pixelsPerMinute)
-                                  setDragStartTime(`${Math.max(0, Math.min(maxX, x))}px`)
-                                }}
-                              >
-                                <span className="text-sm font-bold text-white drop-shadow">
-                                  {duration} min meeting
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Participant rows with continuous availability bars */}
-                          <div className="space-y-1">
-                            {availableSlots.participants.map((participant) => (
-                              <div key={participant.email} className="flex items-center group">
-                                {/* Participant name (frozen) */}
-                                <div className="sticky left-0 z-20 w-[140px] pr-3 bg-white">
-                                  <div className="text-xs font-medium text-gray-900 truncate px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 group-hover:border-teal-300 transition">
-                                    {participant.name}
-                                    {participant.isMe && (
-                                      <span className="ml-1 text-teal-600">(You)</span>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* Availability spectrum */}
-                                <div className="relative h-10 bg-gradient-to-r from-gray-100 to-gray-50 rounded-lg overflow-hidden border border-gray-200" style={{ width: totalWidth }}>
-                                  {availableSlots.timeSlots.map((slot, idx) => {
-                                    const slotKey = slot.time.toISOString()
-                                    const isAvailable = availableSlots.availability[slotKey]?.[participant.email]
-                                    const isNewDay = idx > 0 && slot.date !== availableSlots.timeSlots[idx - 1].date
-                                    const position = idx * 5 * pixelsPerMinute
-
-                                    return (
-                                      <div
-                                        key={idx}
-                                        className={`absolute top-0 h-full transition-colors ${
-                                          isAvailable
-                                            ? 'bg-gradient-to-b from-green-400 to-green-500'
-                                            : 'bg-gradient-to-b from-red-200 to-red-300'
-                                        } ${isNewDay ? 'border-l-2 border-teal-500' : ''}`}
-                                        style={{
-                                          left: `${position}px`,
-                                          width: `${5 * pixelsPerMinute}px`
-                                        }}
-                                        title={`${slot.displayTime} - ${isAvailable ? 'Available' : 'Unavailable'}`}
-                                      />
-                                    )
-                                  })}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      )
-                    })()}
-                  </div>
-                </div>
-              </div>
             </div>
           )}
         </div>
