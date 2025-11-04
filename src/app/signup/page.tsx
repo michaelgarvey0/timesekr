@@ -2,20 +2,14 @@
 
 import { Box, Button, Typography, TextField, Link } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 
 const textFieldStyle = {};
 
 function SignupForm() {
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState('');
-
-  useEffect(() => {
-    const emailParam = searchParams.get('email');
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-  }, [searchParams]);
+  const emailParam = searchParams.get('email');
+  const [email, setEmail] = useState(emailParam || '');
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>

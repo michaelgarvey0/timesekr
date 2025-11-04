@@ -29,7 +29,7 @@ export default function HomePage() {
         </Typography>
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-          Let's get started
+          Let&apos;s get started
         </Typography>
 
         <Stack spacing={2}>

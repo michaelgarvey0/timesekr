@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, TextField, Button, IconButton, Stack, Chip, Autocomplete, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Slider, FormControlLabel, Switch } from '@mui/material';
+import { Box, Typography, TextField, Button, IconButton, Stack, Chip, Autocomplete, FormControlLabel, Switch } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
