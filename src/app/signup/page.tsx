@@ -2,11 +2,11 @@
 
 import { Box, Button, Typography, TextField, Link } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 
 const textFieldStyle = {};
 
-export default function SignupPage() {
+function SignupForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
 
@@ -99,5 +99,13 @@ export default function SignupPage() {
         </Box>
       </Box>
     </Box>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<Box sx={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</Box>}>
+      <SignupForm />
+    </Suspense>
   );
 }
