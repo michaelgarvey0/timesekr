@@ -15,12 +15,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dayjs, { Dayjs } from 'dayjs';
 
-interface Contact {
-  email: string;
-  name: string;
-  isContact: boolean;
-}
-
 interface Attendee {
   id: string;
   email: string;
@@ -35,10 +29,10 @@ const textFieldStyle = {
 };
 
 // Mock contacts - this would come from the user's linked contacts
-const mockContacts: Contact[] = [
-  { email: 'john@example.com', name: 'John Doe', isContact: true },
-  { email: 'jane@example.com', name: 'Jane Smith', isContact: true },
-  { email: 'bob@company.com', name: 'Bob Johnson', isContact: true },
+const mockContacts: Attendee[] = [
+  { id: 'contact-1', email: 'john@example.com', name: 'John Doe', isContact: true },
+  { id: 'contact-2', email: 'jane@example.com', name: 'Jane Smith', isContact: true },
+  { id: 'contact-3', email: 'bob@company.com', name: 'Bob Johnson', isContact: true },
 ];
 
 export default function CreateMeetingPage() {
@@ -347,7 +341,7 @@ export default function CreateMeetingPage() {
               />
             </Box>
 
-          <Autocomplete
+          <Autocomplete<Attendee, true, false, true>
             multiple
             freeSolo
             value={attendees}
