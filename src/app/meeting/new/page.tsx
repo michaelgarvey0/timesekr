@@ -22,6 +22,22 @@ interface Attendee {
   isContact: boolean;
 }
 
+interface TimeSlot {
+  date: string;
+  time: string;
+  available: number;
+  total: number;
+  attendeeAvailability: AttendeeWithStatus[];
+}
+
+interface AttendeeWithStatus extends Attendee {
+  status: 'available' | 'unavailable' | 'unknown';
+}
+
+interface TimeSlotsByCategory {
+  [category: string]: TimeSlot[];
+}
+
 const textFieldStyle = {
   '& .MuiOutlinedInput-root': {
     height: '42px',
@@ -116,7 +132,7 @@ export default function CreateMeetingPage() {
 
   // Mock suggested times - would be calculated based on attendees' calendars
   // Organized by availability score (best first)
-  const suggestedTimesByAvailability = attendees.length > 0 ? {
+  const suggestedTimesByAvailability: TimeSlotsByCategory = attendees.length > 0 ? {
     'Everyone Available': [
       {
         date: 'Friday, Jan 17',
@@ -350,7 +366,7 @@ export default function CreateMeetingPage() {
               const filtered = options.filter((option) => {
                 const searchStr = params.inputValue.toLowerCase();
                 return (
-                  option.name.toLowerCase().includes(searchStr) ||
+                  option.name?.toLowerCase().includes(searchStr) ||
                   option.email.toLowerCase().includes(searchStr)
                 );
               });
@@ -382,11 +398,16 @@ export default function CreateMeetingPage() {
             }}
             onChange={(event, newValue) => {
               // Filter out "Me" if present - we manage that separately with isAttending
-              const filteredValue = newValue.filter(a => a.id !== 'me');
+              // Also filter out strings (shouldn't happen with our setup but TypeScript needs it)
+              const filteredValue = newValue.filter((a): a is Attendee =>
+                typeof a !== 'string' && a.id !== 'me'
+              );
 
               // Check if user added a new attendee
               if (filteredValue.length > otherAttendees.length) {
-                const lastValue = filteredValue[filteredValue.length - 1];
+                const lastValue = newValue[newValue.length - 1];
+
+                // Check the actual last value from newValue (before filtering)
                 if (typeof lastValue === 'string') {
                   // User typed and pressed enter
                   const matchingContact = mockContacts.find(
@@ -405,8 +426,8 @@ export default function CreateMeetingPage() {
                         isContact: false,
                       };
                   setOtherAttendees([...otherAttendees, newAttendee]);
-                } else {
-                  // User selected from dropdown
+                } else if (lastValue && lastValue.id !== 'me') {
+                  // User selected from dropdown (and it's not "Me")
                   const newAttendee: Attendee = {
                     id: Date.now().toString(),
                     email: lastValue.email,
@@ -467,7 +488,7 @@ export default function CreateMeetingPage() {
                     <>
                       <PersonIcon sx={{ mr: 1, fontSize: 20, color: 'primary.main' }} />
                       <Box>
-                        <Typography variant="body2">{option.name}</Typography>
+                        <Typography variant="body2">{option.name || option.email}</Typography>
                         <Typography variant="caption" color="text.secondary">
                           {option.email}
                         </Typography>
@@ -529,7 +550,7 @@ export default function CreateMeetingPage() {
                         gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
                         gap: 1.5
                       }}>
-                        {slots.map((slot, index) => {
+                        {slots.map((slot: TimeSlot, index: number) => {
                           const slotId = `${category}-${index}`;
                           const isSelected = selectedTimeSlots.includes(slotId);
                           const selectionNumber = isSelected ? selectedTimeSlots.indexOf(slotId) + 1 : null;
@@ -635,9 +656,9 @@ export default function CreateMeetingPage() {
                         {selectedTimeSlots.map((slotId, idx) => {
                           const selectedSlotData = Object.entries(suggestedTimesByAvailability)
                             .flatMap(([category, slots]) =>
-                              slots.map((slot, index) => ({ ...slot, id: `${category}-${index}` }))
+                              slots.map((slot: TimeSlot, index: number) => ({ ...slot, id: `${category}-${index}` }))
                             )
-                            .find(slot => slot.id === slotId);
+                            .find((slot) => slot.id === slotId);
 
                           return selectedSlotData ? (
                             <Box
@@ -680,7 +701,7 @@ export default function CreateMeetingPage() {
                                 </Box>
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                {selectedSlotData.attendeeAvailability.slice(0, 3).map((attendee, i) => (
+                                {selectedSlotData.attendeeAvailability.slice(0, 3).map((attendee: AttendeeWithStatus, i: number) => (
                                   <Box
                                     key={attendee.id}
                                     sx={{
