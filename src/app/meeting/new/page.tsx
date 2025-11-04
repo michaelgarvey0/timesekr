@@ -59,7 +59,7 @@ export default function CreateMeetingPage() {
   // Computed: combine "Me" with other attendees
   const attendees = isAttending ? [meAttendee, ...otherAttendees] : otherAttendees;
 
-  const handleAddAttendee = (value: string | Contact | null) => {
+  const handleAddAttendee = (value: string | Attendee | null) => {
     if (!value) return;
 
     let newAttendee: Attendee;
@@ -362,10 +362,11 @@ export default function CreateMeetingPage() {
 
               if (params.inputValue && !existsInContacts) {
                 filtered.push({
+                  id: `temp-${Date.now()}`,
                   email: params.inputValue,
                   name: params.inputValue,
                   isContact: false,
-                } as Contact);
+                } as Attendee);
               }
 
               return filtered;
