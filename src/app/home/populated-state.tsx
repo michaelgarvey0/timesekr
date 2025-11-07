@@ -1,186 +1,53 @@
 'use client';
 
-import { Box, Typography, Button, Grid, AppBar, Toolbar, IconButton, Menu, MenuItem, Chip, Avatar, Badge, Stack, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Button, Grid, AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar, Badge, Stack, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import WarningIcon from '@mui/icons-material/Warning';
 import GroupsIcon from '@mui/icons-material/Groups';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import SendIcon from '@mui/icons-material/Send';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-// Participant status types
-type ParticipantStatus =
-  | 'on_platform_calendar_shared'
-  | 'on_platform_responded_manually'
-  | 'on_platform_not_responded'
-  | 'invite_sent_not_on_platform'
-  | 'not_invited_yet';
-
-interface Participant {
-  name: string;
-  status: ParticipantStatus;
-  avatar?: string;
-}
-
 // Mock data
-const actionRequired = [
-  {
-    id: 'action-1',
-    type: 'needs_your_response',
-    title: 'Weekly Team Standup',
-    organizer: 'Sarah Chen',
-    deadline: 'Tomorrow',
-    responded: 4,
-    total: 6,
-    topTime: 'Mon Jan 15 @ 10:00 AM',
-    allTimes: ['Mon Jan 15 @ 10:00 AM', 'Mon Jan 15 @ 2:00 PM', 'Tue Jan 16 @ 9:00 AM'],
-  },
-  {
-    id: 'action-2',
-    type: 'needs_calendar_permission',
-    title: 'Q2 Budget Review',
-    organizer: 'Mike Thompson',
-    deadline: 'Jan 18',
-  },
-  {
-    id: 'action-3',
-    type: 'add_to_contacts',
-    title: 'Product Demo Request',
-    organizer: 'Jane Wilson',
-    company: 'Acme Corp',
-    mutualConnections: 3,
-  },
-  {
-    id: 'action-4',
-    type: 'confirm_final_time',
-    title: 'Marketing Strategy',
-    winningTime: 'Wed Jan 17 @ 3:00 PM',
-    confirmedCount: 5,
-    total: 7,
-  },
+const actionItems = [
+  { id: '1', action: 'RESPOND NOW', title: 'Weekly Team Standup', organizer: 'Sarah Chen', deadline: 'Tomorrow', time: 'Mon Jan 15 @ 10am', responded: '4/6', type: 'response' },
+  { id: '2', action: 'SHARE CALENDAR', title: 'Q2 Budget Review', organizer: 'Mike Thompson', deadline: 'Jan 18', type: 'permission' },
+  { id: '3', action: 'ACCEPT REQUEST', title: 'Jane Wilson', subtitle: 'Product Demo', company: 'Acme Corp', connections: 3, type: 'contact' },
+  { id: '4', action: 'CONFIRM TIME', title: 'Marketing Strategy', time: 'Wed Jan 17 @ 3pm', confirmed: '5/7', type: 'confirm' },
 ];
 
-const outgoingRequests = [
-  {
-    id: 'out-1',
-    type: 'fully_coordinated',
-    title: 'Engineering All-Hands',
-    total: 8,
-    responded: 8,
-    status: '🎉 Everyone ready!',
-    bestTime: 'Thu Jan 18 @ 10:00 AM',
-    participants: [
-      { name: 'Alice Johnson', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Bob Smith', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Carol White', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Dave Brown', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Eve Davis', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Frank Miller', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Grace Lee', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Henry Taylor', status: 'on_platform_calendar_shared' as ParticipantStatus },
-    ],
-  },
-  {
-    id: 'out-2',
-    type: 'waiting_on_responses',
-    title: 'HOA Board Discussion',
-    total: 8,
-    responded: 4,
-    onPlatform: 5,
-    topTime: 'Tue Jan 16 @ 7:00 PM',
-    topVotes: 3,
-    participants: [
-      { name: 'John Smith', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Jane Doe', status: 'on_platform_responded_manually' as ParticipantStatus },
-      { name: 'Bob Wilson', status: 'on_platform_not_responded' as ParticipantStatus },
-      { name: 'Alice Brown', status: 'invite_sent_not_on_platform' as ParticipantStatus },
-      { name: 'Carol Davis', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'David Evans', status: 'on_platform_not_responded' as ParticipantStatus },
-      { name: 'Emma Garcia', status: 'invite_sent_not_on_platform' as ParticipantStatus },
-      { name: 'Frank Harris', status: 'on_platform_calendar_shared' as ParticipantStatus },
-    ],
-  },
-  {
-    id: 'out-3',
-    type: 'cold_start',
-    title: 'Neighborhood Watch',
-    total: 12,
-    responded: 0,
-    invitedDate: '2 days ago',
-  },
-  {
-    id: 'out-4',
-    type: 'waiting_on_responses',
-    title: 'Client Presentation',
-    total: 4,
-    responded: 3,
-    onPlatform: 3,
-    topTime: 'Mon Jan 15 @ 2:00 PM',
-    topVotes: 2,
-    participants: [
-      { name: 'Robert Chen', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Maria Garcia', status: 'on_platform_responded_manually' as ParticipantStatus },
-      { name: 'James Wilson', status: 'on_platform_calendar_shared' as ParticipantStatus },
-      { name: 'Patricia Moore', status: 'invite_sent_not_on_platform' as ParticipantStatus },
-    ],
-  },
+const organizing = [
+  { id: '1', status: 'READY', title: 'Engineering All-Hands', detail: 'Everyone available', time: 'Thu Jan 18 @ 10am', count: '8/8', type: 'ready' },
+  { id: '2', status: 'WAITING', title: 'HOA Board Discussion', detail: 'Top: Tue Jan 16 @ 7pm (3 votes)', count: '4/8', progress: 50, type: 'waiting' },
+  { id: '3', status: 'SENT', title: 'Neighborhood Watch', detail: 'Invites sent 2 days ago', count: '0/12', type: 'cold' },
+  { id: '4', status: 'WAITING', title: 'Client Presentation', detail: 'Top: Mon Jan 15 @ 2pm (2 votes)', count: '3/4', progress: 75, type: 'waiting' },
 ];
 
-const incomingRequests = [
-  {
-    id: 'in-1',
-    type: 'auto_confirmed',
-    title: '1:1 with Manager',
-    organizer: 'Sarah Chen',
-    time: 'Tomorrow @ 2:00 PM',
-  },
-  {
-    id: 'in-2',
-    type: 'needs_vote',
-    title: 'Design Review',
-    organizer: 'Mike Johnson',
-    timeOptions: 3,
-    conflicts: 1,
-  },
+const invited = [
+  { id: '1', status: 'ADDED', title: '1:1 with Manager', organizer: 'Sarah Chen', time: 'Tomorrow @ 2pm', type: 'confirmed' },
+  { id: '2', status: 'VOTE NOW', title: 'Design Review', organizer: 'Mike Johnson', detail: '3 options, 1 conflict', type: 'vote' },
 ];
 
 const upcoming = [
-  { id: '1', title: 'Sprint Planning', time: 'Today @ 3:00 PM', attendees: 6, inMinutes: 180 },
-  { id: '2', title: 'Product Roadmap', time: 'Tomorrow @ 10:00 AM', attendees: 8 },
-  { id: '3', title: 'Customer Success', time: 'Thu @ 1:00 PM', attendees: 4 },
+  { id: '1', title: 'Sprint Planning', time: 'Today @ 3pm', attendees: 6, urgent: true },
+  { id: '2', title: 'Product Roadmap', time: 'Tomorrow @ 10am', attendees: 8 },
+  { id: '3', title: 'Customer Success', time: 'Thu @ 1pm', attendees: 4 },
 ];
-
-const needsAttention = [
-  { id: '1', type: 'quorum', title: 'Coffee Chat', responded: 2, total: 8, minRequired: 4 },
-  { id: '2', type: 'deadline', title: 'Annual Planning', deadline: '2 hours', responded: 3, total: 10 },
-  { id: '3', type: 'reschedule', title: 'Training Session', requestedBy: 'Linda M.' },
-];
-
-const getStatusIcon = (status: ParticipantStatus) => {
-  switch (status) {
-    case 'on_platform_calendar_shared': return '✅';
-    case 'on_platform_responded_manually': return '✅';
-    case 'on_platform_not_responded': return '⏰';
-    case 'invite_sent_not_on_platform': return '📧';
-    case 'not_invited_yet': return '❌';
-  }
-};
 
 export default function PopulatedHomePage() {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
+  const [currentTab, setCurrentTab] = useState(0);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -195,6 +62,254 @@ export default function PopulatedHomePage() {
     router.push('/');
   };
 
+  const renderActionCard = (item: any) => {
+    if (item.type === 'response') {
+      return (
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '3px solid #ef4444', p: 2.5, mb: 2 }}>
+          <Typography variant="h6" sx={{ color: '#ef4444', fontWeight: 700, mb: 0.5 }}>{item.action}</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+            {item.organizer} • {item.responded} responded • Due {item.deadline}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Box sx={{ flex: 1, p: 1.5, bgcolor: '#f0f9ff', borderRadius: '8px' }}>
+              <Typography variant="caption" color="text.secondary">Top choice</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.time}</Typography>
+            </Box>
+            <Button variant="contained" color="error" sx={{ textTransform: 'none', minWidth: 120 }}>Respond</Button>
+          </Box>
+        </Box>
+      );
+    }
+
+    if (item.type === 'permission') {
+      return (
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '3px solid #f59e0b', p: 2.5, mb: 2 }}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <VisibilityIcon sx={{ fontSize: 48, color: '#f59e0b' }} />
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h6" sx={{ color: '#f59e0b', fontWeight: 700, mb: 0.5 }}>{item.action}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
+              <Typography variant="caption" color="text.secondary">{item.organizer} • Due {item.deadline}</Typography>
+            </Box>
+            <Stack spacing={1}>
+              <Button variant="contained" sx={{ bgcolor: '#10b981', textTransform: 'none', '&:hover': { bgcolor: '#059669' } }}>Share</Button>
+              <Button variant="outlined" size="small" sx={{ textTransform: 'none' }}>Pass</Button>
+            </Stack>
+          </Stack>
+        </Box>
+      );
+    }
+
+    if (item.type === 'contact') {
+      return (
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '3px solid #3b82f6', p: 2.5, mb: 2 }}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar sx={{ width: 56, height: 56, bgcolor: '#3b82f6', fontSize: '24px', fontWeight: 700 }}>
+              {item.title.charAt(0)}
+            </Avatar>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h6" sx={{ color: '#3b82f6', fontWeight: 700, mb: 0.5 }}>{item.action}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
+              <Typography variant="caption" color="text.secondary">{item.company} • {item.connections} mutual • {item.subtitle}</Typography>
+            </Box>
+            <Stack spacing={1}>
+              <Button variant="contained" sx={{ bgcolor: '#3b82f6', textTransform: 'none', '&:hover': { bgcolor: '#2563eb' } }}>Accept</Button>
+              <Button variant="text" size="small" sx={{ textTransform: 'none' }}>Ignore</Button>
+            </Stack>
+          </Stack>
+        </Box>
+      );
+    }
+
+    if (item.type === 'confirm') {
+      return (
+        <Box sx={{ bgcolor: '#f0fdf4', borderRadius: '12px', border: '3px solid #10b981', p: 2.5, mb: 2 }}>
+          <Typography variant="h6" sx={{ color: '#10b981', fontWeight: 700, mb: 0.5 }}>{item.action}</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
+          <Typography variant="h5" sx={{ color: '#047857', fontWeight: 700, my: 1.5 }}>🎉 {item.time}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="caption" color="text.secondary">{item.confirmed} can attend</Typography>
+            <Button variant="contained" sx={{ bgcolor: '#10b981', textTransform: 'none', '&:hover': { bgcolor: '#059669' } }}>Confirm & Send</Button>
+          </Box>
+        </Box>
+      );
+    }
+  };
+
+  const renderOrganizingCard = (item: any) => {
+    if (item.type === 'ready') {
+      return (
+        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '2px solid #10b981', overflow: 'hidden', mb: 2 }}>
+          <Box sx={{ bgcolor: '#d1fae5', px: 2, py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="overline" sx={{ fontWeight: 700, color: '#047857', lineHeight: 1 }}>{item.status}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
+            </Box>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: '#047857' }}>{item.count}</Typography>
+          </Box>
+          <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">{item.detail}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: '#3b82f6' }}>{item.time}</Typography>
+            </Box>
+            <Button size="small" variant="contained" sx={{ textTransform: 'none' }}>Lock In</Button>
+          </Box>
+        </Box>
+      );
+    }
+
+    if (item.type === 'waiting') {
+      return (
+        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', p: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            <Box>
+              <Typography variant="overline" sx={{ fontSize: '10px', fontWeight: 700, color: '#f59e0b' }}>{item.status}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
+            </Box>
+            <Typography variant="caption" sx={{ fontWeight: 600 }}>{item.count}</Typography>
+          </Box>
+          <Box sx={{ height: 6, bgcolor: '#f3f4f6', borderRadius: 3, mb: 1.5, overflow: 'hidden' }}>
+            <Box sx={{ height: '100%', width: `${item.progress}%`, bgcolor: '#f59e0b', borderRadius: 3 }} />
+          </Box>
+          <Typography variant="caption" color="text.secondary">{item.detail}</Typography>
+        </Box>
+      );
+    }
+
+    if (item.type === 'cold') {
+      return (
+        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', p: 2, mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography variant="overline" sx={{ fontSize: '10px', fontWeight: 700, color: '#6b7280' }}>{item.status}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
+            <Typography variant="caption" color="text.secondary">{item.detail} • {item.count}</Typography>
+          </Box>
+          <Button size="small" variant="outlined" sx={{ textTransform: 'none' }}>Nudge</Button>
+        </Box>
+      );
+    }
+  };
+
+  const renderInvitedCard = (item: any) => {
+    if (item.type === 'confirmed') {
+      return (
+        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', p: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <CheckCircleIcon sx={{ color: '#10b981', fontSize: 32 }} />
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="overline" sx={{ fontSize: '10px', fontWeight: 700, color: '#10b981' }}>{item.status}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
+            <Typography variant="caption" color="text.secondary">{item.organizer} • {item.time}</Typography>
+          </Box>
+        </Box>
+      );
+    }
+
+    if (item.type === 'vote') {
+      return (
+        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '3px solid #3b82f6', p: 2, mb: 2 }}>
+          <Typography variant="h6" sx={{ color: '#3b82f6', fontWeight: 700, mb: 0.5 }}>{item.status}</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="caption" color="text.secondary">{item.organizer} • {item.detail}</Typography>
+            <Button variant="contained" size="small" sx={{ textTransform: 'none' }}>Vote</Button>
+          </Box>
+        </Box>
+      );
+    }
+  };
+
+  const renderTabContent = () => {
+    if (currentTab === 0) {
+      // ALL
+      return (
+        <Box>
+          {actionItems.length > 0 && (
+            <Box sx={{ mb: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <Box sx={{ width: 4, height: 24, bgcolor: '#ef4444', borderRadius: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>Action Required</Typography>
+                <Badge badgeContent={actionItems.length} sx={{ ml: 1, '& .MuiBadge-badge': { bgcolor: '#ef4444', color: 'white' } }} />
+              </Box>
+              {actionItems.map(renderActionCard)}
+            </Box>
+          )}
+
+          <Box sx={{ mb: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <Box sx={{ width: 4, height: 24, bgcolor: '#3b82f6', borderRadius: 1 }} />
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>You're Organizing</Typography>
+            </Box>
+            {organizing.slice(0, 2).map(renderOrganizingCard)}
+          </Box>
+
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <Box sx={{ width: 4, height: 24, bgcolor: '#8b5cf6', borderRadius: 1 }} />
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>You're Invited To</Typography>
+            </Box>
+            {invited.map(renderInvitedCard)}
+          </Box>
+        </Box>
+      );
+    }
+
+    if (currentTab === 1) {
+      // ACTION REQUIRED
+      return (
+        <Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            {actionItems.length} items need your immediate attention
+          </Typography>
+          {actionItems.map(renderActionCard)}
+        </Box>
+      );
+    }
+
+    if (currentTab === 2) {
+      // ORGANIZING
+      return (
+        <Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Meetings you're coordinating
+          </Typography>
+          {organizing.map(renderOrganizingCard)}
+        </Box>
+      );
+    }
+
+    if (currentTab === 3) {
+      // INVITED TO
+      return (
+        <Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Meetings others are organizing
+          </Typography>
+          {invited.map(renderInvitedCard)}
+        </Box>
+      );
+    }
+
+    if (currentTab === 4) {
+      // UPCOMING
+      return (
+        <Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Your confirmed meetings
+          </Typography>
+          {upcoming.map((mtg) => (
+            <Box key={mtg.id} sx={{ bgcolor: 'white', borderRadius: '8px', border: mtg.urgent ? '2px solid #ef4444' : '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+              {mtg.urgent && <Typography variant="overline" sx={{ fontSize: '10px', fontWeight: 700, color: '#ef4444' }}>SOON</Typography>}
+              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>{mtg.title}</Typography>
+              <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, mb: 0.5 }}>{mtg.time}</Typography>
+              <Typography variant="caption" color="text.secondary">{mtg.attendees} attendees</Typography>
+            </Box>
+          ))}
+        </Box>
+      );
+    }
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
       {/* Top Navigation */}
@@ -203,7 +318,7 @@ export default function PopulatedHomePage() {
           <Box sx={{ flexGrow: 1 }}>
             <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
           </Box>
-          <Badge badgeContent={actionRequired.length} color="error" sx={{ mr: 2 }}>
+          <Badge badgeContent={actionItems.length} color="error" sx={{ mr: 2 }}>
             <NotificationsIcon sx={{ color: 'text.secondary' }} />
           </Badge>
           <IconButton onClick={handleMenuOpen} sx={{ bgcolor: 'grey.100', '&:hover': { bgcolor: 'grey.200' } }}>
@@ -223,12 +338,11 @@ export default function PopulatedHomePage() {
       </AppBar>
 
       {/* Main Content */}
-      <Box sx={{ maxWidth: 1200, width: '100%', mx: 'auto', px: 3, py: 4 }}>
+      <Box sx={{ maxWidth: 1200, width: '100%', mx: 'auto', px: 3, py: 3 }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 700 }}>Dashboard</Typography>
-            <Typography variant="body2" color="text.secondary">{actionRequired.length} items need attention</Typography>
           </Box>
           <Button variant="contained" startIcon={<EventIcon />} onClick={() => router.push('/meeting/new')} sx={{ textTransform: 'none' }}>
             New Meeting
@@ -237,271 +351,75 @@ export default function PopulatedHomePage() {
 
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, lg: 8 }}>
-            {/* ACTION REQUIRED */}
-            {actionRequired.length > 0 && (
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                  Action Required <Chip label={actionRequired.length} size="small" color="error" />
-                </Typography>
-
-                {actionRequired.map((item) => (
-                  <Box key={item.id} sx={{ mb: 2 }}>
-                    {/* Needs Response - Compact horizontal layout */}
-                    {item.type === 'needs_your_response' && (
-                      <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '2px solid #ff4444', p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 600 }}>{item.title}</Typography>
-                          <Typography variant="caption" color="text.secondary">{item.organizer} • {item.responded}/{item.total} responded • Due {item.deadline}</Typography>
-                          <Typography variant="body2" color="primary.main" sx={{ mt: 0.5 }}>Top choice: {item.topTime}</Typography>
-                        </Box>
-                        <Stack spacing={1}>
-                          <Button variant="contained" color="error" size="small" sx={{ textTransform: 'none', whiteSpace: 'nowrap' }}>Respond</Button>
-                          <Button variant="text" size="small" onClick={() => setSelectedMeeting(item)} sx={{ textTransform: 'none' }}>Details</Button>
-                        </Stack>
-                      </Box>
-                    )}
-
-                    {/* Calendar Permission - Icon-focused layout */}
-                    {item.type === 'needs_calendar_permission' && (
-                      <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '2px solid #ff9800', p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <VisibilityIcon sx={{ fontSize: 40, color: 'warning.main' }} />
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 600 }}>{item.title}</Typography>
-                          <Typography variant="caption" color="text.secondary">{item.organizer} wants calendar access • Due {item.deadline}</Typography>
-                        </Box>
-                        <Stack spacing={1} direction="row">
-                          <Button variant="contained" color="success" size="small" sx={{ textTransform: 'none' }}>Share</Button>
-                          <Button variant="outlined" size="small" sx={{ textTransform: 'none' }}>Decline</Button>
-                        </Stack>
-                      </Box>
-                    )}
-
-                    {/* Add Contact - Profile card style */}
-                    {item.type === 'add_to_contacts' && (
-                      <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '2px solid #2196f3', p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ width: 48, height: 48, bgcolor: 'info.main' }}>
-                          {item.organizer.charAt(0)}
-                        </Avatar>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 600 }}>{item.organizer}</Typography>
-                          <Typography variant="caption" color="text.secondary">{item.company} • {item.mutualConnections} mutual connections</Typography>
-                          <Typography variant="body2" sx={{ mt: 0.5 }}>{item.title}</Typography>
-                        </Box>
-                        <Stack spacing={1} direction="row">
-                          <Button variant="contained" color="info" size="small" sx={{ textTransform: 'none' }}>Accept</Button>
-                          <Button variant="text" size="small" sx={{ textTransform: 'none' }}>Ignore</Button>
-                        </Stack>
-                      </Box>
-                    )}
-
-                    {/* Confirm Time - Celebration layout */}
-                    {item.type === 'confirm_final_time' && (
-                      <Box sx={{ bgcolor: '#f0fdf4', borderRadius: '8px', border: '2px solid #22c55e', p: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                          <CheckCircleIcon sx={{ color: 'success.main' }} />
-                          <Typography variant="body1" sx={{ fontWeight: 600 }}>Ready to lock in: {item.title}</Typography>
-                        </Box>
-                        <Typography variant="h6" color="success.dark" sx={{ mb: 1 }}>🎉 {item.winningTime}</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Typography variant="caption" color="text.secondary">{item.confirmedCount}/{item.total} can attend</Typography>
-                          <Button variant="contained" color="success" sx={{ textTransform: 'none' }}>Confirm & Send</Button>
-                        </Box>
-                      </Box>
-                    )}
-                  </Box>
-                ))}
-              </Box>
-            )}
-
-            {/* YOUR MEETINGS - Different layouts for each state */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>Your Meetings</Typography>
-
-              {outgoingRequests.map((meeting) => (
-                <Box key={meeting.id} sx={{ mb: 2 }}>
-                  {/* Fully Coordinated - Success banner style */}
-                  {meeting.type === 'fully_coordinated' && (
-                    <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid', borderColor: 'success.main', overflow: 'hidden' }}>
-                      <Box sx={{ bgcolor: 'success.50', px: 2, py: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{meeting.title}</Typography>
-                          <Typography variant="caption">{meeting.status}</Typography>
-                        </Box>
-                        <Chip label={`${meeting.responded}/${meeting.total}`} size="small" color="success" />
-                      </Box>
-                      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography variant="body2" color="primary.main">{meeting.bestTime}</Typography>
-                        <Stack direction="row" spacing={1}>
-                          <Button size="small" sx={{ textTransform: 'none' }}>Confirm</Button>
-                          <IconButton size="small" onClick={() => setSelectedMeeting(meeting)}><ArrowForwardIcon fontSize="small" /></IconButton>
-                        </Stack>
-                      </Box>
-                    </Box>
-                  )}
-
-                  {/* Waiting on Responses - Progress bar style */}
-                  {meeting.type === 'waiting_on_responses' && (
-                    <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid', borderColor: 'grey.200', p: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{meeting.title}</Typography>
-                        <Typography variant="caption" color="text.secondary">{meeting.responded}/{meeting.total}</Typography>
-                      </Box>
-                      <Box sx={{ height: 4, bgcolor: 'grey.100', borderRadius: 1, mb: 1, overflow: 'hidden' }}>
-                        <Box sx={{ height: '100%', width: `${(meeting.responded / meeting.total) * 100}%`, bgcolor: 'warning.main' }} />
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography variant="caption" color="text.secondary">Top: {meeting.topTime} ({meeting.topVotes} votes)</Typography>
-                        <Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => setSelectedMeeting(meeting)} sx={{ textTransform: 'none' }}>View</Button>
-                      </Box>
-                    </Box>
-                  )}
-
-                  {/* Cold Start - Minimalist waiting style */}
-                  {meeting.type === 'cold_start' && (
-                    <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid', borderColor: 'grey.200', p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{meeting.title}</Typography>
-                        <Typography variant="caption" color="text.secondary">📧 Waiting for {meeting.total} people • Sent {meeting.invitedDate}</Typography>
-                      </Box>
-                      <Button size="small" variant="outlined" sx={{ textTransform: 'none' }}>Remind</Button>
-                    </Box>
-                  )}
-                </Box>
-              ))}
-            </Box>
-
-            {/* INCOMING */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>Incoming</Typography>
-
-              {incomingRequests.map((req) => (
-                <Box key={req.id} sx={{ mb: 2 }}>
-                  {/* Auto-confirmed - Minimal info pill */}
-                  {req.type === 'auto_confirmed' && (
-                    <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid', borderColor: 'grey.200', p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <CheckCircleIcon sx={{ color: 'success.main' }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{req.title}</Typography>
-                        <Typography variant="caption" color="text.secondary">{req.organizer} • {req.time}</Typography>
-                      </Box>
-                      <Chip label="Added" size="small" color="success" variant="outlined" />
-                    </Box>
-                  )}
-
-                  {/* Needs Vote - Action-oriented */}
-                  {req.type === 'needs_vote' && (
-                    <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '2px solid', borderColor: 'info.main', p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <CalendarTodayIcon sx={{ color: 'info.main' }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{req.title}</Typography>
-                        <Typography variant="caption" color="text.secondary">{req.organizer} • {req.timeOptions} options • {req.conflicts} conflict</Typography>
-                      </Box>
-                      <Button variant="contained" color="info" size="small" sx={{ textTransform: 'none' }}>Vote</Button>
-                    </Box>
-                  )}
-                </Box>
-              ))}
-            </Box>
-
-            {/* NEEDS ATTENTION - Ultra compact */}
-            {needsAttention.length > 0 && (
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>Needs Attention</Typography>
-                {needsAttention.map((item) => (
-                  <Box key={item.id} sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid', borderColor: 'grey.200', p: 1.5, mb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {/* Tabs */}
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+              <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)}>
+                <Tab label="All" sx={{ textTransform: 'none', fontWeight: 600 }} />
+                <Tab
+                  label={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {item.type === 'quorum' && <GroupsIcon sx={{ fontSize: 20, color: 'text.secondary' }} />}
-                      {item.type === 'deadline' && <AccessTimeIcon sx={{ fontSize: 20, color: 'warning.main' }} />}
-                      {item.type === 'reschedule' && <CalendarTodayIcon sx={{ fontSize: 20, color: 'text.secondary' }} />}
-                      <Box>
-                        <Typography variant="caption" sx={{ fontWeight: 600 }}>{item.title}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                          {item.type === 'quorum' && `${item.responded}/${item.total} (need ${item.minRequired})`}
-                          {item.type === 'deadline' && `${item.deadline} left • ${item.responded}/${item.total}`}
-                          {item.type === 'reschedule' && `${item.requestedBy} requested change`}
-                        </Typography>
-                      </Box>
+                      Action Required
+                      {actionItems.length > 0 && (
+                        <Box sx={{
+                          bgcolor: '#ef4444',
+                          color: 'white',
+                          borderRadius: '12px',
+                          px: 1,
+                          py: 0.25,
+                          fontSize: '11px',
+                          fontWeight: 700
+                        }}>
+                          {actionItems.length}
+                        </Box>
+                      )}
                     </Box>
-                    <IconButton size="small"><ArrowForwardIcon fontSize="small" /></IconButton>
-                  </Box>
-                ))}
-              </Box>
-            )}
+                  }
+                  sx={{ textTransform: 'none', fontWeight: 600 }}
+                />
+                <Tab label="Organizing" sx={{ textTransform: 'none', fontWeight: 600 }} />
+                <Tab label="Invited To" sx={{ textTransform: 'none', fontWeight: 600 }} />
+                <Tab label="Upcoming" sx={{ textTransform: 'none', fontWeight: 600 }} />
+              </Tabs>
+            </Box>
+
+            {/* Tab Content */}
+            {renderTabContent()}
           </Grid>
 
           {/* SIDEBAR */}
           <Grid size={{ xs: 12, lg: 4 }}>
-            {/* Upcoming - Clean list */}
-            <Box sx={{ bgcolor: 'white', borderRadius: '8px', p: 2, mb: 3 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Upcoming</Typography>
-              {upcoming.map((mtg, idx) => (
-                <Box key={mtg.id} sx={{ py: 1.5, borderBottom: idx < upcoming.length - 1 ? '1px solid' : 'none', borderColor: 'grey.100' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 600 }}>{mtg.title}</Typography>
-                  <Typography variant="caption" color="primary.main" sx={{ display: 'block' }}>{mtg.time}</Typography>
-                  <Typography variant="caption" color="text.secondary">{mtg.attendees} people</Typography>
-                </Box>
-              ))}
-            </Box>
-
             {/* Quick Stats */}
-            <Box sx={{ bgcolor: 'white', borderRadius: '8px', p: 2 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>This Week</Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ bgcolor: 'white', borderRadius: '12px', p: 3, mb: 3, border: '1px solid #e5e7eb' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 2, color: 'text.secondary' }}>THIS WEEK</Typography>
+              <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>12</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#3b82f6' }}>12</Typography>
                   <Typography variant="caption" color="text.secondary">Meetings</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>18h</Typography>
-                  <Typography variant="caption" color="text.secondary">In meetings</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#10b981' }}>18h</Typography>
+                  <Typography variant="caption" color="text.secondary">Meeting time</Typography>
                 </Box>
               </Box>
-              <Box sx={{ height: 40, bgcolor: 'grey.50', borderRadius: 1, display: 'flex', alignItems: 'center', px: 1.5 }}>
-                <Typography variant="caption" color="text.secondary">Busiest: Thursday (6 meetings)</Typography>
+              <Box sx={{ p: 2, bgcolor: '#fef3c7', borderRadius: '8px' }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#92400e' }}>⚠️ Busiest day: Thu (6 meetings)</Typography>
               </Box>
+            </Box>
+
+            {/* Next Up */}
+            <Box sx={{ bgcolor: 'white', borderRadius: '12px', p: 3, border: '1px solid #e5e7eb' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 2, color: 'text.secondary' }}>NEXT UP</Typography>
+              {upcoming.slice(0, 3).map((mtg, idx) => (
+                <Box key={mtg.id} sx={{ py: 2, borderBottom: idx < 2 ? '1px solid #f3f4f6' : 'none' }}>
+                  {mtg.urgent && <Typography variant="overline" sx={{ fontSize: '9px', fontWeight: 700, color: '#ef4444' }}>SOON</Typography>}
+                  <Typography variant="caption" sx={{ fontWeight: 600, display: 'block' }}>{mtg.title}</Typography>
+                  <Typography variant="caption" color="primary.main" sx={{ fontWeight: 600, display: 'block' }}>{mtg.time}</Typography>
+                </Box>
+              ))}
             </Box>
           </Grid>
         </Grid>
       </Box>
-
-      {/* Detail Modal */}
-      <Dialog open={Boolean(selectedMeeting)} onClose={() => setSelectedMeeting(null)} maxWidth="sm" fullWidth>
-        {selectedMeeting && (
-          <>
-            <DialogTitle>{selectedMeeting.title}</DialogTitle>
-            <DialogContent>
-              {selectedMeeting.participants && (
-                <>
-                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>Participants ({selectedMeeting.participants.length})</Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                    {selectedMeeting.participants.map((p: Participant, idx: number) => (
-                      <Chip
-                        key={idx}
-                        label={`${getStatusIcon(p.status)} ${p.name}`}
-                        size="small"
-                        variant="outlined"
-                      />
-                    ))}
-                  </Box>
-                </>
-              )}
-              {selectedMeeting.allTimes && (
-                <>
-                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>Time Options</Typography>
-                  {selectedMeeting.allTimes.map((time: string, idx: number) => (
-                    <Box key={idx} sx={{ p: 1.5, bgcolor: 'grey.50', borderRadius: '8px', mb: 1 }}>
-                      <Typography variant="body2">{time}</Typography>
-                    </Box>
-                  ))}
-                </>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setSelectedMeeting(null)}>Close</Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
     </Box>
   );
 }
