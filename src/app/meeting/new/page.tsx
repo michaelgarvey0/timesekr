@@ -461,7 +461,6 @@ export default function CreateMeetingPage() {
                   </Typography>
                 </Box>
               </Stack>
-              </Box>
             </Box>
           </Box>
         </Box>
