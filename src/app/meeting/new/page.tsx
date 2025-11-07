@@ -282,42 +282,73 @@ export default function CreateMeetingPage() {
     // Initial email view
     if (emailResponseView === 'initial') {
       return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
-          <Box sx={{ maxWidth: 700, mx: 'auto', px: 3 }}>
-            {/* Email Client Header */}
-            <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <IconButton onClick={() => {
-                setShowEmailPreview(false);
-                setEmailResponseView('initial');
-                setSelectedEmailTimes([]);
-              }}>
-                <ArrowBackIcon />
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>
+          {/* Fake Email Client Header */}
+          <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e0e0e0', px: 2, py: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <IconButton onClick={() => {
+                  setShowEmailPreview(false);
+                  setEmailResponseView('initial');
+                  setSelectedEmailTimes([]);
+                }}>
+                  <ArrowBackIcon />
+                </IconButton>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#202124' }}>
+                  Email
+                </Typography>
+              </Box>
+              <Typography variant="caption" sx={{ bgcolor: '#fef7cd', px: 1, py: 0.5, borderRadius: '4px', fontWeight: 500 }}>
+                PREVIEW MODE
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Email Content */}
+          <Box sx={{ maxWidth: 900, mx: 'auto', bgcolor: 'white', minHeight: 'calc(100vh - 60px)' }}>
+            {/* Email Toolbar */}
+            <Box sx={{ borderBottom: '1px solid #e0e0e0', px: 3, py: 2, display: 'flex', gap: 1 }}>
+              <IconButton size="small" disabled>
+                <ArrowBackIcon fontSize="small" />
               </IconButton>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Preview: Email to non-registered users</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>Meeting Request: {title}</Typography>
+              <IconButton size="small" disabled>
+                <EmailIcon fontSize="small" />
+              </IconButton>
+              <IconButton size="small" disabled>
+                <AccessTimeIcon fontSize="small" />
+              </IconButton>
+            </Box>
+
+            {/* Email Header Info */}
+            <Box sx={{ px: 3, py: 3, borderBottom: '1px solid #f0f0f0' }}>
+              <Typography variant="h5" sx={{ fontWeight: 400, mb: 2, color: '#202124' }}>
+                You're invited: {title}
+              </Typography>
+
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'start' }}>
+                <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+                  {meAttendee.name?.charAt(0) || 'M'}
+                </Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#202124' }}>
+                        {meAttendee.name || meAttendee.email}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        to me
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Just now
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
             </Box>
 
-            {/* Email Card */}
-            <Card sx={{ boxShadow: 3 }}>
-              <CardContent sx={{ p: 4 }}>
-                {/* Email Header */}
-                <Box sx={{ borderBottom: '2px solid #f0f0f0', pb: 3, mb: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Avatar sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
-                      <EventIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                        You're invited: {title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        from {meAttendee.name || meAttendee.email}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
+            {/* Email Body */}
+            <Box sx={{ px: 3, py: 4 }}>
 
                 {/* Email Body */}
                 <Stack spacing={3}>
@@ -426,14 +457,14 @@ export default function CreateMeetingPage() {
                     )}
                   </Box>
 
-                  <Box sx={{ textAlign: 'center', py: 2 }}>
+                  <Box sx={{ textAlign: 'center', py: 2, mt: 4 }}>
                     <Typography variant="caption" color="text.secondary">
                       Sent via timesēkr - Multi-party scheduling made simple
                     </Typography>
                   </Box>
                 </Stack>
-              </CardContent>
-            </Card>
+              </Box>
+            </Box>
           </Box>
         </Box>
       );
