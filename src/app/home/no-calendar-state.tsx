@@ -1,12 +1,14 @@
 'use client';
 
-import { Box, Typography, Button, AppBar, Toolbar, IconButton, Menu, MenuItem, Card, CardContent, Alert } from '@mui/material';
+import { Box, Typography, Button, AppBar, Toolbar, IconButton, Menu, MenuItem, Card, CardContent, Chip, Stack, Divider } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import AddIcon from '@mui/icons-material/Add';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import EventIcon from '@mui/icons-material/Event';
+import GroupsIcon from '@mui/icons-material/Groups';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -85,118 +87,139 @@ export default function NoCalendarHomePage() {
 
       {/* Main Content */}
       <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3, py: 4 }}>
-        {/* Calendar Connection Banner */}
-        <Alert
-          severity="warning"
-          icon={<WarningAmberIcon />}
-          sx={{ mb: 3, borderRadius: 2 }}
-          action={
-            <Button
-              color="inherit"
-              size="small"
-              variant="outlined"
-              sx={{ textTransform: 'none' }}
-            >
-              Connect Now
-            </Button>
-          }
-        >
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-            Connect your calendar to get started
-          </Typography>
-          <Typography variant="caption">
-            timesēkr needs access to your calendar to find available times and schedule meetings automatically
-          </Typography>
-        </Alert>
+        {/* Calendar Connection Encouragement Banner */}
+        <Card sx={{ mb: 3, border: '2px solid', borderColor: 'primary.main', bgcolor: '#f0f9ff' }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', gap: 3, alignItems: 'start' }}>
+              <AutoAwesomeIcon sx={{ fontSize: 40, color: 'primary.main', mt: 0.5 }} />
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                  Connect your calendar for the full experience
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  You can respond to meeting requests now, but connecting your calendar lets us automatically find times when you're free and add confirmed meetings to your schedule.
+                </Typography>
+                <Stack direction="row" spacing={2}>
+                  <Button
+                    variant="contained"
+                    size="medium"
+                    startIcon={<CalendarTodayIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Connect Google Calendar
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="medium"
+                    startIcon={<CalendarTodayIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Connect Microsoft
+                  </Button>
+                </Stack>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
 
-        {/* Getting Started Card */}
-        <Card sx={{ mb: 3, border: '1px solid #e5e7eb' }}>
-          <CardContent sx={{ p: 4, textAlign: 'center' }}>
-            <CalendarTodayIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-              Connect Your Calendar
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 500, mx: 'auto' }}>
-              To use timesēkr, you'll need to connect at least one calendar. This allows us to:
-            </Typography>
-            <Box sx={{ textAlign: 'left', maxWidth: 400, mx: 'auto', mb: 3 }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                ✓ Find times when you're actually available
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                ✓ Automatically add confirmed meetings to your calendar
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                ✓ Prevent double-booking
-              </Typography>
-              <Typography variant="body2">
-                ✓ See all your meetings in one place
+        {/* Pending Meeting Request */}
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+          Pending Requests
+        </Typography>
+
+        <Card sx={{ mb: 3, border: '1px solid #e5e7eb', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { borderColor: 'primary.main', boxShadow: 2 } }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <EventIcon color="primary" />
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    Q1 Planning Session
+                  </Typography>
+                  <Chip label="Action Needed" color="error" size="small" />
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  from Sarah Chen
+                </Typography>
+              </Box>
+              <Typography variant="caption" color="text.secondary">
+                2 hours ago
               </Typography>
             </Box>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<CalendarTodayIcon />}
-              sx={{ textTransform: 'none', px: 4 }}
-            >
-              Connect Google Calendar
-            </Button>
-            <Box sx={{ mt: 2 }}>
+
+            <Divider sx={{ mb: 2 }} />
+
+            <Stack spacing={2}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <AccessTimeIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                <Typography variant="body2" color="text.secondary">
+                  60 minutes • 3 time options
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <GroupsIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                <Typography variant="body2" color="text.secondary">
+                  5 attendees
+                </Typography>
+              </Box>
+
+              <Box sx={{ bgcolor: '#f8fafc', p: 2, borderRadius: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 1 }}>
+                  PROPOSED TIMES:
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  • Wed, Jan 15 at 10:00 AM
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  • Thu, Jan 16 at 2:00 PM
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  • Fri, Jan 17 at 1:00 PM
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+              <Button
+                variant="contained"
+                fullWidth
+                sx={{ textTransform: 'none' }}
+              >
+                Respond to Request
+              </Button>
               <Button
                 variant="outlined"
-                size="large"
-                startIcon={<CalendarTodayIcon />}
-                sx={{ textTransform: 'none', px: 4 }}
+                sx={{ textTransform: 'none', minWidth: 100 }}
               >
-                Connect Microsoft Calendar
+                Decline
               </Button>
             </Box>
           </CardContent>
         </Card>
 
-        {/* Limited Functionality Card */}
-        <Card sx={{ border: '1px solid #e5e7eb', bgcolor: '#f8fafc' }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
-              What you can do without a calendar:
+        {/* Empty State for Other Sections */}
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, mt: 4 }}>
+          Your Meetings
+        </Typography>
+        <Card sx={{ border: '1px solid #e5e7eb', bgcolor: '#fafbfc' }}>
+          <CardContent sx={{ p: 5, textAlign: 'center' }}>
+            <CalendarTodayIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              No confirmed meetings yet
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'start' }}>
-                <AddIcon sx={{ color: 'primary.main', mt: 0.5 }} />
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Create meeting requests
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    You can still send meeting requests, but you'll need to manually enter available times
-                  </Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'start' }}>
-                <AddIcon sx={{ color: 'primary.main', mt: 0.5 }} />
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Respond to invites
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Select times that work for you from meeting invites you receive
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Once you respond to meeting requests, confirmed meetings will appear here
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={() => router.push('/meeting/new')}
+              sx={{ textTransform: 'none' }}
+            >
+              Schedule a Meeting
+            </Button>
           </CardContent>
         </Card>
-
-        {/* Quick Action - Create Meeting Anyway */}
-        <Box sx={{ mt: 4, textAlign: 'center' }}>
-          <Button
-            variant="text"
-            onClick={() => router.push('/meeting/new')}
-            sx={{ textTransform: 'none' }}
-          >
-            Skip for now and create a meeting manually
-          </Button>
-        </Box>
       </Box>
     </Box>
   );
