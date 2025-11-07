@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, TextField, Button, IconButton, Stack, Chip, Autocomplete, Avatar, AppBar, Toolbar, Menu, MenuItem, Badge, Stepper, Step, StepLabel, Card, CardContent, ButtonGroup, Switch, FormControlLabel, Collapse, Divider } from '@mui/material';
+import { Box, Typography, TextField, Button, IconButton, Stack, Chip, Autocomplete, Avatar, AppBar, Toolbar, Menu, MenuItem, Badge, Stepper, Step, StepLabel, Card, CardContent, ButtonGroup, Switch, FormControlLabel, Collapse, Divider, Alert, Select, FormControl, InputLabel, Tooltip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
@@ -20,6 +20,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AddIcon from '@mui/icons-material/Add';
+import StarIcon from '@mui/icons-material/Star';
+import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
+import LockIcon from '@mui/icons-material/Lock';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -34,6 +38,7 @@ interface Attendee {
   name?: string;
   isContact: boolean;
   onPlatform: boolean; // true if they're on timesēkr, false if they need email invite
+  required?: boolean; // true if required, false if optional (default: true)
 }
 
 interface ParticipantStatus {
@@ -66,7 +71,7 @@ const mockPlatformUsers: Attendee[] = [
 
 export default function CreateMeetingPage() {
   const router = useRouter();
-  const [version, setVersion] = useState(1); // Toggle between 3 versions
+  const [version, setVersion] = useState(4); // Toggle between versions (default to Combined)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   // Common state
@@ -92,6 +97,15 @@ export default function CreateMeetingPage() {
 
   // Expanded slot details
   const [expandedSlot, setExpandedSlot] = useState<number | null>(null);
+
+  // Quorum rules state
+  const [quorumType, setQuorumType] = useState<'time' | 'percentage' | 'both'>('percentage');
+  const [quorumPercentage, setQuorumPercentage] = useState(80);
+  const [quorumDeadline, setQuorumDeadline] = useState<Dayjs | null>(null);
+
+  // Monetization tracking (mock - would be from backend)
+  const [freeMeetingsUsed, setFreeMeetingsUsed] = useState(1); // User has used 1 of 3 free large meetings
+  const [isPremium, setIsPremium] = useState(false);
 
   // "Me" attendee
   const meAttendee: Attendee = {
@@ -200,12 +214,12 @@ export default function CreateMeetingPage() {
       // Check if in contacts first
       const matchingContact = mockContacts.find(c => c.email.toLowerCase() === email);
       if (matchingContact) {
-        newAttendee = matchingContact;
+        newAttendee = { ...matchingContact, required: true };
       } else {
         // Check if on platform but not in contacts
         const matchingPlatformUser = mockPlatformUsers.find(u => u.email.toLowerCase() === email);
         if (matchingPlatformUser) {
-          newAttendee = matchingPlatformUser;
+          newAttendee = { ...matchingPlatformUser, required: true };
         } else {
           // Not on platform - will get email invite
           newAttendee = {
@@ -213,11 +227,12 @@ export default function CreateMeetingPage() {
             email: value.trim(),
             isContact: false,
             onPlatform: false,
+            required: true,
           };
         }
       }
     } else {
-      newAttendee = { ...value, id: Date.now().toString() };
+      newAttendee = { ...value, id: Date.now().toString(), required: true };
     }
 
     if (attendees.some(a => a.email === newAttendee.email)) {
@@ -228,6 +243,15 @@ export default function CreateMeetingPage() {
     setAttendees([...attendees, newAttendee]);
     setInputValue('');
   };
+
+  const toggleRequired = (attendeeId: string) => {
+    setAttendees(attendees.map(a =>
+      a.id === attendeeId ? { ...a, required: !a.required } : a
+    ));
+  };
+
+  // Check if user needs upgrade
+  const needsUpgrade = !isPremium && allParticipants.length >= 5 && freeMeetingsUsed >= 3;
 
   // Render participant status for a time slot
   const renderParticipantStatus = (participants: ParticipantStatus[]) => {
@@ -1911,6 +1935,581 @@ export default function CreateMeetingPage() {
     );
   };
 
+  // Version 4: Combined Smart + Split with monetization and quorum rules
+  const renderVersion4 = () => {
+    const showUpgradeWarning = !isPremium && allParticipants.length >= 5;
+    const canSend = !needsUpgrade && selectedSlots.length > 0;
+
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
+        <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, py: 4 }}>
+          {/* Upgrade Warning */}
+          {showUpgradeWarning && (
+            <Alert
+              severity={needsUpgrade ? "error" : "warning"}
+              sx={{ mb: 3 }}
+              action={
+                <Button
+                  size="small"
+                  startIcon={<UpgradeIcon />}
+                  onClick={() => alert('Upgrade flow would go here')}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Upgrade
+                </Button>
+              }
+            >
+              {needsUpgrade ? (
+                <Typography variant="body2">
+                  <strong>Upgrade required:</strong> You've used your 3 free meetings with 5+ people. Upgrade to continue scheduling large meetings.
+                </Typography>
+              ) : (
+                <Typography variant="body2">
+                  <strong>Heads up:</strong> Large meetings (5+ people) are limited to 3 free per account. You've used {freeMeetingsUsed}/3.
+                </Typography>
+              )}
+            </Alert>
+          )}
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '500px 1fr' }, gap: 3 }}>
+            {/* Left: Smart View Style Form */}
+            <Box>
+              <Stack spacing={3}>
+                {/* Smart Header */}
+                <Box sx={{ mb: 2 }}>
+                  <AutoAwesomeIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                    Let's schedule your meeting
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    I'll find the perfect time for everyone
+                  </Typography>
+                </Box>
+
+                {/* Question Cards */}
+                <Card sx={{ border: '1px solid #e5e7eb' }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      What's this meeting about?
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      placeholder="e.g., Sprint Planning, Coffee Chat..."
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      sx={{ '& .MuiOutlinedInput-root': { fontSize: '1.25rem', fontWeight: 600 } }}
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ border: '1px solid #e5e7eb' }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      How long do you need?
+                    </Typography>
+                    <Stack direction="row" spacing={1}>
+                      {[15, 30, 45, 60, 90].map((mins) => (
+                        <Button
+                          key={mins}
+                          variant={duration === mins ? 'contained' : 'outlined'}
+                          onClick={() => setDuration(mins)}
+                          sx={{ flex: 1, textTransform: 'none' }}
+                        >
+                          {mins < 60 ? `${mins}m` : `${mins / 60}h`}
+                        </Button>
+                      ))}
+                    </Stack>
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ border: '1px solid #e5e7eb' }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                      When should I search?
+                    </Typography>
+                    <Stack spacing={2}>
+                      <DatePicker
+                        label="Start Date"
+                        value={startDate}
+                        onChange={(newValue) => setStartDate(newValue)}
+                        slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                      />
+                      <DatePicker
+                        label="End Date"
+                        value={endDate}
+                        onChange={(newValue) => setEndDate(newValue)}
+                        minDate={startDate || undefined}
+                        slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                      />
+                    </Stack>
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ border: '1px solid #e5e7eb' }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={isAttending}
+                          onChange={(e) => setIsAttending(e.target.checked)}
+                          color="primary"
+                        />
+                      }
+                      label={
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            Will you be attending?
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            This helps us find times that work for everyone
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ border: '1px solid #e5e7eb' }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                      Who should attend?
+                    </Typography>
+                    <Autocomplete
+                      multiple
+                      freeSolo
+                      size="small"
+                      options={
+                        inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
+                          ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
+                          : mockContacts
+                      }
+                      value={attendees || []}
+                      inputValue={inputValue}
+                      onInputChange={(e, newValue) => setInputValue(newValue)}
+                      onChange={(e, newValue) => {
+                        if (!newValue) {
+                          setAttendees([]);
+                          return;
+                        }
+                        if (newValue.length < attendees.length) {
+                          setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
+                        } else {
+                          const lastItem = newValue[newValue.length - 1];
+                          if (lastItem) {
+                            handleAddAttendee(lastItem);
+                          }
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && inputValue.trim()) {
+                          e.preventDefault();
+                          handleAddAttendee(inputValue.trim());
+                        }
+                      }}
+                      getOptionLabel={(option) => {
+                        if (typeof option === 'string') return option;
+                        return option.name || option.email;
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Add attendees..."
+                          inputProps={{
+                            ...params.inputProps,
+                            autoComplete: 'nope',
+                            'data-lpignore': 'true',
+                            'data-form-type': 'other',
+                          }}
+                          autoComplete="nope"
+                          name={`attendee-${Math.random()}`}
+                        />
+                      )}
+                      renderTags={(value, getTagProps) =>
+                        (value || []).map((option, index) => {
+                          if (typeof option === 'string') return null;
+                          const { key, ...tagProps } = getTagProps({ index });
+                          return (
+                            <Chip
+                              key={key}
+                              label={
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  {option.name || option.email}
+                                  <Tooltip title={option.required ? "Required attendee" : "Optional attendee"}>
+                                    <IconButton
+                                      size="small"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleRequired(option.id);
+                                      }}
+                                      sx={{ p: 0.2, ml: 0.5 }}
+                                    >
+                                      {option.required ? (
+                                        <StarIcon sx={{ fontSize: 14, color: '#f59e0b' }} />
+                                      ) : (
+                                        <StarOutlineIcon sx={{ fontSize: 14 }} />
+                                      )}
+                                    </IconButton>
+                                  </Tooltip>
+                                </Box>
+                              }
+                              {...tagProps}
+                              icon={getAttendeeIcon(option)}
+                              color="primary"
+                            />
+                          );
+                        })
+                      }
+                      renderOption={(props, option) => {
+                        const { key, ...otherProps } = props;
+                        if (typeof option === 'string') return null;
+                        if (option.id === 'add-new') {
+                          return (
+                            <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                              <AddIcon sx={{ color: 'primary.main' }} />
+                              <Typography variant="body2">Add "{option.email}"</Typography>
+                            </Box>
+                          );
+                        }
+                        return (
+                          <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <Avatar sx={{ width: 32, height: 32 }}>
+                              {option.name?.charAt(0) || option.email.charAt(0)}
+                            </Avatar>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="body2">{option.name}</Typography>
+                              <Typography variant="caption" color="text.secondary">{option.email}</Typography>
+                            </Box>
+                          </Box>
+                        );
+                      }}
+                    />
+
+                    {attendees.length > 0 && (
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
+                        <StarIcon sx={{ fontSize: 12, color: '#f59e0b', verticalAlign: 'middle' }} /> = Required •
+                        <StarOutlineIcon sx={{ fontSize: 12, verticalAlign: 'middle', ml: 0.5 }} /> = Optional (click stars to toggle)
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Quorum Rules */}
+                {attendees.length > 0 && (
+                  <Card sx={{ border: '1px solid #e5e7eb' }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        When should the meeting be finalized?
+                      </Typography>
+
+                      <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                        <InputLabel>Quorum Type</InputLabel>
+                        <Select
+                          value={quorumType}
+                          label="Quorum Type"
+                          onChange={(e) => setQuorumType(e.target.value as 'time' | 'percentage' | 'both')}
+                        >
+                          <MenuItem value="percentage">When % of people respond</MenuItem>
+                          <MenuItem value="time">By a specific deadline</MenuItem>
+                          <MenuItem value="both">Both % and deadline</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {(quorumType === 'percentage' || quorumType === 'both') && (
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                            Finalize when {quorumPercentage}% of required attendees respond
+                          </Typography>
+                          <Stack direction="row" spacing={1}>
+                            {[50, 66, 75, 80, 100].map((pct) => (
+                              <Button
+                                key={pct}
+                                size="small"
+                                variant={quorumPercentage === pct ? 'contained' : 'outlined'}
+                                onClick={() => setQuorumPercentage(pct)}
+                                sx={{ flex: 1, textTransform: 'none' }}
+                              >
+                                {pct}%
+                              </Button>
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+
+                      {(quorumType === 'time' || quorumType === 'both') && (
+                        <DatePicker
+                          label="Finalize by"
+                          value={quorumDeadline}
+                          onChange={(newValue) => setQuorumDeadline(newValue)}
+                          minDate={dayjs()}
+                          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                        />
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </Stack>
+            </Box>
+
+            {/* Right: Available Times */}
+            <Box>
+              {attendees.length === 0 ? (
+                <Card sx={{ border: '2px dashed #e5e7eb', p: 6, textAlign: 'center' }}>
+                  <GroupsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    Add attendees to see available times
+                  </Typography>
+                </Card>
+              ) : !title || !startDate || !endDate ? (
+                <Card sx={{ border: '2px dashed #e5e7eb', p: 6, textAlign: 'center' }}>
+                  <AccessTimeIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    {!title && 'Add a meeting title'}
+                    {title && !startDate && 'Select a date range'}
+                    {title && startDate && !endDate && 'Select an end date'}
+                  </Typography>
+                </Card>
+              ) : (
+                <Card sx={{ border: '1px solid #e5e7eb', position: 'sticky', top: 20 }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                      <AccessTimeIcon color="primary" sx={{ fontSize: 28 }} />
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                          Available Times
+                        </Typography>
+                        {startDate && endDate && (
+                          <Typography variant="caption" color="text.secondary">
+                            {startDate.format('MMM D')} - {endDate.format('MMM D, YYYY')}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                      {everyoneAvailable.length > 0
+                        ? `Found ${everyoneAvailable.length} perfect time${everyoneAvailable.length > 1 ? 's' : ''}!`
+                        : suggestedTimes.length > 0
+                        ? `Found ${suggestedTimes.length} available times`
+                        : 'Searching for times...'}
+                    </Typography>
+
+                    <Box sx={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto', pr: 1 }}>
+                      <Stack spacing={2}>
+                        {/* Everyone Available */}
+                        {everyoneAvailable.length > 0 && (
+                          <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#22c55e', mb: 1, display: 'block' }}>
+                              ✓ EVERYONE AVAILABLE
+                            </Typography>
+                            <Stack spacing={1}>
+                              {everyoneAvailable.map((slot) => (
+                                <Box key={slot.id}>
+                                  <Box
+                                    onClick={() => {
+                                      if (selectedSlots.includes(slot.id)) {
+                                        setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                      } else {
+                                        setSelectedSlots([...selectedSlots, slot.id]);
+                                      }
+                                    }}
+                                    sx={{
+                                      p: 2,
+                                      bgcolor: selectedSlots.includes(slot.id) ? 'primary.main' : 'white',
+                                      color: selectedSlots.includes(slot.id) ? 'white' : 'inherit',
+                                      border: '1px solid',
+                                      borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                      borderRadius: '8px',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      '&:hover': { bgcolor: selectedSlots.includes(slot.id) ? 'primary.dark' : '#f8fafc' },
+                                    }}
+                                  >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                      <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                          {slot.day} at {slot.time}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                          All {slot.total} people free
+                                        </Typography>
+                                      </Box>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <IconButton
+                                          size="small"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                          }}
+                                          sx={{ color: selectedSlots.includes(slot.id) ? 'white' : 'inherit' }}
+                                        >
+                                          {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                        </IconButton>
+                                        {selectedSlots.includes(slot.id) && <CheckCircleIcon />}
+                                      </Box>
+                                    </Box>
+                                  </Box>
+                                  <Collapse in={expandedSlot === slot.id}>
+                                    <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                      {renderParticipantStatus(slot.participants)}
+                                    </Box>
+                                  </Collapse>
+                                </Box>
+                              ))}
+                            </Stack>
+                          </Box>
+                        )}
+
+                        {/* Most Available */}
+                        {mostAvailable.length > 0 && (
+                          <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b82f6', mb: 1, display: 'block' }}>
+                              ◐ MOST AVAILABLE
+                            </Typography>
+                            <Stack spacing={1}>
+                              {mostAvailable.map((slot) => (
+                                <Box key={slot.id}>
+                                  <Box
+                                    onClick={() => {
+                                      if (selectedSlots.includes(slot.id)) {
+                                        setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                      } else {
+                                        setSelectedSlots([...selectedSlots, slot.id]);
+                                      }
+                                    }}
+                                    sx={{
+                                      p: 2,
+                                      bgcolor: selectedSlots.includes(slot.id) ? 'primary.main' : 'white',
+                                      color: selectedSlots.includes(slot.id) ? 'white' : 'inherit',
+                                      border: '1px solid',
+                                      borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                      borderRadius: '8px',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      '&:hover': { bgcolor: selectedSlots.includes(slot.id) ? 'primary.dark' : '#f8fafc' },
+                                    }}
+                                  >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                      <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                          {slot.day} at {slot.time}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                          {slot.available}/{slot.total} people free
+                                        </Typography>
+                                      </Box>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <IconButton
+                                          size="small"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                          }}
+                                          sx={{ color: selectedSlots.includes(slot.id) ? 'white' : 'inherit' }}
+                                        >
+                                          {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                        </IconButton>
+                                        {selectedSlots.includes(slot.id) && <CheckCircleIcon />}
+                                      </Box>
+                                    </Box>
+                                  </Box>
+                                  <Collapse in={expandedSlot === slot.id}>
+                                    <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                      {renderParticipantStatus(slot.participants)}
+                                    </Box>
+                                  </Collapse>
+                                </Box>
+                              ))}
+                            </Stack>
+                          </Box>
+                        )}
+
+                        {/* Some Conflicts */}
+                        {someConflicts.length > 0 && (
+                          <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#f59e0b', mb: 1, display: 'block' }}>
+                              ⚠ SOME CONFLICTS
+                            </Typography>
+                            <Stack spacing={1}>
+                              {someConflicts.map((slot) => (
+                                <Box key={slot.id}>
+                                  <Box
+                                    onClick={() => {
+                                      if (selectedSlots.includes(slot.id)) {
+                                        setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                      } else {
+                                        setSelectedSlots([...selectedSlots, slot.id]);
+                                      }
+                                    }}
+                                    sx={{
+                                      p: 2,
+                                      bgcolor: selectedSlots.includes(slot.id) ? 'primary.main' : 'white',
+                                      color: selectedSlots.includes(slot.id) ? 'white' : 'inherit',
+                                      border: '1px solid',
+                                      borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                      borderRadius: '8px',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      '&:hover': { bgcolor: selectedSlots.includes(slot.id) ? 'primary.dark' : '#f8fafc' },
+                                    }}
+                                  >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                      <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                          {slot.day} at {slot.time}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                          {slot.available}/{slot.total} people free
+                                        </Typography>
+                                      </Box>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <IconButton
+                                          size="small"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                          }}
+                                          sx={{ color: selectedSlots.includes(slot.id) ? 'white' : 'inherit' }}
+                                        >
+                                          {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                        </IconButton>
+                                        {selectedSlots.includes(slot.id) && <CheckCircleIcon />}
+                                      </Box>
+                                    </Box>
+                                  </Box>
+                                  <Collapse in={expandedSlot === slot.id}>
+                                    <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                      {renderParticipantStatus(slot.participants)}
+                                    </Box>
+                                  </Collapse>
+                                </Box>
+                              ))}
+                            </Stack>
+                          </Box>
+                        )}
+                      </Stack>
+                    </Box>
+
+                    <Button
+                      variant="contained"
+                      size="large"
+                      fullWidth
+                      disabled={!canSend}
+                      startIcon={needsUpgrade ? <LockIcon /> : <SendIcon />}
+                      onClick={() => needsUpgrade ? alert('Upgrade required') : setShowEmailPreview(true)}
+                      sx={{ mt: 3, textTransform: 'none' }}
+                    >
+                      {needsUpgrade ? 'Upgrade to Send' : `Send Invite (${selectedSlots.length} selected)`}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ minHeight: '100vh', bgcolor: showEmailPreview ? '#f5f5f5' : '#fafbfc' }}>
@@ -1948,6 +2547,13 @@ export default function CreateMeetingPage() {
               >
                 Smart
               </Button>
+              <Button
+                variant={version === 4 ? 'contained' : 'outlined'}
+                onClick={() => setVersion(4)}
+                sx={{ textTransform: 'none' }}
+              >
+                Combined
+              </Button>
             </ButtonGroup>
 
             <Badge badgeContent={0} color="error" sx={{ mr: 2 }}>
@@ -1978,6 +2584,7 @@ export default function CreateMeetingPage() {
             {version === 1 && renderVersion1()}
             {version === 2 && renderVersion2()}
             {version === 3 && renderVersion3()}
+            {version === 4 && renderVersion4()}
           </>
         )}
       </Box>
