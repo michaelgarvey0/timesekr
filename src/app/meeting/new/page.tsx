@@ -135,7 +135,7 @@ export default function CreateMeetingPage() {
       participants: allParticipants.map((a, i) => ({
         attendee: a,
         available: i < Math.floor(allParticipants.length * 0.8),
-        status: (i < Math.floor(allParticipants.length * 0.8) ? 'available' : 'busy') as const
+        status: i < Math.floor(allParticipants.length * 0.8) ? 'available' as const : 'busy' as const
       }))
     },
     {
@@ -148,7 +148,7 @@ export default function CreateMeetingPage() {
       participants: allParticipants.map((a, i) => ({
         attendee: a,
         available: i < Math.floor(allParticipants.length * 0.6),
-        status: (i < Math.floor(allParticipants.length * 0.6) ? 'available' : 'busy') as const
+        status: i < Math.floor(allParticipants.length * 0.6) ? 'available' as const : 'busy' as const
       }))
     },
     {
@@ -161,7 +161,7 @@ export default function CreateMeetingPage() {
       participants: allParticipants.map((a, i) => ({
         attendee: a,
         available: i < Math.floor(allParticipants.length * 0.5),
-        status: (i < Math.floor(allParticipants.length * 0.5) ? 'available' : 'busy') as const
+        status: i < Math.floor(allParticipants.length * 0.5) ? 'available' as const : 'busy' as const
       }))
     },
   ] : [];
