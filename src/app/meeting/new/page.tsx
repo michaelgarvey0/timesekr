@@ -354,13 +354,18 @@ export default function CreateMeetingPage() {
                     multiple
                     freeSolo
                     options={[...mockContacts, ...mockPlatformUsers]}
-                    value={attendees}
+                    value={attendees || []}
                     inputValue={inputValue}
                     onInputChange={(e, newValue) => setInputValue(newValue)}
                     onChange={(e, newValue) => {
+                      if (!newValue) {
+                        setAttendees([]);
+                        return;
+                      }
+
                       // Handle removing
                       if (newValue.length < attendees.length) {
-                        setAttendees(newValue as Attendee[]);
+                        setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
                       } else {
                         // Handle adding
                         const lastItem = newValue[newValue.length - 1];
@@ -374,7 +379,8 @@ export default function CreateMeetingPage() {
                       <TextField {...params} placeholder={attendees.length === 0 ? "Add people by name or email" : ""} />
                     )}
                     renderTags={(value, getTagProps) =>
-                      value.map((option, index) => {
+                      (value || []).map((option, index) => {
+                        if (typeof option === 'string') return null;
                         const { key, ...tagProps } = getTagProps({ index });
                         const status = getAttendeeStatus(option);
                         return (
@@ -746,12 +752,17 @@ export default function CreateMeetingPage() {
                     size="small"
                     freeSolo
                     options={[...mockContacts, ...mockPlatformUsers]}
-                    value={attendees}
+                    value={attendees || []}
                     inputValue={inputValue}
                     onInputChange={(e, newValue) => setInputValue(newValue)}
                     onChange={(e, newValue) => {
+                      if (!newValue) {
+                        setAttendees([]);
+                        return;
+                      }
+
                       if (newValue.length < attendees.length) {
-                        setAttendees(newValue as Attendee[]);
+                        setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
                       } else {
                         const lastItem = newValue[newValue.length - 1];
                         if (lastItem) {
@@ -762,7 +773,8 @@ export default function CreateMeetingPage() {
                     getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
                     renderInput={(params) => <TextField {...params} placeholder={attendees.length === 0 ? "Add people..." : ""} />}
                     renderTags={(value, getTagProps) =>
-                      value.map((option, index) => {
+                      (value || []).map((option, index) => {
+                        if (typeof option === 'string') return null;
                         const { key, ...tagProps } = getTagProps({ index });
                         const status = getAttendeeStatus(option);
                         return (
@@ -1122,12 +1134,17 @@ export default function CreateMeetingPage() {
                 multiple
                 freeSolo
                 options={[...mockContacts, ...mockPlatformUsers]}
-                value={attendees}
+                value={attendees || []}
                 inputValue={inputValue}
                 onInputChange={(e, newValue) => setInputValue(newValue)}
                 onChange={(e, newValue) => {
+                  if (!newValue) {
+                    setAttendees([]);
+                    return;
+                  }
+
                   if (newValue.length < attendees.length) {
-                    setAttendees(newValue as Attendee[]);
+                    setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
                   } else {
                     const lastItem = newValue[newValue.length - 1];
                     if (lastItem) {
@@ -1140,7 +1157,8 @@ export default function CreateMeetingPage() {
                   <TextField {...params} placeholder={attendees.length === 0 ? "Type a name or email..." : ""} />
                 )}
                 renderTags={(value, getTagProps) =>
-                  value.map((option, index) => {
+                  (value || []).map((option, index) => {
+                    if (typeof option === 'string') return null;
                     const { key, ...tagProps } = getTagProps({ index });
                     const status = getAttendeeStatus(option);
                     return (
