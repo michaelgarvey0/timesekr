@@ -22,6 +22,10 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CancelIcon from '@mui/icons-material/Cancel';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import SyncIcon from '@mui/icons-material/Sync';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -80,6 +84,20 @@ export default function NoCalendarHomePage() {
     { id: 1, day: 'Wed, Jan 15', time: '10:00 AM' },
     { id: 2, day: 'Thu, Jan 16', time: '2:00 PM' },
     { id: 3, day: 'Fri, Jan 17', time: '1:00 PM' },
+  ];
+
+  // Mock contacts with different relationship states
+  const mockPendingRequests = [
+    { name: 'Alex Johnson', email: 'alex@company.com', avatar: 'A', color: '#3b82f6', sharedCalendar: true },
+    { name: 'Maria Garcia', email: 'maria@startup.io', avatar: 'M', color: '#8b5cf6', sharedCalendar: false },
+  ];
+
+  const mockConnectedContacts = [
+    { name: 'Sarah Chen', email: 'sarah@company.com', avatar: 'S', color: '#2196f3', calendarStatus: 'mutual' }, // Both shared
+    { name: 'David Kim', email: 'david@startup.io', avatar: 'D', color: '#4caf50', calendarStatus: 'they-shared' }, // They shared with you
+    { name: 'Emma Wilson', email: 'emma@enterprise.com', avatar: 'E', color: '#ff9800', calendarStatus: 'you-shared' }, // You shared with them
+    { name: 'James Rodriguez', email: 'james@tech.com', avatar: 'J', color: '#9c27b0', calendarStatus: 'none' }, // No sharing
+    { name: 'Lisa Anderson', email: 'lisa@design.co', avatar: 'L', color: '#f44336', calendarStatus: 'mutual' },
   ];
 
   // Mock organizing meeting with 10 people
@@ -348,47 +366,194 @@ export default function NoCalendarHomePage() {
         {/* Contacts View */}
         {selectedNav === 'contacts' && (
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 600, mb: 3 }}>
-              Contacts
-            </Typography>
-
-            {/* Add Contact Button */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                Contacts
+              </Typography>
               <Button
                 variant="contained"
-                startIcon={<ContactsIcon />}
+                startIcon={<PersonAddAltIcon />}
                 sx={{ textTransform: 'none' }}
+                onClick={() => alert('Add contact')}
               >
                 Add Contact
               </Button>
             </Box>
 
-            {/* Contact List */}
-            <Card>
-              <List>
-                {[
-                  { name: 'Sarah Chen', email: 'sarah@company.com', avatar: 'S', color: '#2196f3' },
-                  { name: 'David Kim', email: 'david@startup.io', avatar: 'D', color: '#4caf50' },
-                  { name: 'Emma Wilson', email: 'emma@enterprise.com', avatar: 'E', color: '#ff9800' },
-                  { name: 'James Rodriguez', email: 'james@tech.com', avatar: 'J', color: '#9c27b0' },
-                  { name: 'Lisa Anderson', email: 'lisa@design.co', avatar: 'L', color: '#f44336' },
-                ].map((contact, index) => (
-                  <Box key={index}>
-                    <ListItem>
-                      <ListItemIcon>
-                        <Avatar sx={{ bgcolor: contact.color, width: 40, height: 40 }}>
-                          {contact.avatar}
-                        </Avatar>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={contact.name}
-                        secondary={contact.email}
-                      />
-                    </ListItem>
-                    {index < 4 && <Divider />}
+            {/* Pending Contact Requests */}
+            {mockPendingRequests.length > 0 && (
+              <Card sx={{ mb: 3, border: '2px solid #3b82f6', bgcolor: '#eff6ff' }}>
+                <CardContent sx={{ p: 2.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <Badge badgeContent={mockPendingRequests.length} color="primary">
+                      <PersonAddAltIcon color="primary" />
+                    </Badge>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      Pending Requests
+                    </Typography>
                   </Box>
-                ))}
-              </List>
+
+                  <Stack spacing={2}>
+                    {mockPendingRequests.map((request, index) => (
+                      <Card key={index} sx={{ bgcolor: 'white' }}>
+                        <CardContent sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ bgcolor: request.color, width: 48, height: 48 }}>
+                              {request.avatar}
+                            </Avatar>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                {request.name}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {request.email}
+                              </Typography>
+                              {request.sharedCalendar && (
+                                <Chip
+                                  icon={<CalendarTodayIcon sx={{ fontSize: 14 }} />}
+                                  label="Shared calendar with you"
+                                  size="small"
+                                  sx={{ mt: 0.5, bgcolor: '#dcfce7', color: '#16a34a', fontSize: '0.75rem' }}
+                                />
+                              )}
+                            </Box>
+                            <Stack direction="row" spacing={1}>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                onClick={() => alert(`Accept ${request.name}`)}
+                                sx={{ textTransform: 'none' }}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => alert(`Decline ${request.name}`)}
+                                sx={{ textTransform: 'none' }}
+                              >
+                                Decline
+                              </Button>
+                            </Stack>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Stack>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Connected Contacts */}
+            <Card>
+              <CardContent sx={{ p: 2.5 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                  Connected ({mockConnectedContacts.length})
+                </Typography>
+
+                <List sx={{ p: 0 }}>
+                  {mockConnectedContacts.map((contact, index) => (
+                    <Box key={index}>
+                      <ListItem sx={{ px: 0, py: 2 }}>
+                        <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}>
+                          <Avatar sx={{ bgcolor: contact.color, width: 48, height: 48 }}>
+                            {contact.avatar}
+                          </Avatar>
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                              {contact.name}
+                            </Typography>
+                          }
+                          secondary={
+                            <Box>
+                              <Typography variant="body2" color="text.secondary">
+                                {contact.email}
+                              </Typography>
+                              {/* Calendar Sharing Status */}
+                              {contact.calendarStatus === 'mutual' && (
+                                <Chip
+                                  icon={<SwapHorizIcon sx={{ fontSize: 14 }} />}
+                                  label="Calendars shared"
+                                  size="small"
+                                  sx={{ mt: 0.5, bgcolor: '#dcfce7', color: '#16a34a', fontSize: '0.75rem' }}
+                                />
+                              )}
+                              {contact.calendarStatus === 'they-shared' && (
+                                <Chip
+                                  icon={<CalendarTodayIcon sx={{ fontSize: 14 }} />}
+                                  label="They shared with you"
+                                  size="small"
+                                  sx={{ mt: 0.5, bgcolor: '#e0f2fe', color: '#0284c7', fontSize: '0.75rem' }}
+                                />
+                              )}
+                              {contact.calendarStatus === 'you-shared' && (
+                                <Chip
+                                  icon={<CalendarTodayIcon sx={{ fontSize: 14 }} />}
+                                  label="You shared with them"
+                                  size="small"
+                                  sx={{ mt: 0.5, bgcolor: '#fef3c7', color: '#d97706', fontSize: '0.75rem' }}
+                                />
+                              )}
+                              {contact.calendarStatus === 'none' && (
+                                <Chip
+                                  label="No calendar sharing"
+                                  size="small"
+                                  sx={{ mt: 0.5, bgcolor: '#f1f5f9', color: '#64748b', fontSize: '0.75rem' }}
+                                />
+                              )}
+                            </Box>
+                          }
+                        />
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          {contact.calendarStatus === 'none' && (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<ShareIcon />}
+                              onClick={() => alert(`Share calendar with ${contact.name}`)}
+                              sx={{ textTransform: 'none' }}
+                            >
+                              Share Calendar
+                            </Button>
+                          )}
+                          {contact.calendarStatus === 'they-shared' && (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              startIcon={<ShareIcon />}
+                              onClick={() => alert(`Share calendar with ${contact.name}`)}
+                              sx={{ textTransform: 'none' }}
+                            >
+                              Share Back
+                            </Button>
+                          )}
+                          {contact.calendarStatus === 'you-shared' && (
+                            <Chip
+                              label="Waiting for them"
+                              size="small"
+                              sx={{ bgcolor: '#fef3c7', color: '#d97706' }}
+                            />
+                          )}
+                          {contact.calendarStatus === 'mutual' && (
+                            <Chip
+                              icon={<SyncIcon sx={{ fontSize: 14 }} />}
+                              label="Synced"
+                              size="small"
+                              color="success"
+                            />
+                          )}
+                          <IconButton size="small">
+                            <MoreVertIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </ListItem>
+                      {index < mockConnectedContacts.length - 1 && <Divider />}
+                    </Box>
+                  ))}
+                </List>
+              </CardContent>
             </Card>
           </Box>
         )}
