@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, AppBar, Toolbar, IconButton, Menu, MenuItem, Card, CardContent, Chip, Stack, Divider, Tabs, Tab, Grid, Checkbox } from '@mui/material';
+import { Box, Typography, Button, AppBar, Toolbar, IconButton, Menu, MenuItem, Card, CardContent, Chip, Stack, Divider, Tabs, Tab, Grid, Checkbox, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Avatar, Drawer } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -12,31 +12,21 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ShareIcon from '@mui/icons-material/Share';
 import ReplyIcon from '@mui/icons-material/Reply';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HomeIcon from '@mui/icons-material/Home';
+import ContactsIcon from '@mui/icons-material/Contacts';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+const SIDEBAR_WIDTH = 240;
+
 export default function NoCalendarHomePage() {
   const router = useRouter();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentTab, setCurrentTab] = useState(0);
   const [selectedTimes, setSelectedTimes] = useState<number[]>([]);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleSettings = () => {
-    handleMenuClose();
-    // Navigate to settings
-  };
+  const [selectedNav, setSelectedNav] = useState('home');
 
   const handleLogout = () => {
-    handleMenuClose();
     router.push('/');
   };
 
@@ -55,57 +45,157 @@ export default function NoCalendarHomePage() {
   ];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
-      {/* Top Navigation */}
-      <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid', borderColor: 'grey.200' }}>
-        <Toolbar sx={{ py: 1 }}>
-          <Box sx={{ flexGrow: 1 }}>
-            <Image
-              src="/images/logomark.svg"
-              alt="timesēkr"
-              width={120}
-              height={32}
-              priority
-            />
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Left Sidebar */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: SIDEBAR_WIDTH,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: SIDEBAR_WIDTH,
+            boxSizing: 'border-box',
+            borderRight: '1px solid #e5e7eb',
+            bgcolor: 'white',
+          },
+        }}
+      >
+        {/* Logo */}
+        <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
+          <Image
+            src="/images/logomark.svg"
+            alt="timesēkr"
+            width={120}
+            height={32}
+            priority
+          />
+        </Box>
+
+        {/* Navigation */}
+        <List sx={{ px: 2, py: 2 }}>
+          <ListItem disablePadding sx={{ mb: 1 }}>
+            <ListItemButton
+              selected={selectedNav === 'home'}
+              onClick={() => setSelectedNav('home')}
+              sx={{
+                borderRadius: '8px',
+                '&.Mui-selected': {
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  },
+                  '& .MuiListItemIcon-root': {
+                    color: 'white',
+                  },
+                },
+              }}
+            >
+              <ListItemIcon>
+                <HomeIcon />
+              </ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding sx={{ mb: 1 }}>
+            <ListItemButton
+              selected={selectedNav === 'contacts'}
+              onClick={() => setSelectedNav('contacts')}
+              sx={{
+                borderRadius: '8px',
+                '&.Mui-selected': {
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  },
+                  '& .MuiListItemIcon-root': {
+                    color: 'white',
+                  },
+                },
+              }}
+            >
+              <ListItemIcon>
+                <ContactsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Contacts" />
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem disablePadding sx={{ mb: 1 }}>
+            <ListItemButton
+              onClick={() => router.push('/meeting/new')}
+              sx={{ borderRadius: '8px' }}
+            >
+              <ListItemIcon>
+                <EventIcon />
+              </ListItemIcon>
+              <ListItemText primary="New Meeting" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+
+        {/* Profile Section at Bottom */}
+        <Box sx={{ mt: 'auto', borderTop: '1px solid #e5e7eb' }}>
+          <List sx={{ px: 2, py: 2 }}>
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                selected={selectedNav === 'settings'}
+                onClick={() => setSelectedNav('settings')}
+                sx={{
+                  borderRadius: '8px',
+                  '&.Mui-selected': {
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: 'primary.dark',
+                    },
+                    '& .MuiListItemIcon-root': {
+                      color: 'white',
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon>
+                  <SettingsIcon />
+                </ListItemIcon>
+                <ListItemText primary="Settings" />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleLogout} sx={{ borderRadius: '8px' }}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItemButton>
+            </ListItem>
+          </List>
+
+          {/* User Profile */}
+          <Box sx={{ p: 2, borderTop: '1px solid #e5e7eb' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
+                M
+              </Avatar>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }} noWrap>
+                  Michael Garvey
+                </Typography>
+                <Typography variant="caption" color="text.secondary" noWrap>
+                  michael@example.com
+                </Typography>
+              </Box>
+            </Box>
           </Box>
-          <IconButton
-            onClick={handleMenuOpen}
-            sx={{
-              bgcolor: 'grey.100',
-              '&:hover': {
-                bgcolor: 'grey.200',
-              }
-            }}
-          >
-            <AccountCircleIcon sx={{ color: 'primary.main' }} />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-          >
-            <MenuItem onClick={handleSettings}>
-              <SettingsIcon sx={{ mr: 1.5, fontSize: 20 }} />
-              Settings
-            </MenuItem>
-            <MenuItem onClick={handleLogout}>
-              <LogoutIcon sx={{ mr: 1.5, fontSize: 20 }} />
-              Logout
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+        </Box>
+      </Drawer>
 
       {/* Main Content */}
-      <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3, py: 3 }}>
+      <Box sx={{ flexGrow: 1, bgcolor: '#fafbfc', overflow: 'auto' }}>
+        <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3, py: 3 }}>
         {/* Calendar Connection Encouragement Banner */}
         <Card sx={{ mb: 3, border: '2px solid', borderColor: 'primary.main', bgcolor: '#f0f9ff' }}>
           <CardContent sx={{ p: 2.5 }}>
@@ -273,6 +363,7 @@ export default function NoCalendarHomePage() {
             </Button>
           </Box>
         )}
+        </Box>
       </Box>
     </Box>
   );
