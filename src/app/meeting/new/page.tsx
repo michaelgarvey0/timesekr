@@ -416,12 +416,12 @@ export default function CreateMeetingPage() {
                         placeholder={attendees.length === 0 ? "Add people by name or email" : ""}
                         inputProps={{
                           ...params.inputProps,
-                          autoComplete: 'off',
-                          form: {
-                            autoComplete: 'off',
-                          },
+                          autoComplete: 'nope',
+                          'data-lpignore': 'true',
+                          'data-form-type': 'other',
                         }}
-                        autoComplete="off"
+                        autoComplete="nope"
+                        name={`attendee-${Math.random()}`}
                       />
                     )}
                     renderTags={(value, getTagProps) =>
@@ -849,12 +849,12 @@ export default function CreateMeetingPage() {
                         placeholder={attendees.length === 0 ? "Add people..." : ""}
                         inputProps={{
                           ...params.inputProps,
-                          autoComplete: 'off',
-                          form: {
-                            autoComplete: 'off',
-                          },
+                          autoComplete: 'nope',
+                          'data-lpignore': 'true',
+                          'data-form-type': 'other',
                         }}
-                        autoComplete="off"
+                        autoComplete="nope"
+                        name={`attendee-${Math.random()}`}
                       />
                     )}
                     renderTags={(value, getTagProps) =>
@@ -1271,12 +1271,12 @@ export default function CreateMeetingPage() {
                     placeholder={attendees.length === 0 ? "Type a name or email..." : ""}
                     inputProps={{
                       ...params.inputProps,
-                      autoComplete: 'off',
-                      form: {
-                        autoComplete: 'off',
-                      },
+                      autoComplete: 'nope',
+                      'data-lpignore': 'true',
+                      'data-form-type': 'other',
                     }}
-                    autoComplete="off"
+                    autoComplete="nope"
+                    name={`attendee-${Math.random()}`}
                   />
                 )}
                 renderTags={(value, getTagProps) =>
