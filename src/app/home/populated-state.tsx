@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Grid, AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar, Badge, Stack, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab } from '@mui/material';
+import { Box, Typography, Button, Grid, AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar, Badge, Stack, Tabs, Tab, Chip } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -10,8 +10,10 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import GroupsIcon from '@mui/icons-material/Groups';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ReplyIcon from '@mui/icons-material/Reply';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import SendIcon from '@mui/icons-material/Send';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -19,22 +21,22 @@ import { useState } from 'react';
 
 // Mock data
 const actionItems = [
-  { id: '1', action: 'RESPOND NOW', title: 'Weekly Team Standup', organizer: 'Sarah Chen', deadline: 'Tomorrow', time: 'Mon Jan 15 @ 10am', responded: '4/6', type: 'response' },
-  { id: '2', action: 'SHARE CALENDAR', title: 'Q2 Budget Review', organizer: 'Mike Thompson', deadline: 'Jan 18', type: 'permission' },
-  { id: '3', action: 'ACCEPT REQUEST', title: 'Jane Wilson', subtitle: 'Product Demo', company: 'Acme Corp', connections: 3, type: 'contact' },
-  { id: '4', action: 'CONFIRM TIME', title: 'Marketing Strategy', time: 'Wed Jan 17 @ 3pm', confirmed: '5/7', type: 'confirm' },
+  { id: '1', action: 'Respond Now', title: 'Weekly Team Standup', organizer: 'Sarah Chen', deadline: 'Tomorrow', time: 'Mon Jan 15 @ 10am', responded: '4/6', type: 'response' },
+  { id: '2', action: 'Share Calendar', title: 'Q2 Budget Review', organizer: 'Mike Thompson', deadline: 'Jan 18', type: 'permission' },
+  { id: '3', action: 'Accept Request', title: 'Jane Wilson', subtitle: 'Product Demo', company: 'Acme Corp', connections: 3, type: 'contact' },
+  { id: '4', action: 'Confirm Time', title: 'Marketing Strategy', time: 'Wed Jan 17 @ 3pm', confirmed: '5/7', type: 'confirm' },
 ];
 
 const organizing = [
-  { id: '1', status: 'READY', title: 'Engineering All-Hands', detail: 'Everyone available', time: 'Thu Jan 18 @ 10am', count: '8/8', type: 'ready' },
-  { id: '2', status: 'WAITING', title: 'HOA Board Discussion', detail: 'Top: Tue Jan 16 @ 7pm (3 votes)', count: '4/8', progress: 50, type: 'waiting' },
-  { id: '3', status: 'SENT', title: 'Neighborhood Watch', detail: 'Invites sent 2 days ago', count: '0/12', type: 'cold' },
-  { id: '4', status: 'WAITING', title: 'Client Presentation', detail: 'Top: Mon Jan 15 @ 2pm (2 votes)', count: '3/4', progress: 75, type: 'waiting' },
+  { id: '1', status: 'Ready', title: 'Engineering All-Hands', detail: 'Everyone available', time: 'Thu Jan 18 @ 10am', count: '8/8', type: 'ready' },
+  { id: '2', status: 'Waiting', title: 'HOA Board Discussion', detail: 'Top: Tue Jan 16 @ 7pm (3 votes)', count: '4/8', progress: 50, type: 'waiting' },
+  { id: '3', status: 'Sent', title: 'Neighborhood Watch', detail: 'Invites sent 2 days ago', count: '0/12', type: 'cold' },
+  { id: '4', status: 'Waiting', title: 'Client Presentation', detail: 'Top: Mon Jan 15 @ 2pm (2 votes)', count: '3/4', progress: 75, type: 'waiting' },
 ];
 
 const invited = [
-  { id: '1', status: 'ADDED', title: '1:1 with Manager', organizer: 'Sarah Chen', time: 'Tomorrow @ 2pm', type: 'confirmed' },
-  { id: '2', status: 'VOTE NOW', title: 'Design Review', organizer: 'Mike Johnson', detail: '3 options, 1 conflict', type: 'vote' },
+  { id: '1', status: 'Added', title: '1:1 with Manager', organizer: 'Sarah Chen', time: 'Tomorrow @ 2pm', type: 'confirmed' },
+  { id: '2', status: 'Vote Now', title: 'Design Review', organizer: 'Mike Johnson', detail: '3 options, 1 conflict', type: 'vote' },
 ];
 
 const upcoming = [
@@ -47,7 +49,6 @@ export default function PopulatedHomePage() {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentTab, setCurrentTab] = useState(0);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -65,18 +66,23 @@ export default function PopulatedHomePage() {
   const renderActionCard = (item: any) => {
     if (item.type === 'response') {
       return (
-        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '3px solid #ef4444', p: 2.5, mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#ef4444', fontWeight: 700, mb: 0.5 }}>{item.action}</Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+          <Chip
+            icon={<ReplyIcon />}
+            label={item.action}
+            size="small"
+            sx={{ mb: 1.5, fontWeight: 600 }}
+          />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             {item.organizer} • {item.responded} responded • Due {item.deadline}
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Box sx={{ flex: 1, p: 1.5, bgcolor: '#f0f9ff', borderRadius: '8px' }}>
+            <Box sx={{ flex: 1, p: 1.5, bgcolor: '#f8fafc', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
               <Typography variant="caption" color="text.secondary">Top choice</Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.time}</Typography>
             </Box>
-            <Button variant="contained" color="error" sx={{ textTransform: 'none', minWidth: 120 }}>Respond</Button>
+            <Button variant="contained" sx={{ textTransform: 'none', minWidth: 120 }}>Respond</Button>
           </Box>
         </Box>
       );
@@ -84,18 +90,20 @@ export default function PopulatedHomePage() {
 
     if (item.type === 'permission') {
       return (
-        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '3px solid #f59e0b', p: 2.5, mb: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <VisibilityIcon sx={{ fontSize: 48, color: '#f59e0b' }} />
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" sx={{ color: '#f59e0b', fontWeight: 700, mb: 0.5 }}>{item.action}</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
-              <Typography variant="caption" color="text.secondary">{item.organizer} • Due {item.deadline}</Typography>
-            </Box>
-            <Stack spacing={1}>
-              <Button variant="contained" sx={{ bgcolor: '#10b981', textTransform: 'none', '&:hover': { bgcolor: '#059669' } }}>Share</Button>
-              <Button variant="outlined" size="small" sx={{ textTransform: 'none' }}>Pass</Button>
-            </Stack>
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+          <Chip
+            icon={<VisibilityIcon />}
+            label={item.action}
+            size="small"
+            sx={{ mb: 1.5, fontWeight: 600 }}
+          />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {item.organizer} wants to see your calendar • Due {item.deadline}
+          </Typography>
+          <Stack spacing={1} direction="row">
+            <Button variant="contained" sx={{ textTransform: 'none' }}>Share</Button>
+            <Button variant="outlined" sx={{ textTransform: 'none' }}>Respond Manually</Button>
           </Stack>
         </Box>
       );
@@ -103,20 +111,26 @@ export default function PopulatedHomePage() {
 
     if (item.type === 'contact') {
       return (
-        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '3px solid #3b82f6', p: 2.5, mb: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar sx={{ width: 56, height: 56, bgcolor: '#3b82f6', fontSize: '24px', fontWeight: 700 }}>
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+          <Chip
+            icon={<PersonAddIcon />}
+            label={item.action}
+            size="small"
+            sx={{ mb: 1.5, fontWeight: 600 }}
+          />
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+            <Avatar sx={{ width: 48, height: 48 }}>
               {item.title.charAt(0)}
             </Avatar>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" sx={{ color: '#3b82f6', fontWeight: 700, mb: 0.5 }}>{item.action}</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
-              <Typography variant="caption" color="text.secondary">{item.company} • {item.connections} mutual • {item.subtitle}</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>{item.title}</Typography>
+              <Typography variant="body2" color="text.secondary">{item.company} • {item.connections} mutual connections</Typography>
+              <Typography variant="body2" color="text.secondary">{item.subtitle}</Typography>
             </Box>
-            <Stack spacing={1}>
-              <Button variant="contained" sx={{ bgcolor: '#3b82f6', textTransform: 'none', '&:hover': { bgcolor: '#2563eb' } }}>Accept</Button>
-              <Button variant="text" size="small" sx={{ textTransform: 'none' }}>Ignore</Button>
-            </Stack>
+          </Stack>
+          <Stack spacing={1} direction="row">
+            <Button variant="contained" sx={{ textTransform: 'none' }}>Accept</Button>
+            <Button variant="outlined" sx={{ textTransform: 'none' }}>Ignore</Button>
           </Stack>
         </Box>
       );
@@ -124,13 +138,19 @@ export default function PopulatedHomePage() {
 
     if (item.type === 'confirm') {
       return (
-        <Box sx={{ bgcolor: '#f0fdf4', borderRadius: '12px', border: '3px solid #10b981', p: 2.5, mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#10b981', fontWeight: 700, mb: 0.5 }}>{item.action}</Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
-          <Typography variant="h5" sx={{ color: '#047857', fontWeight: 700, my: 1.5 }}>🎉 {item.time}</Typography>
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+          <Chip
+            icon={<ThumbUpIcon />}
+            label={item.action}
+            size="small"
+            color="success"
+            sx={{ mb: 1.5, fontWeight: 600 }}
+          />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, my: 1.5 }}>{item.time}</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography variant="caption" color="text.secondary">{item.confirmed} can attend</Typography>
-            <Button variant="contained" sx={{ bgcolor: '#10b981', textTransform: 'none', '&:hover': { bgcolor: '#059669' } }}>Confirm & Send</Button>
+            <Typography variant="body2" color="text.secondary">{item.confirmed} can attend</Typography>
+            <Button variant="contained" color="success" sx={{ textTransform: 'none' }}>Confirm & Send</Button>
           </Box>
         </Box>
       );
@@ -140,19 +160,20 @@ export default function PopulatedHomePage() {
   const renderOrganizingCard = (item: any) => {
     if (item.type === 'ready') {
       return (
-        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '2px solid #10b981', overflow: 'hidden', mb: 2 }}>
-          <Box sx={{ bgcolor: '#d1fae5', px: 2, py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box>
-              <Typography variant="overline" sx={{ fontWeight: 700, color: '#047857', lineHeight: 1 }}>{item.status}</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
-            </Box>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: '#047857' }}>{item.count}</Typography>
-          </Box>
-          <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box>
-              <Typography variant="caption" color="text.secondary">{item.detail}</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: '#3b82f6' }}>{item.time}</Typography>
-            </Box>
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+          <Chip
+            icon={<CheckCircleIcon />}
+            label={item.status}
+            size="small"
+            color="success"
+            sx={{ mb: 1.5, fontWeight: 600 }}
+          />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {item.detail} • {item.count}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.time}</Typography>
             <Button size="small" variant="contained" sx={{ textTransform: 'none' }}>Lock In</Button>
           </Box>
         </Box>
@@ -161,31 +182,42 @@ export default function PopulatedHomePage() {
 
     if (item.type === 'waiting') {
       return (
-        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', p: 2, mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-            <Box>
-              <Typography variant="overline" sx={{ fontSize: '10px', fontWeight: 700, color: '#f59e0b' }}>{item.status}</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
-            </Box>
-            <Typography variant="caption" sx={{ fontWeight: 600 }}>{item.count}</Typography>
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+            <Chip
+              icon={<HourglassEmptyIcon />}
+              label={item.status}
+              size="small"
+              sx={{ fontWeight: 600 }}
+            />
+            <Typography variant="body2" color="text.secondary">{item.count}</Typography>
           </Box>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>{item.title}</Typography>
           <Box sx={{ height: 6, bgcolor: '#f3f4f6', borderRadius: 3, mb: 1.5, overflow: 'hidden' }}>
-            <Box sx={{ height: '100%', width: `${item.progress}%`, bgcolor: '#f59e0b', borderRadius: 3 }} />
+            <Box sx={{ height: '100%', width: `${item.progress}%`, bgcolor: '#64748b', borderRadius: 3 }} />
           </Box>
-          <Typography variant="caption" color="text.secondary">{item.detail}</Typography>
+          <Typography variant="body2" color="text.secondary">{item.detail}</Typography>
         </Box>
       );
     }
 
     if (item.type === 'cold') {
       return (
-        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', p: 2, mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="overline" sx={{ fontSize: '10px', fontWeight: 700, color: '#6b7280' }}>{item.status}</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
-            <Typography variant="caption" color="text.secondary">{item.detail} • {item.count}</Typography>
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+            <Chip
+              icon={<SendIcon />}
+              label={item.status}
+              size="small"
+              sx={{ fontWeight: 600 }}
+            />
+            <Typography variant="body2" color="text.secondary">{item.count}</Typography>
           </Box>
-          <Button size="small" variant="outlined" sx={{ textTransform: 'none' }}>Nudge</Button>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>{item.title}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="body2" color="text.secondary">{item.detail}</Typography>
+            <Button size="small" variant="outlined" sx={{ textTransform: 'none' }}>Remind</Button>
+          </Box>
         </Box>
       );
     }
@@ -194,24 +226,32 @@ export default function PopulatedHomePage() {
   const renderInvitedCard = (item: any) => {
     if (item.type === 'confirmed') {
       return (
-        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', p: 2, mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <CheckCircleIcon sx={{ color: '#10b981', fontSize: 32 }} />
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="overline" sx={{ fontSize: '10px', fontWeight: 700, color: '#10b981' }}>{item.status}</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{item.title}</Typography>
-            <Typography variant="caption" color="text.secondary">{item.organizer} • {item.time}</Typography>
-          </Box>
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+          <Chip
+            icon={<CheckCircleIcon />}
+            label={item.status}
+            size="small"
+            color="success"
+            sx={{ mb: 1.5, fontWeight: 600 }}
+          />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
+          <Typography variant="body2" color="text.secondary">{item.organizer} • {item.time}</Typography>
         </Box>
       );
     }
 
     if (item.type === 'vote') {
       return (
-        <Box sx={{ bgcolor: 'white', borderRadius: '8px', border: '3px solid #3b82f6', p: 2, mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#3b82f6', fontWeight: 700, mb: 0.5 }}>{item.status}</Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography variant="caption" color="text.secondary">{item.organizer} • {item.detail}</Typography>
+        <Box sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+          <Chip
+            icon={<CalendarTodayIcon />}
+            label={item.status}
+            size="small"
+            sx={{ mb: 1.5, fontWeight: 600 }}
+          />
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>{item.title}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">{item.organizer} • {item.detail}</Typography>
             <Button variant="contained" size="small" sx={{ textTransform: 'none' }}>Vote</Button>
           </Box>
         </Box>
@@ -226,28 +266,18 @@ export default function PopulatedHomePage() {
         <Box>
           {actionItems.length > 0 && (
             <Box sx={{ mb: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <Box sx={{ width: 4, height: 24, bgcolor: '#ef4444', borderRadius: 1 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>Action Required</Typography>
-                <Badge badgeContent={actionItems.length} sx={{ ml: 1, '& .MuiBadge-badge': { bgcolor: '#ef4444', color: 'white' } }} />
-              </Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>Action Required</Typography>
               {actionItems.map(renderActionCard)}
             </Box>
           )}
 
           <Box sx={{ mb: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Box sx={{ width: 4, height: 24, bgcolor: '#3b82f6', borderRadius: 1 }} />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>You're Organizing</Typography>
-            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>You're Organizing</Typography>
             {organizing.slice(0, 2).map(renderOrganizingCard)}
           </Box>
 
           <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Box sx={{ width: 4, height: 24, bgcolor: '#8b5cf6', borderRadius: 1 }} />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>You're Invited To</Typography>
-            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>You're Invited To</Typography>
             {invited.map(renderInvitedCard)}
           </Box>
         </Box>
@@ -255,7 +285,6 @@ export default function PopulatedHomePage() {
     }
 
     if (currentTab === 1) {
-      // ACTION REQUIRED
       return (
         <Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -267,7 +296,6 @@ export default function PopulatedHomePage() {
     }
 
     if (currentTab === 2) {
-      // ORGANIZING
       return (
         <Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -279,7 +307,6 @@ export default function PopulatedHomePage() {
     }
 
     if (currentTab === 3) {
-      // INVITED TO
       return (
         <Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -291,18 +318,24 @@ export default function PopulatedHomePage() {
     }
 
     if (currentTab === 4) {
-      // UPCOMING
       return (
         <Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Your confirmed meetings
           </Typography>
           {upcoming.map((mtg) => (
-            <Box key={mtg.id} sx={{ bgcolor: 'white', borderRadius: '8px', border: mtg.urgent ? '2px solid #ef4444' : '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
-              {mtg.urgent && <Typography variant="overline" sx={{ fontSize: '10px', fontWeight: 700, color: '#ef4444' }}>SOON</Typography>}
-              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>{mtg.title}</Typography>
-              <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600, mb: 0.5 }}>{mtg.time}</Typography>
-              <Typography variant="caption" color="text.secondary">{mtg.attendees} attendees</Typography>
+            <Box key={mtg.id} sx={{ bgcolor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', p: 2.5, mb: 2 }}>
+              {mtg.urgent && (
+                <Chip
+                  label="Soon"
+                  size="small"
+                  color="error"
+                  sx={{ mb: 1.5, fontWeight: 600 }}
+                />
+              )}
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>{mtg.title}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>{mtg.time}</Typography>
+              <Typography variant="body2" color="text.secondary">{mtg.attendees} attendees</Typography>
             </Box>
           ))}
         </Box>
@@ -360,17 +393,7 @@ export default function PopulatedHomePage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       Action Required
                       {actionItems.length > 0 && (
-                        <Box sx={{
-                          bgcolor: '#ef4444',
-                          color: 'white',
-                          borderRadius: '12px',
-                          px: 1,
-                          py: 0.25,
-                          fontSize: '11px',
-                          fontWeight: 700
-                        }}>
-                          {actionItems.length}
-                        </Box>
+                        <Badge badgeContent={actionItems.length} color="error" />
                       )}
                     </Box>
                   }
@@ -393,16 +416,16 @@ export default function PopulatedHomePage() {
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 2, color: 'text.secondary' }}>THIS WEEK</Typography>
               <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#3b82f6' }}>12</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>12</Typography>
                   <Typography variant="caption" color="text.secondary">Meetings</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#10b981' }}>18h</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>18h</Typography>
                   <Typography variant="caption" color="text.secondary">Meeting time</Typography>
                 </Box>
               </Box>
-              <Box sx={{ p: 2, bgcolor: '#fef3c7', borderRadius: '8px' }}>
-                <Typography variant="caption" sx={{ fontWeight: 600, color: '#92400e' }}>⚠️ Busiest day: Thu (6 meetings)</Typography>
+              <Box sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                <Typography variant="caption" sx={{ fontWeight: 600 }}>Busiest: Thursday (6 meetings)</Typography>
               </Box>
             </Box>
 
@@ -411,9 +434,16 @@ export default function PopulatedHomePage() {
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 2, color: 'text.secondary' }}>NEXT UP</Typography>
               {upcoming.slice(0, 3).map((mtg, idx) => (
                 <Box key={mtg.id} sx={{ py: 2, borderBottom: idx < 2 ? '1px solid #f3f4f6' : 'none' }}>
-                  {mtg.urgent && <Typography variant="overline" sx={{ fontSize: '9px', fontWeight: 700, color: '#ef4444' }}>SOON</Typography>}
-                  <Typography variant="caption" sx={{ fontWeight: 600, display: 'block' }}>{mtg.title}</Typography>
-                  <Typography variant="caption" color="primary.main" sx={{ fontWeight: 600, display: 'block' }}>{mtg.time}</Typography>
+                  {mtg.urgent && (
+                    <Chip
+                      label="Soon"
+                      size="small"
+                      color="error"
+                      sx={{ mb: 0.5, height: 20, fontWeight: 600, fontSize: '10px' }}
+                    />
+                  )}
+                  <Typography variant="body2" sx={{ fontWeight: 600, display: 'block' }}>{mtg.title}</Typography>
+                  <Typography variant="caption" sx={{ fontWeight: 600, display: 'block' }}>{mtg.time}</Typography>
                 </Box>
               ))}
             </Box>
