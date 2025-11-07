@@ -1978,10 +1978,10 @@ export default function CreateMeetingPage() {
               <Box sx={{ mb: 3 }}>
                 <AutoAwesomeIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
                 <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                  Let's schedule your meeting
+                  Schedule a Meeting
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  I'll find the perfect time for everyone
+                  Find the perfect time for everyone
                 </Typography>
               </Box>
 
@@ -2029,7 +2029,7 @@ export default function CreateMeetingPage() {
                     {/* Date Range - Side by Side */}
                     <Box>
                       <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 600 }}>
-                        When should I search?
+                        Date Range
                       </Typography>
                       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                         <DatePicker
@@ -2053,7 +2053,7 @@ export default function CreateMeetingPage() {
                     {/* Attending Switch */}
                     <Box>
                       <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
-                        Will you be attending?
+                        Organizer Attending?
                       </Typography>
                       <FormControlLabel
                         control={
@@ -2065,7 +2065,7 @@ export default function CreateMeetingPage() {
                         }
                         label={
                           <Typography variant="body2" color="text.secondary">
-                            Include my availability in the search
+                            Include organizer availability in the search
                           </Typography>
                         }
                       />
