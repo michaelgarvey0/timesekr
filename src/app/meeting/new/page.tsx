@@ -87,6 +87,8 @@ export default function CreateMeetingPage() {
 
   // Email preview state
   const [showEmailPreview, setShowEmailPreview] = useState(false);
+  const [emailResponseView, setEmailResponseView] = useState<'initial' | 'selected' | 'signup' | 'declined'>('initial');
+  const [selectedEmailTimes, setSelectedEmailTimes] = useState<number[]>([]);
 
   // Expanded slot details
   const [expandedSlot, setExpandedSlot] = useState<number | null>(null);
@@ -269,157 +271,352 @@ export default function CreateMeetingPage() {
   const renderEmailPreview = () => {
     const selectedTimes = suggestedTimes.filter(t => selectedSlots.includes(t.id));
 
-    return (
-      <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
-        <Box sx={{ maxWidth: 700, mx: 'auto', px: 3 }}>
-          {/* Email Client Header */}
-          <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => setShowEmailPreview(false)}>
-              <ArrowBackIcon />
-            </IconButton>
-            <Box>
-              <Typography variant="caption" color="text.secondary">Preview: Email to non-registered users</Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>Meeting Request: {title}</Typography>
-            </Box>
-          </Box>
+    const handleTimeClick = (slotId: number) => {
+      if (selectedEmailTimes.includes(slotId)) {
+        setSelectedEmailTimes(selectedEmailTimes.filter(id => id !== slotId));
+      } else {
+        setSelectedEmailTimes([...selectedEmailTimes, slotId]);
+      }
+    };
 
-          {/* Email Card */}
-          <Card sx={{ boxShadow: 3 }}>
-            <CardContent sx={{ p: 4 }}>
-              {/* Email Header */}
-              <Box sx={{ borderBottom: '2px solid #f0f0f0', pb: 3, mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
-                    <EventIcon />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                      You're invited: {title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      from {meAttendee.name || meAttendee.email}
-                    </Typography>
-                  </Box>
-                </Box>
+    // Initial email view
+    if (emailResponseView === 'initial') {
+      return (
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
+          <Box sx={{ maxWidth: 700, mx: 'auto', px: 3 }}>
+            {/* Email Client Header */}
+            <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconButton onClick={() => {
+                setShowEmailPreview(false);
+                setEmailResponseView('initial');
+                setSelectedEmailTimes([]);
+              }}>
+                <ArrowBackIcon />
+              </IconButton>
+              <Box>
+                <Typography variant="caption" color="text.secondary">Preview: Email to non-registered users</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>Meeting Request: {title}</Typography>
               </Box>
+            </Box>
 
-              {/* Email Body */}
-              <Stack spacing={3}>
-                <Typography variant="body1">
-                  Hi there,
-                </Typography>
-
-                <Typography variant="body1">
-                  I'd like to schedule a meeting with you. Please vote on the times that work best for you:
-                </Typography>
-
-                {/* Time Options */}
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
-                    Which times work for you? (Select all that work)
-                  </Typography>
-                  <Stack spacing={2}>
-                    {selectedTimes.map((slot) => (
-                      <Box
-                        key={slot.id}
-                        sx={{
-                          p: 2.5,
-                          border: '2px solid #e5e7eb',
-                          borderRadius: '8px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          transition: 'all 0.2s',
-                          cursor: 'pointer',
-                          '&:hover': {
-                            borderColor: 'primary.main',
-                            bgcolor: '#f0f9ff',
-                          }
-                        }}
-                      >
-                        <Box>
-                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                            {slot.day}
-                          </Typography>
-                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                            {slot.time}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {duration} minutes
-                          </Typography>
-                        </Box>
-                        <Button variant="contained" sx={{ textTransform: 'none' }}>
-                          This works
-                        </Button>
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
-
-                {/* CTA Section */}
-                <Box sx={{ mt: 3, p: 3, bgcolor: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2 }}>
-                    <AutoAwesomeIcon sx={{ color: 'primary.main', mt: 0.5 }} />
+            {/* Email Card */}
+            <Card sx={{ boxShadow: 3 }}>
+              <CardContent sx={{ p: 4 }}>
+                {/* Email Header */}
+                <Box sx={{ borderBottom: '2px solid #f0f0f0', pb: 3, mb: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
+                      <EventIcon />
+                    </Avatar>
                     <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        Can't make any of these times?
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                        You're invited: {title}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Connect your calendar and suggest times that work better for you.
-                        It takes 30 seconds and makes scheduling so much easier.
+                        from {meAttendee.name || meAttendee.email}
                       </Typography>
                     </Box>
                   </Box>
+                </Box>
+
+                {/* Email Body */}
+                <Stack spacing={3}>
+                  <Typography variant="body1">
+                    Hi there,
+                  </Typography>
+
+                  <Typography variant="body1">
+                    I'd like to schedule a meeting with you. Let me know which times work for you:
+                  </Typography>
+
+                  {/* Time Options */}
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Select all times that work
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                      The more options you give, the easier it is to find a time
+                    </Typography>
+                    <Stack spacing={2}>
+                      {selectedTimes.map((slot) => {
+                        const isSelected = selectedEmailTimes.includes(slot.id);
+                        return (
+                          <Box
+                            key={slot.id}
+                            onClick={() => handleTimeClick(slot.id)}
+                            sx={{
+                              p: 2.5,
+                              border: '2px solid',
+                              borderColor: isSelected ? 'primary.main' : '#e5e7eb',
+                              borderRadius: '8px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              transition: 'all 0.2s',
+                              cursor: 'pointer',
+                              bgcolor: isSelected ? '#f0f9ff' : 'white',
+                              '&:hover': {
+                                borderColor: 'primary.main',
+                                bgcolor: '#f0f9ff',
+                              }
+                            }}
+                          >
+                            <Box>
+                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                {slot.day}
+                              </Typography>
+                              <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                                {slot.time}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {duration} minutes
+                              </Typography>
+                            </Box>
+                            {isSelected ? (
+                              <CheckCircleIcon color="primary" sx={{ fontSize: 32 }} />
+                            ) : (
+                              <Button variant="outlined" sx={{ textTransform: 'none' }}>
+                                Select
+                              </Button>
+                            )}
+                          </Box>
+                        );
+                      })}
+                    </Stack>
+
+                    {selectedEmailTimes.length > 0 && (
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        size="large"
+                        onClick={() => setEmailResponseView('selected')}
+                        sx={{ mt: 3, textTransform: 'none', fontWeight: 600 }}
+                      >
+                        Submit {selectedEmailTimes.length} Time{selectedEmailTimes.length > 1 ? 's' : ''}
+                      </Button>
+                    )}
+                  </Box>
+
+                  {/* CTA Section */}
+                  <Box sx={{ mt: 3, p: 3, bgcolor: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2 }}>
+                      <AutoAwesomeIcon sx={{ color: 'primary.main', mt: 0.5 }} />
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          Can't make any of these times?
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Connect your calendar and suggest times that work better for you.
+                          It takes 30 seconds and makes scheduling so much easier.
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      size="large"
+                      onClick={() => setEmailResponseView('signup')}
+                      sx={{ textTransform: 'none', fontWeight: 600 }}
+                    >
+                      Join timesēkr & Suggest Other Times
+                    </Button>
+                  </Box>
+
+                  {/* Decline */}
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Button
+                      variant="text"
+                      color="error"
+                      onClick={() => setEmailResponseView('declined')}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      I can't attend this meeting
+                    </Button>
+                  </Box>
+
+                  {/* Footer */}
+                  <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid #e5e7eb' }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                      Meeting details:
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Duration: {duration} minutes
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Attendees: {allParticipants.length} people
+                    </Typography>
+                    {description && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        {description}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  <Box sx={{ textAlign: 'center', py: 2 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Sent via timesēkr - Multi-party scheduling made simple
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+      );
+    }
+
+    // After selecting times
+    if (emailResponseView === 'selected') {
+      const selectedTimeSlots = selectedTimes.filter(t => selectedEmailTimes.includes(t.id));
+      return (
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
+          <Box sx={{ maxWidth: 700, mx: 'auto', px: 3 }}>
+            <Card sx={{ boxShadow: 3, textAlign: 'center' }}>
+              <CardContent sx={{ p: 5 }}>
+                <CheckCircleIcon color="success" sx={{ fontSize: 80, mb: 2 }} />
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  Thanks! Your response has been sent
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                  {meAttendee.name} will be notified that these times work for you:
+                </Typography>
+                <Stack spacing={1.5} sx={{ mb: 4 }}>
+                  {selectedTimeSlots.map(slot => (
+                    <Box key={slot.id} sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: '8px' }}>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {slot.day} at {slot.time}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+                <Divider sx={{ my: 3 }} />
+                <Box sx={{ p: 3, bgcolor: '#f0f9ff', borderRadius: '12px' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                    Want to make scheduling even easier?
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Connect your calendar to timesēkr and never play email tag again
+                  </Typography>
                   <Button
                     variant="contained"
                     fullWidth
-                    size="large"
-                    sx={{ textTransform: 'none', fontWeight: 600 }}
-                  >
-                    Join timesēkr & Suggest Other Times
-                  </Button>
-                </Box>
-
-                {/* Decline */}
-                <Box sx={{ textAlign: 'center' }}>
-                  <Button
-                    variant="text"
-                    color="error"
+                    onClick={() => setEmailResponseView('signup')}
                     sx={{ textTransform: 'none' }}
                   >
-                    I can't attend this meeting
+                    Get Started - It's Free
                   </Button>
                 </Box>
-
-                {/* Footer */}
-                <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid #e5e7eb' }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                    Meeting details:
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Duration: {duration} minutes
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Attendees: {allParticipants.length} people
-                  </Typography>
-                  {description && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                      {description}
-                    </Typography>
-                  )}
-                </Box>
-
-                <Box sx={{ textAlign: 'center', py: 2 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Sent via timesēkr - Multi-party scheduling made simple
-                  </Typography>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Box>
         </Box>
-      </Box>
-    );
+      );
+    }
+
+    // Signup flow
+    if (emailResponseView === 'signup') {
+      return (
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
+          <Box sx={{ maxWidth: 500, mx: 'auto', px: 3 }}>
+            <Card sx={{ boxShadow: 3 }}>
+              <CardContent sx={{ p: 4 }}>
+                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                  <AutoAwesomeIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                    Join timesēkr
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Connect your calendar and suggest better times
+                  </Typography>
+                </Box>
+
+                <Stack spacing={2}>
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    type="email"
+                    placeholder="you@company.com"
+                  />
+                  <TextField
+                    fullWidth
+                    label="Name"
+                    placeholder="Your name"
+                  />
+                  <Button
+                    variant="contained"
+                    size="large"
+                    fullWidth
+                    sx={{ textTransform: 'none', py: 1.5 }}
+                  >
+                    Continue
+                  </Button>
+                </Stack>
+
+                <Divider sx={{ my: 3 }}>OR</Divider>
+
+                <Stack spacing={1.5}>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    fullWidth
+                    startIcon={<EmailIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Continue with Google
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    fullWidth
+                    startIcon={<EmailIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Continue with Microsoft
+                  </Button>
+                </Stack>
+
+                <Box sx={{ mt: 3, textAlign: 'center' }}>
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => setEmailResponseView('initial')}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Go back
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+      );
+    }
+
+    // Declined
+    if (emailResponseView === 'declined') {
+      return (
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
+          <Box sx={{ maxWidth: 700, mx: 'auto', px: 3 }}>
+            <Card sx={{ boxShadow: 3, textAlign: 'center' }}>
+              <CardContent sx={{ p: 5 }}>
+                <CloseIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  Response sent
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                  {meAttendee.name} has been notified that you can't attend
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  We'll let them know if the meeting gets rescheduled
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+      );
+    }
+
+    return null;
   };
 
   // VERSION 1: STEP-BY-STEP WIZARD
