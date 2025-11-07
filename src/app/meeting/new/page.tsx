@@ -349,120 +349,118 @@ export default function CreateMeetingPage() {
 
             {/* Email Body */}
             <Box sx={{ px: 3, py: 4 }}>
+              <Stack spacing={3}>
+                <Typography variant="body1">
+                  Hi there,
+                </Typography>
 
-                {/* Email Body */}
-                <Stack spacing={3}>
-                  <Typography variant="body1">
-                    Hi there,
+                <Typography variant="body1">
+                  I'd like to schedule a meeting with you. Let me know which times work for you:
+                </Typography>
+
+                {/* Time Options */}
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                    Click any time that works for you:
                   </Typography>
-
-                  <Typography variant="body1">
-                    I'd like to schedule a meeting with you. Let me know which times work for you:
-                  </Typography>
-
-                  {/* Time Options */}
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
-                      Click any time that works for you:
-                    </Typography>
-                    <Stack spacing={2}>
-                      {selectedTimes.map((slot) => (
-                        <Box
-                          key={slot.id}
-                          sx={{
-                            p: 2.5,
-                            border: '2px solid #e5e7eb',
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            bgcolor: 'white',
-                          }}
-                        >
-                          <Box>
-                            <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                              {slot.day}
-                            </Typography>
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                              {slot.time}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {duration} minutes
-                            </Typography>
-                          </Box>
-                          <Button
-                            variant="contained"
-                            onClick={() => setEmailResponseView('selected')}
-                            sx={{ textTransform: 'none' }}
-                          >
-                            This works for me
-                          </Button>
+                  <Stack spacing={2}>
+                    {selectedTimes.map((slot) => (
+                      <Box
+                        key={slot.id}
+                        sx={{
+                          p: 2.5,
+                          border: '2px solid #e5e7eb',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          bgcolor: 'white',
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            {slot.day}
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                            {slot.time}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {duration} minutes
+                          </Typography>
                         </Box>
-                      ))}
-                    </Stack>
-                  </Box>
-
-                  {/* CTA Section */}
-                  <Box sx={{ mt: 3, p: 3, bgcolor: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2 }}>
-                      <AutoAwesomeIcon sx={{ color: 'primary.main', mt: 0.5 }} />
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                          Can't make any of these times?
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Connect your calendar and suggest times that work better for you.
-                          It takes 30 seconds and makes scheduling so much easier.
-                        </Typography>
+                        <Button
+                          variant="contained"
+                          onClick={() => setEmailResponseView('selected')}
+                          sx={{ textTransform: 'none' }}
+                        >
+                          This works for me
+                        </Button>
                       </Box>
-                    </Box>
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      size="large"
-                      onClick={() => setEmailResponseView('signup')}
-                      sx={{ textTransform: 'none', fontWeight: 600 }}
-                    >
-                      Join timesēkr & Suggest Other Times
-                    </Button>
-                  </Box>
+                    ))}
+                  </Stack>
+                </Box>
 
-                  {/* Decline */}
-                  <Box sx={{ textAlign: 'center' }}>
-                    <Button
-                      variant="text"
-                      color="error"
-                      onClick={() => setEmailResponseView('declined')}
-                      sx={{ textTransform: 'none' }}
-                    >
-                      I can't attend this meeting
-                    </Button>
-                  </Box>
-
-                  {/* Footer */}
-                  <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid #e5e7eb' }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                      Meeting details:
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Duration: {duration} minutes
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Attendees: {allParticipants.length} people
-                    </Typography>
-                    {description && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        {description}
+                {/* CTA Section */}
+                <Box sx={{ mt: 3, p: 3, bgcolor: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2 }}>
+                    <AutoAwesomeIcon sx={{ color: 'primary.main', mt: 0.5 }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Can't make any of these times?
                       </Typography>
-                    )}
+                      <Typography variant="body2" color="text.secondary">
+                        Connect your calendar and suggest times that work better for you.
+                        It takes 30 seconds and makes scheduling so much easier.
+                      </Typography>
+                    </Box>
                   </Box>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    onClick={() => setEmailResponseView('signup')}
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Join timesēkr & Suggest Other Times
+                  </Button>
+                </Box>
 
-                  <Box sx={{ textAlign: 'center', py: 2, mt: 4 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      Sent via timesēkr - Multi-party scheduling made simple
+                {/* Decline */}
+                <Box sx={{ textAlign: 'center' }}>
+                  <Button
+                    variant="text"
+                    color="error"
+                    onClick={() => setEmailResponseView('declined')}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    I can't attend this meeting
+                  </Button>
+                </Box>
+
+                {/* Footer */}
+                <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid #e5e7eb' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                    Meeting details:
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Duration: {duration} minutes
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Attendees: {allParticipants.length} people
+                  </Typography>
+                  {description && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {description}
                     </Typography>
-                  </Box>
-                </Stack>
+                  )}
+                </Box>
+
+                <Box sx={{ textAlign: 'center', py: 2, mt: 4 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Sent via timesēkr - Multi-party scheduling made simple
+                  </Typography>
+                </Box>
+              </Stack>
               </Box>
             </Box>
           </Box>
