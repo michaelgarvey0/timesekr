@@ -87,7 +87,7 @@ export default function CreateMeetingPage() {
 
   // Email preview state
   const [showEmailPreview, setShowEmailPreview] = useState(false);
-  const [emailResponseView, setEmailResponseView] = useState<'initial' | 'selected' | 'signup' | 'declined'>('initial');
+  const [emailResponseView, setEmailResponseView] = useState<'initial' | 'selected' | 'declined'>('initial');
   const [selectedEmailTimes, setSelectedEmailTimes] = useState<number[]>([]);
 
   // Expanded slot details
@@ -418,7 +418,7 @@ export default function CreateMeetingPage() {
                     variant="contained"
                     fullWidth
                     size="large"
-                    onClick={() => setEmailResponseView('signup')}
+                    onClick={() => router.push('/signup?email=attendee@example.com')}
                     sx={{ textTransform: 'none', fontWeight: 600 }}
                   >
                     Join timesēkr & Suggest Other Times
@@ -559,7 +559,7 @@ export default function CreateMeetingPage() {
                   <Button
                     variant="contained"
                     fullWidth
-                    onClick={() => setEmailResponseView('signup')}
+                    onClick={() => router.push('/signup?email=attendee@example.com')}
                     sx={{ textTransform: 'none' }}
                   >
                     Join & Suggest Other Times
@@ -575,85 +575,6 @@ export default function CreateMeetingPage() {
                     sx={{ textTransform: 'none' }}
                   >
                     I can't attend
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
-        </Box>
-      );
-    }
-
-    // Signup flow
-    if (emailResponseView === 'signup') {
-      return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
-          <Box sx={{ maxWidth: 500, mx: 'auto', px: 3 }}>
-            <Card sx={{ boxShadow: 3 }}>
-              <CardContent sx={{ p: 4 }}>
-                <Box sx={{ textAlign: 'center', mb: 3 }}>
-                  <AutoAwesomeIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                    Join timesēkr
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Connect your calendar and suggest better times
-                  </Typography>
-                </Box>
-
-                <Stack spacing={2}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    type="email"
-                    placeholder="you@company.com"
-                  />
-                  <TextField
-                    fullWidth
-                    label="Name"
-                    placeholder="Your name"
-                  />
-                  <Button
-                    variant="contained"
-                    size="large"
-                    fullWidth
-                    sx={{ textTransform: 'none', py: 1.5 }}
-                  >
-                    Continue
-                  </Button>
-                </Stack>
-
-                <Divider sx={{ my: 3 }}>OR</Divider>
-
-                <Stack spacing={1.5}>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    fullWidth
-                    startIcon={<EmailIcon />}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Continue with Google
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    fullWidth
-                    startIcon={<EmailIcon />}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Continue with Microsoft
-                  </Button>
-                </Stack>
-
-                <Box sx={{ mt: 3, textAlign: 'center' }}>
-                  <Button
-                    variant="text"
-                    size="small"
-                    onClick={() => setEmailResponseView('initial')}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Go back
                   </Button>
                 </Box>
               </CardContent>
