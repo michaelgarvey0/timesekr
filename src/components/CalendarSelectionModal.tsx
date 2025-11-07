@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Modal, Typography, Button, Checkbox, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
+import { Box, Modal, Typography, Button, Checkbox, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { useState } from 'react';
 
@@ -86,39 +86,44 @@ export default function CalendarSelectionModal({ open, onClose, onAuthorize, pro
             {mockCalendars.map((calendar, index) => (
               <ListItem
                 key={calendar.id}
-                button
-                onClick={() => handleToggle(calendar.id)}
+                disablePadding
                 sx={{
                   borderBottom: index < mockCalendars.length - 1 ? '1px solid' : 'none',
                   borderColor: 'grey.100',
-                  py: 2,
-                  '&:hover': {
-                    bgcolor: 'grey.50',
-                  }
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <Checkbox
-                    edge="start"
-                    checked={selectedCalendars.includes(calendar.id)}
-                    tabIndex={-1}
-                    disableRipple
+                <ListItemButton
+                  onClick={() => handleToggle(calendar.id)}
+                  sx={{
+                    py: 2,
+                    '&:hover': {
+                      bgcolor: 'grey.50',
+                    }
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <Checkbox
+                      edge="start"
+                      checked={selectedCalendars.includes(calendar.id)}
+                      tabIndex={-1}
+                      disableRipple
+                    />
+                  </ListItemIcon>
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <CalendarTodayIcon sx={{ color: 'primary.main', fontSize: 24 }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={calendar.name}
+                    secondary={calendar.email}
+                    primaryTypographyProps={{
+                      fontWeight: 500,
+                      fontSize: '0.95rem',
+                    }}
+                    secondaryTypographyProps={{
+                      fontSize: '0.8rem',
+                    }}
                   />
-                </ListItemIcon>
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <CalendarTodayIcon sx={{ color: 'primary.main', fontSize: 24 }} />
-                </ListItemIcon>
-                <ListItemText
-                  primary={calendar.name}
-                  secondary={calendar.email}
-                  primaryTypographyProps={{
-                    fontWeight: 500,
-                    fontSize: '0.95rem',
-                  }}
-                  secondaryTypographyProps={{
-                    fontSize: '0.8rem',
-                  }}
-                />
+                </ListItemButton>
               </ListItem>
             ))}
           </List>

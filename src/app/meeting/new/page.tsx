@@ -1,12 +1,29 @@
 'use client';
 
-import { Box, Typography, TextField, Button, IconButton, Stack, Chip, Autocomplete, FormControlLabel, Switch } from '@mui/material';
+import { Box, Typography, TextField, Button, IconButton, Stack, Chip, Autocomplete, Avatar, AppBar, Toolbar, Menu, MenuItem, Badge, Stepper, Step, StepLabel, Card, CardContent, ButtonGroup, Switch, FormControlLabel, Collapse, Divider, Alert, Select, FormControl, InputLabel, Tooltip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import EventIcon from '@mui/icons-material/Event';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import GroupsIcon from '@mui/icons-material/Groups';
+import SettingsIcon from '@mui/icons-material/Settings';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import SendIcon from '@mui/icons-material/Send';
+import CloseIcon from '@mui/icons-material/Close';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import AddIcon from '@mui/icons-material/Add';
+import StarIcon from '@mui/icons-material/Star';
+import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
+import LockIcon from '@mui/icons-material/Lock';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -20,729 +37,2708 @@ interface Attendee {
   email: string;
   name?: string;
   isContact: boolean;
+  onPlatform: boolean; // true if they're on timesēkr, false if they need email invite
+  required?: boolean; // true if required, false if optional (default: true)
+}
+
+interface ParticipantStatus {
+  attendee: Attendee;
+  available: boolean;
+  status: 'available' | 'busy' | 'unknown';
 }
 
 interface TimeSlot {
-  date: string;
+  id: number;
+  day: string;
   time: string;
   available: number;
   total: number;
-  attendeeAvailability: AttendeeWithStatus[];
+  type: 'perfect' | 'good' | 'partial';
+  participants: ParticipantStatus[];
 }
 
-interface AttendeeWithStatus extends Attendee {
-  status: 'available' | 'unavailable' | 'unknown';
-}
-
-interface TimeSlotsByCategory {
-  [category: string]: TimeSlot[];
-}
-
-const textFieldStyle = {
-  '& .MuiOutlinedInput-root': {
-    height: '42px',
-  },
-};
-
-// Mock contacts - this would come from the user's linked contacts
 const mockContacts: Attendee[] = [
-  { id: 'contact-1', email: 'john@example.com', name: 'John Doe', isContact: true },
-  { id: 'contact-2', email: 'jane@example.com', name: 'Jane Smith', isContact: true },
-  { id: 'contact-3', email: 'bob@company.com', name: 'Bob Johnson', isContact: true },
+  { id: 'contact-1', email: 'john@example.com', name: 'John Doe', isContact: true, onPlatform: true },
+  { id: 'contact-2', email: 'jane@example.com', name: 'Jane Smith', isContact: true, onPlatform: true },
+  { id: 'contact-3', email: 'bob@company.com', name: 'Bob Johnson', isContact: true, onPlatform: true },
+];
+
+// Mock users on platform but not in contacts
+const mockPlatformUsers: Attendee[] = [
+  { id: 'platform-1', email: 'sarah@startup.io', name: 'Sarah Chen', isContact: false, onPlatform: true },
+  { id: 'platform-2', email: 'mike@tech.com', name: 'Mike Wilson', isContact: false, onPlatform: true },
 ];
 
 export default function CreateMeetingPage() {
   const router = useRouter();
+  const [version, setVersion] = useState(4); // Toggle between versions (default to Combined)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  // Common state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [inputValue, setInputValue] = useState('');
   const [duration, setDuration] = useState(60);
-  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs());
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs().add(2, 'week'));
-  const [selectedTimeSlots, setSelectedTimeSlots] = useState<string[]>([]);
+  const [attendees, setAttendees] = useState<Attendee[]>([]); // Keep for backwards compatibility
+  const [requiredAttendees, setRequiredAttendees] = useState<Attendee[]>([]);
+  const [optionalAttendees, setOptionalAttendees] = useState<Attendee[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
 
-  // "Me" attendee - always first in the list when isAttending is true
+  // Date range and attendance
+  const [startDate, setStartDate] = useState<Dayjs | null>(dayjs());
+  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs().add(7, 'day'));
+  const [isAttending, setIsAttending] = useState(true);
+
+  // Version 1: Stepper state
+  const [activeStep, setActiveStep] = useState(0);
+
+  // Email preview state
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
+  const [emailResponseView, setEmailResponseView] = useState<'initial' | 'selected' | 'declined'>('initial');
+  const [selectedEmailTimes, setSelectedEmailTimes] = useState<number[]>([]);
+
+  // Expanded slot details
+  const [expandedSlot, setExpandedSlot] = useState<number | null>(null);
+
+  // Quorum rules state
+  const [quorumType, setQuorumType] = useState<'time' | 'percentage' | 'both'>('percentage');
+  const [quorumPercentage, setQuorumPercentage] = useState(80);
+  const [quorumDeadline, setQuorumDeadline] = useState<Dayjs | null>(null);
+
+  // Monetization tracking (mock - would be from backend)
+  const [freeMeetingsUsed, setFreeMeetingsUsed] = useState(1); // User has used 1 of 3 free large meetings
+  const [isPremium, setIsPremium] = useState(false);
+
+  // "Me" attendee
   const meAttendee: Attendee = {
     id: 'me',
-    email: 'me@example.com', // Would be actual user email
+    email: 'me@timesekr.com',
     name: 'Me',
     isContact: true,
+    onPlatform: true,
   };
 
-  const [isAttending, setIsAttending] = useState(true);
-  const [otherAttendees, setOtherAttendees] = useState<Attendee[]>([]);
+  // All participants including me if attending
+  const allParticipants = isAttending ? [meAttendee, ...attendees] : attendees;
 
-  // Computed: combine "Me" with other attendees
-  const attendees = isAttending ? [meAttendee, ...otherAttendees] : otherAttendees;
+  // For version 4: combine required and optional
+  const allAttendeesV4 = [...requiredAttendees, ...optionalAttendees];
+  const allParticipantsV4 = isAttending ? [meAttendee, ...allAttendeesV4] : allAttendeesV4;
+
+  // Use appropriate participant list based on version
+  const activeParticipants = version === 4 ? allParticipantsV4 : allParticipants;
+
+  // Mock suggested times with detailed participant availability
+  const suggestedTimes: TimeSlot[] = activeParticipants.length > 0 ? [
+    {
+      id: 1,
+      day: 'Wed, Jan 15',
+      time: '10:00 AM',
+      available: activeParticipants.length,
+      total: activeParticipants.length,
+      type: 'perfect',
+      participants: activeParticipants.map(a => ({ attendee: a, available: true, status: 'available' as const }))
+    },
+    {
+      id: 2,
+      day: 'Thu, Jan 16',
+      time: '2:00 PM',
+      available: activeParticipants.length,
+      total: activeParticipants.length,
+      type: 'perfect',
+      participants: activeParticipants.map(a => ({ attendee: a, available: true, status: 'available' as const }))
+    },
+    {
+      id: 3,
+      day: 'Fri, Jan 17',
+      time: '1:00 PM',
+      available: Math.floor(activeParticipants.length * 0.8),
+      total: activeParticipants.length,
+      type: 'good',
+      participants: activeParticipants.map((a, i) => ({
+        attendee: a,
+        available: i < Math.floor(activeParticipants.length * 0.8),
+        status: i < Math.floor(activeParticipants.length * 0.8) ? 'available' as const : 'busy' as const
+      }))
+    },
+    {
+      id: 4,
+      day: 'Tue, Jan 14',
+      time: '3:00 PM',
+      available: Math.floor(activeParticipants.length * 0.6),
+      total: activeParticipants.length,
+      type: 'partial',
+      participants: activeParticipants.map((a, i) => ({
+        attendee: a,
+        available: i < Math.floor(activeParticipants.length * 0.6),
+        status: i < Math.floor(activeParticipants.length * 0.6) ? 'available' as const : 'busy' as const
+      }))
+    },
+    {
+      id: 5,
+      day: 'Mon, Jan 13',
+      time: '4:00 PM',
+      available: Math.floor(activeParticipants.length * 0.5),
+      total: activeParticipants.length,
+      type: 'partial',
+      participants: activeParticipants.map((a, i) => ({
+        attendee: a,
+        available: i < Math.floor(activeParticipants.length * 0.5),
+        status: i < Math.floor(activeParticipants.length * 0.5) ? 'available' as const : 'busy' as const
+      }))
+    },
+  ] : [];
+
+  // Categorize times by availability
+  const everyoneAvailable = suggestedTimes.filter(t => t.available === t.total);
+  const mostAvailable = suggestedTimes.filter(t => t.available >= t.total * 0.8 && t.available < t.total);
+  const someConflicts = suggestedTimes.filter(t => t.available < t.total * 0.8);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  // Get attendee status with MUI icons
+  const getAttendeeIcon = (attendee: Attendee) => {
+    if (attendee.isContact) {
+      return <AccountCircleIcon sx={{ fontSize: '1rem' }} />;
+    } else if (attendee.onPlatform) {
+      return <PersonAddIcon sx={{ fontSize: '1rem' }} />;
+    } else {
+      return <EmailIcon sx={{ fontSize: '1rem' }} />;
+    }
+  };
 
   const handleAddAttendee = (value: string | Attendee | null) => {
     if (!value) return;
 
     let newAttendee: Attendee;
-
     if (typeof value === 'string') {
-      // User entered a raw email - check if it exists in contacts
-      if (!value.trim()) return;
-      const matchingContact = mockContacts.find(
-        c => c.email.toLowerCase() === value.trim().toLowerCase()
-      );
+      const email = value.trim().toLowerCase();
 
+      // Check if in contacts first
+      const matchingContact = mockContacts.find(c => c.email.toLowerCase() === email);
       if (matchingContact) {
-        newAttendee = {
-          id: Date.now().toString(),
-          email: matchingContact.email,
-          name: matchingContact.name,
-          isContact: true,
-        };
+        newAttendee = { ...matchingContact, required: true };
       } else {
-        newAttendee = {
-          id: Date.now().toString(),
-          email: value.trim(),
-          isContact: false,
-        };
+        // Check if on platform but not in contacts
+        const matchingPlatformUser = mockPlatformUsers.find(u => u.email.toLowerCase() === email);
+        if (matchingPlatformUser) {
+          newAttendee = { ...matchingPlatformUser, required: true };
+        } else {
+          // Not on platform - will get email invite
+          newAttendee = {
+            id: Date.now().toString(),
+            email: value.trim(),
+            isContact: false,
+            onPlatform: false,
+            required: true,
+          };
+        }
       }
     } else {
-      // User selected from dropdown
-      newAttendee = {
-        id: Date.now().toString(),
-        email: value.email,
-        name: value.name,
-        isContact: value.isContact,
-      };
+      newAttendee = { ...value, id: Date.now().toString(), required: true };
     }
 
-    // Don't add duplicates (check against all attendees including "Me")
-    const allAttendees = isAttending ? [meAttendee, ...otherAttendees] : otherAttendees;
-    if (allAttendees.some(a => a.email === newAttendee.email)) {
+    if (attendees.some(a => a.email === newAttendee.email)) {
       setInputValue('');
       return;
     }
 
-    setOtherAttendees([...otherAttendees, newAttendee]);
+    setAttendees([...attendees, newAttendee]);
     setInputValue('');
   };
 
-  const handleRemoveAttendee = (id: string) => {
-    if (id === 'me') {
-      setIsAttending(false);
-    } else {
-      setOtherAttendees(otherAttendees.filter(a => a.id !== id));
-    }
+  const toggleRequired = (attendeeId: string) => {
+    setAttendees(attendees.map(a =>
+      a.id === attendeeId ? { ...a, required: !a.required } : a
+    ));
   };
 
-  // Mock suggested times - would be calculated based on attendees' calendars
-  // Organized by availability score (best first)
-  const suggestedTimesByAvailability: TimeSlotsByCategory = attendees.length > 0 ? {
-    'Everyone Available': [
-      {
-        date: 'Friday, Jan 17',
-        time: '1:00 PM - 2:00 PM',
-        available: attendees.length,
-        total: attendees.length,
-        attendeeAvailability: attendees.map((a) => ({
-          ...a,
-          status: 'available'
-        }))
-      },
-      {
-        date: 'Wednesday, Jan 15',
-        time: '10:00 AM - 11:00 AM',
-        available: attendees.length,
-        total: attendees.length,
-        attendeeAvailability: attendees.map((a) => ({
-          ...a,
-          status: 'available'
-        }))
-      },
-    ],
-    'Most Available': [
-      {
-        date: 'Tuesday, Jan 14',
-        time: '2:00 PM - 3:00 PM',
-        available: Math.floor(attendees.length * 0.7),
-        total: attendees.length,
-        attendeeAvailability: attendees.map((a, i) => ({
-          ...a,
-          status: i % 3 === 0 ? 'available' : i % 3 === 1 ? 'unavailable' : 'unknown'
-        }))
-      },
-      {
-        date: 'Wednesday, Jan 15',
-        time: '3:00 PM - 4:00 PM',
-        available: Math.floor(attendees.length * 0.6),
-        total: attendees.length,
-        attendeeAvailability: attendees.map((a, i) => ({
-          ...a,
-          status: i % 3 === 0 ? 'available' : 'unknown'
-        }))
-      },
-      {
-        date: 'Thursday, Jan 16',
-        time: '11:00 AM - 12:00 PM',
-        available: Math.floor(attendees.length * 0.65),
-        total: attendees.length,
-        attendeeAvailability: attendees.map((a, i) => ({
-          ...a,
-          status: i % 2 === 0 ? 'available' : 'unknown'
-        }))
-      },
-    ],
-    'Some Conflicts': [
-      {
-        date: 'Tuesday, Jan 14',
-        time: '4:00 PM - 5:00 PM',
-        available: Math.floor(attendees.length * 0.4),
-        total: attendees.length,
-        attendeeAvailability: attendees.map((a, i) => ({
-          ...a,
-          status: i % 2 === 0 ? 'available' : 'unavailable'
-        }))
-      },
-    ],
-  } : {};
+  // V4: Add attendee to required list
+  const handleAddRequired = (value: string | Attendee | null) => {
+    if (!value) return;
 
-  return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ minHeight: '100vh', bgcolor: '#EDF5F9' }}>
-        <IconButton
-          onClick={() => router.push('/home')}
-          sx={{ position: 'absolute', top: 24, left: 24 }}
-        >
-          <ArrowBackIcon />
-        </IconButton>
+    let newAttendee: Attendee;
+    if (typeof value === 'string') {
+      const email = value.trim().toLowerCase();
+      const matchingContact = mockContacts.find(c => c.email.toLowerCase() === email);
+      if (matchingContact) {
+        newAttendee = { ...matchingContact, required: true };
+      } else {
+        const matchingPlatformUser = mockPlatformUsers.find(u => u.email.toLowerCase() === email);
+        if (matchingPlatformUser) {
+          newAttendee = { ...matchingPlatformUser, required: true };
+        } else {
+          newAttendee = {
+            id: Date.now().toString(),
+            email: value.trim(),
+            isContact: false,
+            onPlatform: false,
+            required: true,
+          };
+        }
+      }
+    } else {
+      newAttendee = { ...value, id: Date.now().toString(), required: true };
+    }
 
-        <Box sx={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', p: 4 }}>
-          <Box sx={{ width: '100%', maxWidth: 1200 }}>
-            <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              <Image
-                src="/images/logomark.svg"
-                alt="timesēkr"
-                width={150}
-                height={40}
-                priority
-              />
-              <Typography variant="body1" color="text.secondary">
-                Create your meeting
+    // Don't add if already in either list
+    if (requiredAttendees.some(a => a.email === newAttendee.email) ||
+        optionalAttendees.some(a => a.email === newAttendee.email)) {
+      return;
+    }
+
+    setRequiredAttendees([...requiredAttendees, newAttendee]);
+  };
+
+  // V4: Add attendee to optional list
+  const handleAddOptional = (value: string | Attendee | null) => {
+    if (!value) return;
+
+    let newAttendee: Attendee;
+    if (typeof value === 'string') {
+      const email = value.trim().toLowerCase();
+      const matchingContact = mockContacts.find(c => c.email.toLowerCase() === email);
+      if (matchingContact) {
+        newAttendee = { ...matchingContact, required: false };
+      } else {
+        const matchingPlatformUser = mockPlatformUsers.find(u => u.email.toLowerCase() === email);
+        if (matchingPlatformUser) {
+          newAttendee = { ...matchingPlatformUser, required: false };
+        } else {
+          newAttendee = {
+            id: Date.now().toString(),
+            email: value.trim(),
+            isContact: false,
+            onPlatform: false,
+            required: false,
+          };
+        }
+      }
+    } else {
+      newAttendee = { ...value, id: Date.now().toString(), required: false };
+    }
+
+    // Don't add if already in either list
+    if (requiredAttendees.some(a => a.email === newAttendee.email) ||
+        optionalAttendees.some(a => a.email === newAttendee.email)) {
+      return;
+    }
+
+    setOptionalAttendees([...optionalAttendees, newAttendee]);
+  };
+
+  // V4: Move attendee between required and optional
+  const moveToRequired = (attendee: Attendee) => {
+    setOptionalAttendees(optionalAttendees.filter(a => a.id !== attendee.id));
+    setRequiredAttendees([...requiredAttendees, { ...attendee, required: true }]);
+  };
+
+  const moveToOptional = (attendee: Attendee) => {
+    setRequiredAttendees(requiredAttendees.filter(a => a.id !== attendee.id));
+    setOptionalAttendees([...optionalAttendees, { ...attendee, required: false }]);
+  };
+
+  // Check if user needs upgrade
+  const needsUpgrade = !isPremium && allParticipants.length >= 5 && freeMeetingsUsed >= 3;
+  const needsUpgradeV4 = !isPremium && allParticipantsV4.length >= 5 && freeMeetingsUsed >= 3;
+
+  // Render participant status for a time slot
+  const renderParticipantStatus = (participants: ParticipantStatus[]) => {
+    return (
+      <Stack spacing={1} sx={{ mt: 2 }}>
+        {participants.map((p) => (
+          <Box
+            key={p.attendee.id}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+              p: 1,
+              borderRadius: '6px',
+              bgcolor: p.status === 'available' ? '#f0fdf4' : p.status === 'busy' ? '#fef2f2' : '#f8fafc',
+            }}
+          >
+            <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
+              {p.attendee.name?.charAt(0) || p.attendee.email.charAt(0)}
+            </Avatar>
+            <Typography variant="body2" sx={{ flex: 1, fontSize: '0.875rem' }}>
+              {p.attendee.name || p.attendee.email}
+            </Typography>
+            <Chip
+              label={p.status === 'available' ? 'Free' : p.status === 'busy' ? 'Busy' : 'Unknown'}
+              size="small"
+              sx={{
+                bgcolor: p.status === 'available' ? '#22c55e' : p.status === 'busy' ? '#ef4444' : '#94a3b8',
+                color: 'white',
+                fontSize: '0.75rem',
+                height: '20px',
+              }}
+            />
+          </Box>
+        ))}
+      </Stack>
+    );
+  };
+
+  // EMAIL PREVIEW FOR NON-REGISTERED USERS
+  const renderEmailPreview = () => {
+    const selectedTimes = suggestedTimes.filter(t => selectedSlots.includes(t.id));
+
+    const handleTimeClick = (slotId: number) => {
+      if (selectedEmailTimes.includes(slotId)) {
+        setSelectedEmailTimes(selectedEmailTimes.filter(id => id !== slotId));
+      } else {
+        setSelectedEmailTimes([...selectedEmailTimes, slotId]);
+      }
+    };
+
+    // Initial email view
+    if (emailResponseView === 'initial') {
+      return (
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>
+          {/* Fake Email Client Header */}
+          <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e0e0e0', px: 2, py: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <IconButton onClick={() => {
+                  setShowEmailPreview(false);
+                  setEmailResponseView('initial');
+                  setSelectedEmailTimes([]);
+                }}>
+                  <ArrowBackIcon />
+                </IconButton>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#202124' }}>
+                  Email
+                </Typography>
+              </Box>
+              <Typography variant="caption" sx={{ bgcolor: '#fef7cd', px: 1, py: 0.5, borderRadius: '4px', fontWeight: 500 }}>
+                PREVIEW MODE
               </Typography>
             </Box>
+          </Box>
 
-            <Box sx={{ display: 'flex', gap: 4 }}>
-              {/* Left Column - Meeting Details */}
-              <Box sx={{
-                flex: 1,
-                bgcolor: 'white',
-                p: 4,
-                borderRadius: '12px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              }}>
-              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                Meeting Details
+          {/* Email Content */}
+          <Box sx={{ maxWidth: 900, mx: 'auto', bgcolor: 'white', minHeight: 'calc(100vh - 60px)' }}>
+            {/* Email Toolbar */}
+            <Box sx={{ borderBottom: '1px solid #e0e0e0', px: 3, py: 2, display: 'flex', gap: 1 }}>
+              <IconButton size="small" disabled>
+                <ArrowBackIcon fontSize="small" />
+              </IconButton>
+              <IconButton size="small" disabled>
+                <EmailIcon fontSize="small" />
+              </IconButton>
+              <IconButton size="small" disabled>
+                <AccessTimeIcon fontSize="small" />
+              </IconButton>
+            </Box>
+
+            {/* Email Header Info */}
+            <Box sx={{ px: 3, py: 3, borderBottom: '1px solid #f0f0f0' }}>
+              <Typography variant="h5" sx={{ fontWeight: 400, mb: 2, color: '#202124' }}>
+                You're invited: {title}
               </Typography>
 
-          <Stack spacing={2}>
-            <TextField
-              fullWidth
-              size="small"
-              label="Meeting Title"
-              variant="outlined"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              sx={textFieldStyle}
-            />
-
-            <TextField
-              fullWidth
-              variant="outlined"
-              multiline
-              rows={3}
-              label="Description (optional)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-                Duration
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-                {[15, 30, 45, 60, 90, 120].map((mins) => (
-                  <Button
-                    key={mins}
-                    variant={duration === mins ? 'contained' : 'outlined'}
-                    onClick={() => setDuration(mins)}
-                    sx={{
-                      minWidth: 'auto',
-                      px: 2,
-                      borderRadius: '12px',
-                      textTransform: 'none',
-                    }}
-                  >
-                    {mins < 60 ? `${mins}m` : mins === 60 ? '1h' : `${mins / 60}h`}
-                  </Button>
-                ))}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <TextField
-                    size="small"
-                    placeholder="Other"
-                    type="number"
-                    value={![15, 30, 45, 60, 90, 120].includes(duration) ? duration : ''}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      if (!isNaN(val) && val >= 5 && val <= 480) setDuration(val);
-                    }}
-                    sx={{
-                      width: 70,
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '12px',
-                        height: '36.5px',
-                      },
-                      '& input[type=number]::-webkit-inner-spin-button, & input[type=number]::-webkit-outer-spin-button': {
-                        opacity: 1,
-                      }
-                    }}
-                  />
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>min</Typography>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'start' }}>
+                <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+                  {meAttendee.name?.charAt(0) || 'M'}
+                </Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#202124' }}>
+                        {meAttendee.name || meAttendee.email}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        to me
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Just now
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
             </Box>
 
-            <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>
-                Search Within
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <DatePicker
-                  label="From"
-                  value={startDate}
-                  onChange={(newValue) => setStartDate(newValue)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      size: 'small',
-                      sx: textFieldStyle,
-                    },
-                  }}
-                />
-                <DatePicker
-                  label="To"
-                  value={endDate}
-                  onChange={(newValue) => setEndDate(newValue)}
-                  minDate={startDate || undefined}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      size: 'small',
-                      sx: textFieldStyle,
-                    },
-                  }}
-                />
-              </Box>
-            </Box>
+            {/* Email Body */}
+            <Box sx={{ px: 3, py: 4 }}>
+              <Stack spacing={3}>
+                <Typography variant="body1">
+                  Hi there,
+                </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1 }}>
-              <Typography variant="subtitle2">
-                Add Attendees
-              </Typography>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={isAttending}
-                    onChange={(e) => setIsAttending(e.target.checked)}
-                    size="small"
-                  />
-                }
-                label={<Typography variant="body2">I am attending</Typography>}
-                labelPlacement="start"
-                sx={{ ml: 0, gap: 1 }}
-              />
-            </Box>
+                <Typography variant="body1">
+                  I'd like to schedule a meeting with you. Let me know which times work for you:
+                </Typography>
 
-          <Autocomplete<Attendee, true, false, true>
-            multiple
-            freeSolo
-            value={attendees}
-            options={mockContacts}
-            filterOptions={(options, params) => {
-              const filtered = options.filter((option) => {
-                const searchStr = params.inputValue.toLowerCase();
-                return (
-                  option.name?.toLowerCase().includes(searchStr) ||
-                  option.email.toLowerCase().includes(searchStr)
-                );
-              });
-
-              // If there's input and it's not already in contacts, add it as an option to invite
-              const existsInContacts = options.some(
-                (option) => option.email.toLowerCase() === params.inputValue.toLowerCase()
-              );
-
-              if (params.inputValue && !existsInContacts) {
-                filtered.push({
-                  id: `temp-${Date.now()}`,
-                  email: params.inputValue,
-                  name: params.inputValue,
-                  isContact: false,
-                } as Attendee);
-              }
-
-              return filtered;
-            }}
-            getOptionLabel={(option) => {
-              if (typeof option === 'string') return option;
-              if ('email' in option) return option.email;
-              return '';
-            }}
-            inputValue={inputValue}
-            onInputChange={(event, newInputValue) => {
-              setInputValue(newInputValue);
-            }}
-            onChange={(event, newValue) => {
-              // Filter out "Me" if present - we manage that separately with isAttending
-              // Also filter out strings (shouldn't happen with our setup but TypeScript needs it)
-              const filteredValue = newValue.filter((a): a is Attendee =>
-                typeof a !== 'string' && a.id !== 'me'
-              );
-
-              // Check if user added a new attendee
-              if (filteredValue.length > otherAttendees.length) {
-                const lastValue = newValue[newValue.length - 1];
-
-                // Check the actual last value from newValue (before filtering)
-                if (typeof lastValue === 'string') {
-                  // User typed and pressed enter
-                  const matchingContact = mockContacts.find(
-                    c => c.email.toLowerCase() === lastValue.trim().toLowerCase()
-                  );
-                  const newAttendee: Attendee = matchingContact
-                    ? {
-                        id: Date.now().toString(),
-                        email: matchingContact.email,
-                        name: matchingContact.name,
-                        isContact: true,
-                      }
-                    : {
-                        id: Date.now().toString(),
-                        email: lastValue.trim(),
-                        isContact: false,
-                      };
-                  setOtherAttendees([...otherAttendees, newAttendee]);
-                } else if (lastValue && lastValue.id !== 'me') {
-                  // User selected from dropdown (and it's not "Me")
-                  const newAttendee: Attendee = {
-                    id: Date.now().toString(),
-                    email: lastValue.email,
-                    name: lastValue.name,
-                    isContact: lastValue.isContact,
-                  };
-                  setOtherAttendees([...otherAttendees, newAttendee]);
-                }
-              } else {
-                // User removed attendees - sync with filtered value
-                setOtherAttendees(filteredValue);
-              }
-              setInputValue('');
-            }}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip
-                  {...getTagProps({ index })}
-                  key={option.id}
-                  icon={option.isContact ? <PersonIcon /> : <EmailIcon />}
-                  label={option.name || option.email}
-                  size="small"
-                  variant={option.isContact ? 'filled' : 'outlined'}
-                  sx={{
-                    bgcolor: option.isContact ? 'primary.main' : 'transparent',
-                    color: option.isContact ? 'white' : 'text.primary',
-                    borderColor: option.isContact ? 'primary.main' : 'grey.400',
-                    border: !option.isContact ? '1px dashed grey' : undefined,
-                    '& .MuiChip-icon': {
-                      color: option.isContact ? 'white' : 'text.secondary',
-                    },
-                    '& .MuiChip-deleteIcon': {
-                      color: option.isContact ? 'white' : 'text.secondary',
-                      '&:hover': {
-                        color: option.isContact ? 'grey.200' : 'text.primary',
-                      },
-                    },
-                  }}
-                />
-              ))
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                fullWidth
-                size="small"
-                placeholder={attendees.length === 0 ? "Enter email or search contacts" : ""}
-                variant="outlined"
-              />
-            )}
-            renderOption={(props, option) => {
-              if (typeof option === 'string') return null;
-
-              const { key, ...otherProps } = props;
-              return (
-                <Box component="li" key={key} {...otherProps}>
-                  {option.isContact ? (
-                    <>
-                      <PersonIcon sx={{ mr: 1, fontSize: 20, color: 'primary.main' }} />
-                      <Box>
-                        <Typography variant="body2">{option.name || option.email}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {option.email}
-                        </Typography>
+                {/* Time Options */}
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                    Click any time that works for you:
+                  </Typography>
+                  <Stack spacing={2}>
+                    {selectedTimes.map((slot) => (
+                      <Box
+                        key={slot.id}
+                        sx={{
+                          p: 2.5,
+                          border: '2px solid #e5e7eb',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          bgcolor: 'white',
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            {slot.day}
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                            {slot.time}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {duration} minutes
+                          </Typography>
+                        </Box>
+                        <Button
+                          variant="contained"
+                          onClick={() => setEmailResponseView('selected')}
+                          sx={{ textTransform: 'none' }}
+                        >
+                          This works for me
+                        </Button>
                       </Box>
-                    </>
-                  ) : (
-                    <>
-                      <EmailIcon sx={{ mr: 1, fontSize: 20, color: 'text.secondary' }} />
-                      <Box>
-                        <Typography variant="body2">{option.email}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Will send invite
-                        </Typography>
-                      </Box>
-                    </>
+                    ))}
+                  </Stack>
+                </Box>
+
+                {/* CTA Section */}
+                <Box sx={{ mt: 3, p: 3, bgcolor: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2 }}>
+                    <AutoAwesomeIcon sx={{ color: 'primary.main', mt: 0.5 }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Can't make any of these times?
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Connect your calendar and suggest times that work better for you.
+                        It takes 30 seconds and makes scheduling so much easier.
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    onClick={() => router.push('/signup?email=attendee@example.com')}
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Join timesēkr & Suggest Other Times
+                  </Button>
+                </Box>
+
+                {/* Decline */}
+                <Box sx={{ textAlign: 'center' }}>
+                  <Button
+                    variant="text"
+                    color="error"
+                    onClick={() => setEmailResponseView('declined')}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    I can't attend this meeting
+                  </Button>
+                </Box>
+
+                {/* Footer */}
+                <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid #e5e7eb' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                    Meeting details:
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Duration: {duration} minutes
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Attendees: {allParticipants.length} people
+                  </Typography>
+                  {description && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {description}
+                    </Typography>
                   )}
                 </Box>
-              );
-            }}
-          />
 
-          </Stack>
+                <Box sx={{ textAlign: 'center', py: 2, mt: 4 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Sent via timesēkr - Multi-party scheduling made simple
+                  </Typography>
+                </Box>
+              </Stack>
             </Box>
+          </Box>
+        </Box>
+      );
+    }
 
-            {/* Right Column - Suggested Times */}
-            <Box sx={{
-              flex: 1,
-              bgcolor: 'white',
-              p: 4,
-              borderRadius: '12px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            }}>
-              <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
-                Suggested Times
-              </Typography>
+    // Landing page after clicking a time (real flow would be timesekr.com/respond/meeting-id)
+    if (emailResponseView === 'selected') {
+      return (
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
+          <Box sx={{ maxWidth: 700, mx: 'auto', px: 3 }}>
+            <Card sx={{ boxShadow: 3 }}>
+              <CardContent sx={{ p: 4 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  Respond to: {title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  from {meAttendee.name}
+                </Typography>
+
+                <Divider sx={{ mb: 3 }} />
+
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                  Select all times that work for you:
+                </Typography>
+
+                <Stack spacing={2}>
+                  {selectedTimes.map((slot) => {
+                    const isSelected = selectedEmailTimes.includes(slot.id);
+                    return (
+                      <Box
+                        key={slot.id}
+                        onClick={() => handleTimeClick(slot.id)}
+                        sx={{
+                          p: 2.5,
+                          border: '2px solid',
+                          borderColor: isSelected ? 'primary.main' : '#e5e7eb',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                          bgcolor: isSelected ? '#f0f9ff' : 'white',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                          }
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            {slot.day}
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                            {slot.time}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {duration} minutes
+                          </Typography>
+                        </Box>
+                        {isSelected && <CheckCircleIcon color="primary" sx={{ fontSize: 32 }} />}
+                      </Box>
+                    );
+                  })}
+                </Stack>
+
+                {selectedEmailTimes.length > 0 ? (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    sx={{ mt: 3, textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Submit Response ({selectedEmailTimes.length} time{selectedEmailTimes.length > 1 ? 's' : ''})
+                  </Button>
+                ) : (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 3, textAlign: 'center' }}>
+                    Select at least one time to continue
+                  </Typography>
+                )}
+
+                <Divider sx={{ my: 3 }} />
+
+                <Box sx={{ p: 3, bgcolor: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2 }}>
+                    <AutoAwesomeIcon sx={{ color: 'primary.main', mt: 0.5 }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        None of these work?
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Connect your calendar and suggest better times - it takes 30 seconds
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={() => router.push('/signup?email=attendee@example.com')}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Join & Suggest Other Times
+                  </Button>
+                </Box>
+
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Button
+                    variant="text"
+                    color="error"
+                    size="small"
+                    onClick={() => setEmailResponseView('declined')}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    I can't attend
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+      );
+    }
+
+    // Declined
+    if (emailResponseView === 'declined') {
+      return (
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
+          <Box sx={{ maxWidth: 700, mx: 'auto', px: 3 }}>
+            <Card sx={{ boxShadow: 3, textAlign: 'center' }}>
+              <CardContent sx={{ p: 5 }}>
+                <CloseIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  Response sent
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                  {meAttendee.name} has been notified that you can't attend
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  We'll let them know if the meeting gets rescheduled
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+        </Box>
+      );
+    }
+
+    return null;
+  };
+
+  // VERSION 1: STEP-BY-STEP WIZARD
+  const renderVersion1 = () => {
+    const steps = ['Details', 'Attendees', 'Times', 'Review'];
+
+    return (
+      <Box>
+        <Box sx={{ maxWidth: 800, mx: 'auto', px: 3, py: 4 }}>
+          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
+          <Card sx={{ border: '1px solid #e5e7eb' }}>
+            <CardContent sx={{ p: 4 }}>
+              {activeStep === 0 && (
+                <Stack spacing={3}>
+                  <Typography variant="h5" sx={{ fontWeight: 700 }}>Meeting Details</Typography>
+                  <TextField
+                    fullWidth
+                    label="Meeting Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., Q1 Planning Session"
+                  />
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    label="Description (optional)"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                  <Box>
+                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>Duration</Typography>
+                    <Stack direction="row" spacing={1}>
+                      {[30, 60, 90].map((mins) => (
+                        <Button
+                          key={mins}
+                          variant={duration === mins ? 'contained' : 'outlined'}
+                          onClick={() => setDuration(mins)}
+                          sx={{ textTransform: 'none' }}
+                        >
+                          {mins}min
+                        </Button>
+                      ))}
+                    </Stack>
+                  </Box>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Box>
+                    <Typography variant="body2" sx={{ mb: 2, fontWeight: 600 }}>Time Window to Search</Typography>
+                    <Stack direction="row" spacing={2}>
+                      <DatePicker
+                        label="Start Date"
+                        value={startDate}
+                        onChange={(newValue) => setStartDate(newValue)}
+                        slotProps={{ textField: { fullWidth: true } }}
+                      />
+                      <DatePicker
+                        label="End Date"
+                        value={endDate}
+                        onChange={(newValue) => setEndDate(newValue)}
+                        minDate={startDate || undefined}
+                        slotProps={{ textField: { fullWidth: true } }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={isAttending}
+                        onChange={(e) => setIsAttending(e.target.checked)}
+                        color="primary"
+                      />
+                    }
+                    label="I am attending this meeting"
+                  />
+
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => setActiveStep(1)}
+                    disabled={!title || !startDate || !endDate}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Next: Add Attendees
+                  </Button>
+                </Stack>
+              )}
+
+              {activeStep === 1 && (
+                <Stack spacing={3}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 700 }}>Who's attending?</Typography>
+                    <Chip label={`${attendees.length} people`} />
+                  </Box>
+
+                  <Autocomplete
+                    multiple
+                    freeSolo
+                    options={
+                      inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
+                        ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
+                        : mockContacts
+                    }
+                    value={attendees || []}
+                    inputValue={inputValue}
+                    onInputChange={(e, newValue) => setInputValue(newValue)}
+                    onChange={(e, newValue) => {
+                      if (!newValue) {
+                        setAttendees([]);
+                        return;
+                      }
+
+                      // Handle removing
+                      if (newValue.length < attendees.length) {
+                        setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
+                      } else {
+                        // Handle adding
+                        const lastItem = newValue[newValue.length - 1];
+                        if (lastItem) {
+                          handleAddAttendee(lastItem);
+                        }
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && inputValue.trim()) {
+                        e.preventDefault();
+                        handleAddAttendee(inputValue.trim());
+                      }
+                    }}
+                    getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
+                    filterOptions={(options, state) => {
+                      const filtered = options.filter(option => {
+                        if (option.id === 'add-new') return true;
+                        const searchTerm = state.inputValue.toLowerCase();
+                        return (
+                          option.email.toLowerCase().includes(searchTerm) ||
+                          option.name?.toLowerCase().includes(searchTerm)
+                        );
+                      });
+                      return filtered;
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder={attendees.length === 0 ? "Add people by name or email" : ""}
+                        inputProps={{
+                          ...params.inputProps,
+                          autoComplete: 'nope',
+                          'data-lpignore': 'true',
+                          'data-form-type': 'other',
+                        }}
+                        autoComplete="nope"
+                        name={`attendee-${Math.random()}`}
+                      />
+                    )}
+                    renderTags={(value, getTagProps) =>
+                      (value || []).map((option, index) => {
+                        if (typeof option === 'string') return null;
+                        const { key, ...tagProps } = getTagProps({ index });
+                        return (
+                          <Chip
+                            key={key}
+                            label={option.name || option.email}
+                            {...tagProps}
+                            icon={getAttendeeIcon(option)}
+                            color="primary"
+                          />
+                        );
+                      })
+                    }
+                    renderOption={(props, option) => {
+                      const { key, ...otherProps } = props;
+                      if (typeof option === 'string') return null;
+
+                      if (option.id === 'add-new') {
+                        return (
+                          <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <AddIcon sx={{ color: 'primary.main' }} />
+                            <Typography variant="body2">Add "{option.email}"</Typography>
+                          </Box>
+                        );
+                      }
+
+                      return (
+                        <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                          <Avatar sx={{ width: 32, height: 32 }}>
+                            {option.name?.charAt(0) || option.email.charAt(0)}
+                          </Avatar>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2">{option.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">{option.email}</Typography>
+                          </Box>
+                        </Box>
+                      );
+                    }}
+                  />
+
+                  <Stack direction="row" spacing={2}>
+                    <Button variant="outlined" onClick={() => setActiveStep(0)} sx={{ textTransform: 'none' }}>
+                      Back
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={() => setActiveStep(2)}
+                      disabled={attendees.length === 0}
+                      sx={{ textTransform: 'none', flex: 1 }}
+                    >
+                      Next: Find Times
+                    </Button>
+                  </Stack>
+                </Stack>
+              )}
+
+              {activeStep === 2 && (
+                <Stack spacing={3}>
+                  <Typography variant="h5" sx={{ fontWeight: 700 }}>Pick up to 3 times</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Searching {startDate?.format('MMM D')} to {endDate?.format('MMM D, YYYY')}
+                  </Typography>
+
+                  {suggestedTimes.length === 0 ? (
+                    <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#f8fafc', borderRadius: '8px' }}>
+                      <Typography color="text.secondary">Add attendees to see suggested times</Typography>
+                    </Box>
+                  ) : (
+                    <>
+                      {/* Everyone Available */}
+                      {everyoneAvailable.length > 0 && (
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600, color: '#22c55e' }}>
+                            ✓ Everyone Available ({everyoneAvailable.length})
+                          </Typography>
+                          <Stack spacing={1.5}>
+                            {everyoneAvailable.map((slot) => (
+                              <Box key={slot.id}>
+                                <Box
+                                  onClick={() => {
+                                    if (selectedSlots.includes(slot.id)) {
+                                      setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                    } else if (selectedSlots.length < 3) {
+                                      setSelectedSlots([...selectedSlots, slot.id]);
+                                    }
+                                  }}
+                                  sx={{
+                                    p: 2,
+                                    border: '2px solid',
+                                    borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    bgcolor: selectedSlots.includes(slot.id) ? '#f0f9ff' : 'white',
+                                    '&:hover': { borderColor: 'primary.main' },
+                                  }}
+                                >
+                                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <Box>
+                                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{slot.day}</Typography>
+                                      <Typography variant="h6" sx={{ fontWeight: 700 }}>{slot.time}</Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        All {slot.total} people free
+                                      </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                      <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                        }}
+                                      >
+                                        {expandedSlot === slot.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                      </IconButton>
+                                      {selectedSlots.includes(slot.id) && <CheckCircleIcon color="primary" />}
+                                    </Box>
+                                  </Box>
+                                </Box>
+                                <Collapse in={expandedSlot === slot.id}>
+                                  <Box sx={{ pl: 2, pr: 2 }}>
+                                    {renderParticipantStatus(slot.participants)}
+                                  </Box>
+                                </Collapse>
+                              </Box>
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+
+                      {/* Most Available */}
+                      {mostAvailable.length > 0 && (
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600, color: '#3b82f6' }}>
+                            ◐ Most Available ({mostAvailable.length})
+                          </Typography>
+                          <Stack spacing={1.5}>
+                            {mostAvailable.map((slot) => (
+                              <Box key={slot.id}>
+                                <Box
+                                  onClick={() => {
+                                    if (selectedSlots.includes(slot.id)) {
+                                      setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                    } else if (selectedSlots.length < 3) {
+                                      setSelectedSlots([...selectedSlots, slot.id]);
+                                    }
+                                  }}
+                                  sx={{
+                                    p: 2,
+                                    border: '2px solid',
+                                    borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    bgcolor: selectedSlots.includes(slot.id) ? '#f0f9ff' : 'white',
+                                    '&:hover': { borderColor: 'primary.main' },
+                                  }}
+                                >
+                                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <Box>
+                                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{slot.day}</Typography>
+                                      <Typography variant="h6" sx={{ fontWeight: 700 }}>{slot.time}</Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        {slot.available}/{slot.total} people free
+                                      </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                      <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                        }}
+                                      >
+                                        {expandedSlot === slot.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                      </IconButton>
+                                      {selectedSlots.includes(slot.id) && <CheckCircleIcon color="primary" />}
+                                    </Box>
+                                  </Box>
+                                </Box>
+                                <Collapse in={expandedSlot === slot.id}>
+                                  <Box sx={{ pl: 2, pr: 2 }}>
+                                    {renderParticipantStatus(slot.participants)}
+                                  </Box>
+                                </Collapse>
+                              </Box>
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+
+                      {/* Some Conflicts */}
+                      {someConflicts.length > 0 && (
+                        <Box>
+                          <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600, color: '#f59e0b' }}>
+                            ⚠ Some Conflicts ({someConflicts.length})
+                          </Typography>
+                          <Stack spacing={1.5}>
+                            {someConflicts.map((slot) => (
+                              <Box key={slot.id}>
+                                <Box
+                                  onClick={() => {
+                                    if (selectedSlots.includes(slot.id)) {
+                                      setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                    } else if (selectedSlots.length < 3) {
+                                      setSelectedSlots([...selectedSlots, slot.id]);
+                                    }
+                                  }}
+                                  sx={{
+                                    p: 2,
+                                    border: '2px solid',
+                                    borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    bgcolor: selectedSlots.includes(slot.id) ? '#f0f9ff' : 'white',
+                                    '&:hover': { borderColor: 'primary.main' },
+                                  }}
+                                >
+                                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <Box>
+                                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{slot.day}</Typography>
+                                      <Typography variant="h6" sx={{ fontWeight: 700 }}>{slot.time}</Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        {slot.available}/{slot.total} people free
+                                      </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                      <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                        }}
+                                      >
+                                        {expandedSlot === slot.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                      </IconButton>
+                                      {selectedSlots.includes(slot.id) && <CheckCircleIcon color="primary" />}
+                                    </Box>
+                                  </Box>
+                                </Box>
+                                <Collapse in={expandedSlot === slot.id}>
+                                  <Box sx={{ pl: 2, pr: 2 }}>
+                                    {renderParticipantStatus(slot.participants)}
+                                  </Box>
+                                </Collapse>
+                              </Box>
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+
+                      <Stack direction="row" spacing={2}>
+                        <Button variant="outlined" onClick={() => setActiveStep(1)} sx={{ textTransform: 'none' }}>
+                          Back
+                        </Button>
+                        <Button
+                          variant="contained"
+                          onClick={() => setActiveStep(3)}
+                          disabled={selectedSlots.length === 0}
+                          sx={{ textTransform: 'none', flex: 1 }}
+                        >
+                          Review & Send
+                        </Button>
+                      </Stack>
+                    </>
+                  )}
+                </Stack>
+              )}
+
+              {activeStep === 3 && (
+                <Stack spacing={3}>
+                  <Typography variant="h5" sx={{ fontWeight: 700 }}>Review Meeting Request</Typography>
+
+                  <Box sx={{ p: 3, bgcolor: '#f8fafc', borderRadius: '12px' }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>Meeting</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>{title}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {duration} minutes • {attendees.length} attendees • {selectedSlots.length} time options
+                    </Typography>
+                  </Box>
+
+                  <Button
+                    variant="contained"
+                    size="large"
+                    startIcon={<SendIcon />}
+                    onClick={() => setShowEmailPreview(true)}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Send Meeting Request
+                  </Button>
+
+                  <Button variant="text" onClick={() => setActiveStep(2)} sx={{ textTransform: 'none' }}>
+                    Go Back
+                  </Button>
+                </Stack>
+              )}
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+    );
+  };
+
+  // VERSION 2: SPLIT VIEW (COMPACT & CLEAN)
+  const renderVersion2 = () => {
+    return (
+      <Box sx={{ maxWidth: 1200, mx: 'auto', px: 3, py: 4 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+          {/* Left: Form */}
+          <Card sx={{ border: '1px solid #e5e7eb', height: 'fit-content' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Stack spacing={2.5}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>Meeting Details</Typography>
+
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g., Team Sync"
+                />
+
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>Duration</Typography>
+                  <ButtonGroup size="small">
+                    {[30, 60, 90].map((mins) => (
+                      <Button
+                        key={mins}
+                        variant={duration === mins ? 'contained' : 'outlined'}
+                        onClick={() => setDuration(mins)}
+                      >
+                        {mins}m
+                      </Button>
+                    ))}
+                  </ButtonGroup>
+                </Box>
+
+                <Divider />
+
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>Time Window</Typography>
+                  <Stack spacing={1.5}>
+                    <DatePicker
+                      label="Start"
+                      value={startDate}
+                      onChange={(newValue) => setStartDate(newValue)}
+                      slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                    />
+                    <DatePicker
+                      label="End"
+                      value={endDate}
+                      onChange={(newValue) => setEndDate(newValue)}
+                      minDate={startDate || undefined}
+                      slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                    />
+                  </Stack>
+                </Box>
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={isAttending}
+                      onChange={(e) => setIsAttending(e.target.checked)}
+                      size="small"
+                    />
+                  }
+                  label={<Typography variant="body2">I'm attending</Typography>}
+                />
+
+                <Divider />
+
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>Attendees</Typography>
+                  <Autocomplete
+                    multiple
+                    size="small"
+                    freeSolo
+                    options={
+                      inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
+                        ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
+                        : mockContacts
+                    }
+                    value={attendees || []}
+                    inputValue={inputValue}
+                    onInputChange={(e, newValue) => setInputValue(newValue)}
+                    onChange={(e, newValue) => {
+                      if (!newValue) {
+                        setAttendees([]);
+                        return;
+                      }
+
+                      if (newValue.length < attendees.length) {
+                        setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
+                      } else {
+                        const lastItem = newValue[newValue.length - 1];
+                        if (lastItem) {
+                          handleAddAttendee(lastItem);
+                        }
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && inputValue.trim()) {
+                        e.preventDefault();
+                        handleAddAttendee(inputValue.trim());
+                      }
+                    }}
+                    getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
+                    filterOptions={(options, state) => {
+                      const filtered = options.filter(option => {
+                        if (option.id === 'add-new') return true;
+                        const searchTerm = state.inputValue.toLowerCase();
+                        return (
+                          option.email.toLowerCase().includes(searchTerm) ||
+                          option.name?.toLowerCase().includes(searchTerm)
+                        );
+                      });
+                      return filtered;
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder={attendees.length === 0 ? "Add people..." : ""}
+                        inputProps={{
+                          ...params.inputProps,
+                          autoComplete: 'nope',
+                          'data-lpignore': 'true',
+                          'data-form-type': 'other',
+                        }}
+                        autoComplete="nope"
+                        name={`attendee-${Math.random()}`}
+                      />
+                    )}
+                    renderTags={(value, getTagProps) =>
+                      (value || []).map((option, index) => {
+                        if (typeof option === 'string') return null;
+                        const { key, ...tagProps } = getTagProps({ index });
+                        return (
+                          <Chip
+                            key={key}
+                            label={option.name || option.email}
+                            {...tagProps}
+                            size="small"
+                            icon={getAttendeeIcon(option)}
+                            color="primary"
+                            sx={{ maxWidth: '150px' }}
+                          />
+                        );
+                      })
+                    }
+                    renderOption={(props, option) => {
+                      const { key, ...otherProps } = props;
+                      if (typeof option === 'string') return null;
+
+                      if (option.id === 'add-new') {
+                        return (
+                          <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center', fontSize: '0.875rem' }}>
+                            <AddIcon sx={{ color: 'primary.main', fontSize: '1rem' }} />
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>Add "{option.email}"</Typography>
+                          </Box>
+                        );
+                      }
+
+                      return (
+                        <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center', fontSize: '0.875rem' }}>
+                          <Avatar sx={{ width: 28, height: 28, fontSize: '0.75rem' }}>
+                            {option.name?.charAt(0) || option.email.charAt(0)}
+                          </Avatar>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{option.name}</Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>{option.email}</Typography>
+                          </Box>
+                        </Box>
+                      );
+                    }}
+                  />
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Right: Suggested Times */}
+          <Card sx={{ border: '1px solid #e5e7eb' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>Suggested Times</Typography>
+              {startDate && endDate && (
+                <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                  {startDate.format('MMM D')} - {endDate.format('MMM D, YYYY')}
+                </Typography>
+              )}
 
               {attendees.length === 0 ? (
-                <Box sx={{
-                  p: 4,
-                  textAlign: 'center',
-                  bgcolor: 'grey.50',
-                  borderRadius: '12px',
-                  border: '1px solid',
-                  borderColor: 'grey.200'
-                }}>
+                <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#f8fafc', borderRadius: '8px' }}>
+                  <GroupsIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
                   <Typography variant="body2" color="text.secondary">
-                    Add attendees to see suggested meeting times
+                    Add attendees to see available times
                   </Typography>
                 </Box>
               ) : (
-                <Stack spacing={3}>
-                  {Object.entries(suggestedTimesByAvailability).map(([category, slots]) => (
-                    <Box key={category}>
-                      <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: 'text.primary' }}>
-                        {category}
+                <Stack spacing={2.5} sx={{ maxHeight: '70vh', overflowY: 'auto', pr: 1 }}>
+                  {/* Everyone Available */}
+                  {everyoneAvailable.length > 0 && (
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#22c55e', mb: 1, display: 'block' }}>
+                        ✓ EVERYONE AVAILABLE
                       </Typography>
-                      <Box sx={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                        gap: 1.5
-                      }}>
-                        {slots.map((slot: TimeSlot, index: number) => {
-                          const slotId = `${category}-${index}`;
-                          const isSelected = selectedTimeSlots.includes(slotId);
-                          const selectionNumber = isSelected ? selectedTimeSlots.indexOf(slotId) + 1 : null;
-                          return (
+                      <Stack spacing={1}>
+                        {everyoneAvailable.map((slot) => (
+                          <Box key={slot.id}>
                             <Box
-                              key={slotId}
                               onClick={() => {
-                                if (isSelected) {
-                                  setSelectedTimeSlots(selectedTimeSlots.filter(id => id !== slotId));
-                                } else if (selectedTimeSlots.length < 3) {
-                                  setSelectedTimeSlots([...selectedTimeSlots, slotId]);
+                                if (selectedSlots.includes(slot.id)) {
+                                  setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                } else if (selectedSlots.length < 3) {
+                                  setSelectedSlots([...selectedSlots, slot.id]);
                                 }
                               }}
                               sx={{
                                 p: 1.5,
                                 border: '2px solid',
-                                borderColor: isSelected ? 'primary.main' : 'grey.300',
-                                borderRadius: '12px',
-                                cursor: selectedTimeSlots.length >= 3 && !isSelected ? 'not-allowed' : 'pointer',
-                                transition: 'all 0.2s',
-                                bgcolor: isSelected ? 'primary.main' : 'transparent',
-                                color: isSelected ? 'white' : 'text.primary',
-                                opacity: selectedTimeSlots.length >= 3 && !isSelected ? 0.5 : 1,
-                                position: 'relative',
-                                '&:hover': {
-                                  borderColor: selectedTimeSlots.length >= 3 && !isSelected ? 'grey.300' : 'primary.main',
-                                  transform: selectedTimeSlots.length >= 3 && !isSelected ? 'none' : 'translateY(-2px)',
-                                  boxShadow: isSelected ? '0 4px 12px rgba(22, 20, 107, 0.3)' : selectedTimeSlots.length >= 3 && !isSelected ? 'none' : '0 2px 8px rgba(0,0,0,0.1)',
-                                },
+                                borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                bgcolor: selectedSlots.includes(slot.id) ? '#f0f9ff' : 'white',
+                                '&:hover': { borderColor: 'primary.main' },
                               }}
                             >
-                              {isSelected && (
-                                <Box
-                                  sx={{
-                                    position: 'absolute',
-                                    top: 8,
-                                    right: 8,
-                                    width: 20,
-                                    height: 20,
-                                    borderRadius: '50%',
-                                    bgcolor: 'white',
-                                    color: 'primary.main',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: 12,
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  {selectionNumber}
-                                </Box>
-                              )}
-                              <Typography variant="caption" sx={{
-                                display: 'block',
-                                mb: 0.5,
-                                fontWeight: 500,
-                                color: isSelected ? 'white' : 'text.secondary'
-                              }}>
-                                {slot.date}
-                              </Typography>
-                              <Typography variant="body2" sx={{
-                                fontWeight: 600,
-                                mb: 0.5,
-                                color: isSelected ? 'white' : 'text.primary'
-                              }}>
-                                {slot.time}
-                              </Typography>
-                              <Typography variant="caption" sx={{
-                                color: isSelected ? 'rgba(255,255,255,0.9)' : 'text.secondary'
-                              }}>
-                                {slot.available === slot.total ? (
-                                  'All free'
-                                ) : (
-                                  `${slot.available}/${slot.total} free`
-                                )}
-                              </Typography>
-                            </Box>
-                          );
-                        })}
-                      </Box>
-                    </Box>
-                  ))}
-
-                  {selectedTimeSlots.length > 0 && (
-                    <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'grey.200' }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                          Selected Times ({selectedTimeSlots.length}/3)
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          disabled={selectedTimeSlots.length === 0}
-                          onClick={() => {
-                            // TODO: Send meeting request with selected times
-                            console.log('Send meeting request with:', selectedTimeSlots);
-                          }}
-                          sx={{ borderRadius: '12px' }}
-                        >
-                          Send Meeting Request
-                        </Button>
-                      </Box>
-                      <Stack spacing={1}>
-                        {selectedTimeSlots.map((slotId, idx) => {
-                          const selectedSlotData = Object.entries(suggestedTimesByAvailability)
-                            .flatMap(([category, slots]) =>
-                              slots.map((slot: TimeSlot, index: number) => ({ ...slot, id: `${category}-${index}` }))
-                            )
-                            .find((slot) => slot.id === slotId);
-
-                          return selectedSlotData ? (
-                            <Box
-                              key={slotId}
-                              sx={{
-                                p: 2,
-                                border: '1px solid',
-                                borderColor: 'grey.200',
-                                borderRadius: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                              }}
-                            >
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Box
-                                  sx={{
-                                    width: 28,
-                                    height: 28,
-                                    borderRadius: '50%',
-                                    bgcolor: 'primary.main',
-                                    color: 'white',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: 14,
-                                    fontWeight: 700,
-                                    flexShrink: 0,
-                                  }}
-                                >
-                                  {idx + 1}
-                                </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <Box>
-                                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                    {selectedSlotData.date}
+                                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                                    {slot.day} • {slot.time}
                                   </Typography>
-                                  <Typography variant="body2" color="text.secondary">
-                                    {selectedSlotData.time}
+                                  <Typography variant="caption" color="text.secondary">
+                                    All {slot.total} free
                                   </Typography>
                                 </Box>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                {selectedSlotData.attendeeAvailability.slice(0, 3).map((attendee: AttendeeWithStatus, i: number) => (
-                                  <Box
-                                    key={attendee.id}
-                                    sx={{
-                                      width: 32,
-                                      height: 32,
-                                      borderRadius: '50%',
-                                      bgcolor: attendee.status === 'available' ? 'success.light' : attendee.status === 'unavailable' ? 'error.light' : 'grey.200',
-                                      border: '2px solid white',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      ml: i > 0 ? -1 : 0,
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
                                     }}
                                   >
-                                    {attendee.status === 'available' ? (
-                                      <CheckCircleIcon sx={{ fontSize: 16, color: 'success.dark' }} />
-                                    ) : attendee.status === 'unavailable' ? (
-                                      <CancelIcon sx={{ fontSize: 16, color: 'error.dark' }} />
-                                    ) : (
-                                      <HelpOutlineIcon sx={{ fontSize: 16, color: 'grey.600' }} />
-                                    )}
-                                  </Box>
-                                ))}
-                                {selectedSlotData.attendeeAvailability.length > 3 && (
-                                  <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                                    +{selectedSlotData.attendeeAvailability.length - 3}
-                                  </Typography>
-                                )}
+                                    {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                  </IconButton>
+                                  {selectedSlots.includes(slot.id) && <CheckCircleIcon color="primary" fontSize="small" />}
+                                </Box>
                               </Box>
                             </Box>
-                          ) : null;
-                        })}
+                            <Collapse in={expandedSlot === slot.id}>
+                              <Box sx={{ pl: 1.5, pr: 1.5, pb: 1 }}>
+                                {renderParticipantStatus(slot.participants)}
+                              </Box>
+                            </Collapse>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {/* Most Available */}
+                  {mostAvailable.length > 0 && (
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b82f6', mb: 1, display: 'block' }}>
+                        ◐ MOST AVAILABLE
+                      </Typography>
+                      <Stack spacing={1}>
+                        {mostAvailable.map((slot) => (
+                          <Box key={slot.id}>
+                            <Box
+                              onClick={() => {
+                                if (selectedSlots.includes(slot.id)) {
+                                  setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                } else if (selectedSlots.length < 3) {
+                                  setSelectedSlots([...selectedSlots, slot.id]);
+                                }
+                              }}
+                              sx={{
+                                p: 1.5,
+                                border: '2px solid',
+                                borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                bgcolor: selectedSlots.includes(slot.id) ? '#f0f9ff' : 'white',
+                                '&:hover': { borderColor: 'primary.main' },
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Box>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                                    {slot.day} • {slot.time}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {slot.available}/{slot.total} free
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                    }}
+                                  >
+                                    {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                  </IconButton>
+                                  {selectedSlots.includes(slot.id) && <CheckCircleIcon color="primary" fontSize="small" />}
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Collapse in={expandedSlot === slot.id}>
+                              <Box sx={{ pl: 1.5, pr: 1.5, pb: 1 }}>
+                                {renderParticipantStatus(slot.participants)}
+                              </Box>
+                            </Collapse>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {/* Some Conflicts */}
+                  {someConflicts.length > 0 && (
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#f59e0b', mb: 1, display: 'block' }}>
+                        ⚠ SOME CONFLICTS
+                      </Typography>
+                      <Stack spacing={1}>
+                        {someConflicts.map((slot) => (
+                          <Box key={slot.id}>
+                            <Box
+                              onClick={() => {
+                                if (selectedSlots.includes(slot.id)) {
+                                  setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                } else if (selectedSlots.length < 3) {
+                                  setSelectedSlots([...selectedSlots, slot.id]);
+                                }
+                              }}
+                              sx={{
+                                p: 1.5,
+                                border: '2px solid',
+                                borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                bgcolor: selectedSlots.includes(slot.id) ? '#f0f9ff' : 'white',
+                                '&:hover': { borderColor: 'primary.main' },
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Box>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                                    {slot.day} • {slot.time}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {slot.available}/{slot.total} free
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                    }}
+                                  >
+                                    {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                  </IconButton>
+                                  {selectedSlots.includes(slot.id) && <CheckCircleIcon color="primary" fontSize="small" />}
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Collapse in={expandedSlot === slot.id}>
+                              <Box sx={{ pl: 1.5, pr: 1.5, pb: 1 }}>
+                                {renderParticipantStatus(slot.participants)}
+                              </Box>
+                            </Collapse>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {selectedSlots.length > 0 && (
+                    <Button
+                      variant="contained"
+                      size="large"
+                      fullWidth
+                      onClick={() => setShowEmailPreview(true)}
+                      sx={{ textTransform: 'none', position: 'sticky', bottom: 0, bgcolor: 'primary.main' }}
+                    >
+                      Send {selectedSlots.length} Time Option{selectedSlots.length > 1 ? 's' : ''}
+                    </Button>
+                  )}
+                </Stack>
+              )}
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+    );
+  };
+
+  // VERSION 3: SMART/CONVERSATIONAL
+  const renderVersion3 = () => {
+    return (
+      <Box sx={{ maxWidth: 700, mx: 'auto', px: 3, py: 4 }}>
+        <Stack spacing={3}>
+          {/* Smart Header */}
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <AutoAwesomeIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              Let's schedule your meeting
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              I'll help you find the perfect time
+            </Typography>
+          </Box>
+
+          {/* Question Cards */}
+          <Card sx={{ border: '1px solid #e5e7eb' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>What's this meeting about?</Typography>
+              <TextField
+                fullWidth
+                placeholder="e.g., Sprint Planning, Coffee Chat..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                sx={{ '& .MuiOutlinedInput-root': { fontSize: '1.25rem', fontWeight: 600 } }}
+              />
+            </CardContent>
+          </Card>
+
+          <Card sx={{ border: '1px solid #e5e7eb' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>How long do you need?</Typography>
+              <Stack direction="row" spacing={1}>
+                {[15, 30, 45, 60, 90].map((mins) => (
+                  <Button
+                    key={mins}
+                    variant={duration === mins ? 'contained' : 'outlined'}
+                    onClick={() => setDuration(mins)}
+                    sx={{ flex: 1, textTransform: 'none' }}
+                  >
+                    {mins < 60 ? `${mins}m` : `${mins / 60}h`}
+                  </Button>
+                ))}
+              </Stack>
+            </CardContent>
+          </Card>
+
+          <Card sx={{ border: '1px solid #e5e7eb' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>When should I search?</Typography>
+              <Stack spacing={2}>
+                <DatePicker
+                  label="Start Date"
+                  value={startDate}
+                  onChange={(newValue) => setStartDate(newValue)}
+                  slotProps={{ textField: { fullWidth: true } }}
+                />
+                <DatePicker
+                  label="End Date"
+                  value={endDate}
+                  onChange={(newValue) => setEndDate(newValue)}
+                  minDate={startDate || undefined}
+                  slotProps={{ textField: { fullWidth: true } }}
+                />
+              </Stack>
+            </CardContent>
+          </Card>
+
+          <Card sx={{ border: '1px solid #e5e7eb' }}>
+            <CardContent sx={{ p: 3 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isAttending}
+                    onChange={(e) => setIsAttending(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Will you be attending?</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      This helps us find times that work for everyone
+                    </Typography>
+                  </Box>
+                }
+              />
+            </CardContent>
+          </Card>
+
+          <Card sx={{ border: '1px solid #e5e7eb' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Who should attend?</Typography>
+              <Autocomplete
+                multiple
+                freeSolo
+                options={
+                  inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
+                    ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
+                    : mockContacts
+                }
+                value={attendees || []}
+                inputValue={inputValue}
+                onInputChange={(e, newValue) => setInputValue(newValue)}
+                onChange={(e, newValue) => {
+                  if (!newValue) {
+                    setAttendees([]);
+                    return;
+                  }
+
+                  if (newValue.length < attendees.length) {
+                    setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
+                  } else {
+                    const lastItem = newValue[newValue.length - 1];
+                    if (lastItem) {
+                      handleAddAttendee(lastItem);
+                    }
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && inputValue.trim()) {
+                    e.preventDefault();
+                    handleAddAttendee(inputValue.trim());
+                  }
+                }}
+                getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
+                filterOptions={(options, state) => {
+                  const filtered = options.filter(option => {
+                    if (option.id === 'add-new') return true;
+                    const searchTerm = state.inputValue.toLowerCase();
+                    return (
+                      option.email.toLowerCase().includes(searchTerm) ||
+                      option.name?.toLowerCase().includes(searchTerm)
+                    );
+                  });
+                  return filtered;
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    placeholder={attendees.length === 0 ? "Type a name or email..." : ""}
+                    inputProps={{
+                      ...params.inputProps,
+                      autoComplete: 'nope',
+                      'data-lpignore': 'true',
+                      'data-form-type': 'other',
+                    }}
+                    autoComplete="nope"
+                    name={`attendee-${Math.random()}`}
+                  />
+                )}
+                renderTags={(value, getTagProps) =>
+                  (value || []).map((option, index) => {
+                    if (typeof option === 'string') return null;
+                    const { key, ...tagProps } = getTagProps({ index });
+                    return (
+                      <Chip
+                        key={key}
+                        label={option.name || option.email}
+                        {...tagProps}
+                        icon={getAttendeeIcon(option)}
+                        color="primary"
+                      />
+                    );
+                  })
+                }
+                renderOption={(props, option) => {
+                  const { key, ...otherProps } = props;
+                  if (typeof option === 'string') return null;
+
+                  if (option.id === 'add-new') {
+                    return (
+                      <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <AddIcon sx={{ color: 'primary.main' }} />
+                        <Typography variant="body2">Add "{option.email}"</Typography>
+                      </Box>
+                    );
+                  }
+
+                  return (
+                    <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <Avatar sx={{ width: 32, height: 32 }}>
+                        {option.name?.charAt(0) || option.email.charAt(0)}
+                      </Avatar>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2">{option.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">{option.email}</Typography>
+                      </Box>
+                    </Box>
+                  );
+                }}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Smart Results */}
+          {attendees.length > 0 && (
+            <Card sx={{ border: '2px solid', borderColor: 'primary.main', bgcolor: '#f0f9ff' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <AccessTimeIcon color="primary" />
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    Available Times
+                  </Typography>
+                </Box>
+                {startDate && endDate && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                    {startDate.format('MMM D')} - {endDate.format('MMM D, YYYY')}
+                  </Typography>
+                )}
+
+                {!title || !startDate || !endDate ? (
+                  <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'white', borderRadius: '8px' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {!title && 'Add a meeting title to continue'}
+                      {title && !startDate && 'Select a date range to search'}
+                      {title && startDate && !endDate && 'Select an end date to search'}
+                    </Typography>
+                  </Box>
+                ) : (
+                  <>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                      {everyoneAvailable.length > 0
+                        ? `Found ${everyoneAvailable.length} perfect time${everyoneAvailable.length > 1 ? 's' : ''}!`
+                        : suggestedTimes.length > 0
+                        ? `Found ${suggestedTimes.length} available times`
+                        : 'Searching for times...'}
+                    </Typography>
+
+                    <Stack spacing={2}>
+                  {/* Everyone Available */}
+                  {everyoneAvailable.length > 0 && (
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#22c55e', mb: 1, display: 'block' }}>
+                        ✓ EVERYONE AVAILABLE
+                      </Typography>
+                      <Stack spacing={1}>
+                        {everyoneAvailable.map((slot) => (
+                          <Box key={slot.id}>
+                            <Box
+                              onClick={() => {
+                                if (selectedSlots.includes(slot.id)) {
+                                  setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                } else {
+                                  setSelectedSlots([...selectedSlots, slot.id]);
+                                }
+                              }}
+                              sx={{
+                                p: 2,
+                                bgcolor: selectedSlots.includes(slot.id) ? 'primary.main' : 'white',
+                                color: selectedSlots.includes(slot.id) ? 'white' : 'inherit',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                '&:hover': { bgcolor: selectedSlots.includes(slot.id) ? 'primary.dark' : '#f8fafc' },
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Box>
+                                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                    {slot.day} at {slot.time}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                    All {slot.total} people free
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                    }}
+                                    sx={{ color: selectedSlots.includes(slot.id) ? 'white' : 'inherit' }}
+                                  >
+                                    {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                  </IconButton>
+                                  {selectedSlots.includes(slot.id) && <CheckCircleIcon />}
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Collapse in={expandedSlot === slot.id}>
+                              <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                {renderParticipantStatus(slot.participants)}
+                              </Box>
+                            </Collapse>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {/* Most Available */}
+                  {mostAvailable.length > 0 && (
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b82f6', mb: 1, display: 'block' }}>
+                        ◐ MOST AVAILABLE
+                      </Typography>
+                      <Stack spacing={1}>
+                        {mostAvailable.map((slot) => (
+                          <Box key={slot.id}>
+                            <Box
+                              onClick={() => {
+                                if (selectedSlots.includes(slot.id)) {
+                                  setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                } else {
+                                  setSelectedSlots([...selectedSlots, slot.id]);
+                                }
+                              }}
+                              sx={{
+                                p: 2,
+                                bgcolor: selectedSlots.includes(slot.id) ? 'primary.main' : 'white',
+                                color: selectedSlots.includes(slot.id) ? 'white' : 'inherit',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                '&:hover': { bgcolor: selectedSlots.includes(slot.id) ? 'primary.dark' : '#f8fafc' },
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Box>
+                                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                    {slot.day} at {slot.time}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                    {slot.available}/{slot.total} people free
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                    }}
+                                    sx={{ color: selectedSlots.includes(slot.id) ? 'white' : 'inherit' }}
+                                  >
+                                    {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                  </IconButton>
+                                  {selectedSlots.includes(slot.id) && <CheckCircleIcon />}
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Collapse in={expandedSlot === slot.id}>
+                              <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                {renderParticipantStatus(slot.participants)}
+                              </Box>
+                            </Collapse>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {/* Some Conflicts */}
+                  {someConflicts.length > 0 && (
+                    <Box>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#f59e0b', mb: 1, display: 'block' }}>
+                        ⚠ SOME CONFLICTS
+                      </Typography>
+                      <Stack spacing={1}>
+                        {someConflicts.map((slot) => (
+                          <Box key={slot.id}>
+                            <Box
+                              onClick={() => {
+                                if (selectedSlots.includes(slot.id)) {
+                                  setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                } else {
+                                  setSelectedSlots([...selectedSlots, slot.id]);
+                                }
+                              }}
+                              sx={{
+                                p: 2,
+                                bgcolor: selectedSlots.includes(slot.id) ? 'primary.main' : 'white',
+                                color: selectedSlots.includes(slot.id) ? 'white' : 'inherit',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                '&:hover': { bgcolor: selectedSlots.includes(slot.id) ? 'primary.dark' : '#f8fafc' },
+                              }}
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Box>
+                                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                    {slot.day} at {slot.time}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                    {slot.available}/{slot.total} people free
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                    }}
+                                    sx={{ color: selectedSlots.includes(slot.id) ? 'white' : 'inherit' }}
+                                  >
+                                    {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                  </IconButton>
+                                  {selectedSlots.includes(slot.id) && <CheckCircleIcon />}
+                                </Box>
+                              </Box>
+                            </Box>
+                            <Collapse in={expandedSlot === slot.id}>
+                              <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                {renderParticipantStatus(slot.participants)}
+                              </Box>
+                            </Collapse>
+                          </Box>
+                        ))}
                       </Stack>
                     </Box>
                   )}
                 </Stack>
+
+                    <Button
+                      variant="contained"
+                      size="large"
+                      fullWidth
+                      disabled={selectedSlots.length === 0}
+                      onClick={() => setShowEmailPreview(true)}
+                      sx={{ mt: 3, textTransform: 'none', bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f8fafc' } }}
+                    >
+                      Send Invite ({selectedSlots.length} time{selectedSlots.length > 1 ? 's' : ''} selected)
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </Stack>
+      </Box>
+    );
+  };
+
+  // Version 4: Combined Smart + Split with monetization and quorum rules
+  const renderVersion4 = () => {
+    const showUpgradeWarning = !isPremium && allParticipantsV4.length >= 5;
+    const canSend = !needsUpgradeV4 && selectedSlots.length > 0;
+
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
+        {/* Header Above Everything */}
+        <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, pt: 4, pb: 2 }}>
+          <Box sx={{ mb: 1 }}>
+            <AutoAwesomeIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              Schedule a Meeting
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Find the perfect time for everyone
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, pb: 4 }}>
+          {/* Upgrade Warning */}
+          {showUpgradeWarning && (
+            <Alert
+              severity={needsUpgradeV4 ? "error" : "warning"}
+              sx={{ mb: 3 }}
+              action={
+                <Button
+                  size="small"
+                  startIcon={<UpgradeIcon />}
+                  onClick={() => alert('Upgrade flow would go here')}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Upgrade
+                </Button>
+              }
+            >
+              {needsUpgradeV4 ? (
+                <Typography variant="body2">
+                  <strong>Upgrade required:</strong> You've used your 3 free meetings with 5+ people. Upgrade to continue scheduling large meetings.
+                </Typography>
+              ) : (
+                <Typography variant="body2">
+                  <strong>Heads up:</strong> Large meetings (5+ people) are limited to 3 free per account. You've used {freeMeetingsUsed}/3.
+                </Typography>
               )}
+            </Alert>
+          )}
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '500px 1fr' }, gap: 3 }}>
+            {/* Left: Single Consolidated Form */}
+            <Box>
+
+              {/* Single Consolidated Card */}
+              <Card sx={{ border: '1px solid #e5e7eb' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack spacing={3}>
+                    {/* Meeting Title */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+                        What's this meeting about?
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        placeholder="e.g., Sprint Planning, Coffee Chat..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        sx={{ '& .MuiOutlinedInput-root': { fontSize: '1.1rem', fontWeight: 500 } }}
+                      />
+                    </Box>
+
+                    <Divider />
+
+                    {/* Duration */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+                        How long do you need?
+                      </Typography>
+                      <Stack direction="row" spacing={1}>
+                        {[15, 30, 45, 60, 90].map((mins) => (
+                          <Button
+                            key={mins}
+                            variant={duration === mins ? 'contained' : 'outlined'}
+                            onClick={() => setDuration(mins)}
+                            sx={{ flex: 1, textTransform: 'none' }}
+                          >
+                            {mins < 60 ? `${mins}m` : `${mins / 60}h`}
+                          </Button>
+                        ))}
+                      </Stack>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Date Range - Side by Side */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 600 }}>
+                        Date Range
+                      </Typography>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                        <DatePicker
+                          label="Start Date"
+                          value={startDate}
+                          onChange={(newValue) => setStartDate(newValue)}
+                          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                        />
+                        <DatePicker
+                          label="End Date"
+                          value={endDate}
+                          onChange={(newValue) => setEndDate(newValue)}
+                          minDate={startDate || undefined}
+                          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                        />
+                      </Box>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Attending Switch */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+                        Organizer Attending?
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={isAttending}
+                            onChange={(e) => setIsAttending(e.target.checked)}
+                            color="primary"
+                          />
+                        }
+                        label={
+                          <Typography variant="body2" color="text.secondary">
+                            Include organizer availability in the search
+                          </Typography>
+                        }
+                      />
+                    </Box>
+
+                    <Divider />
+
+                    {/* Required Attendees */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 600, color: '#dc2626' }}>
+                        Required Attendees
+                      </Typography>
+                      <Autocomplete
+                        multiple
+                        freeSolo
+                        size="small"
+                        options={mockContacts}
+                        value={requiredAttendees}
+                        onInputChange={(e, newValue) => setInputValue(newValue)}
+                        onChange={(e, newValue) => {
+                          if (!newValue) {
+                            setRequiredAttendees([]);
+                            return;
+                          }
+                          if (newValue.length < requiredAttendees.length) {
+                            setRequiredAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
+                          } else {
+                            const lastItem = newValue[newValue.length - 1];
+                            if (lastItem) {
+                              handleAddRequired(lastItem);
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && inputValue.trim()) {
+                            e.preventDefault();
+                            handleAddRequired(inputValue.trim());
+                            setInputValue('');
+                          }
+                        }}
+                        getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Add required attendees..."
+                            inputProps={{
+                              ...params.inputProps,
+                              autoComplete: 'nope',
+                              'data-lpignore': 'true',
+                              'data-form-type': 'other',
+                            }}
+                            autoComplete="nope"
+                            name={`required-${Math.random()}`}
+                          />
+                        )}
+                        renderTags={(value, getTagProps) =>
+                          value.map((option, index) => {
+                            if (typeof option === 'string') return null;
+                            const { key, ...tagProps } = getTagProps({ index });
+                            return (
+                              <Chip
+                                key={key}
+                                label={option.name || option.email}
+                                {...tagProps}
+                                icon={getAttendeeIcon(option)}
+                                sx={{ bgcolor: '#fee2e2', borderColor: '#dc2626' }}
+                                onDoubleClick={() => moveToOptional(option)}
+                              />
+                            );
+                          })
+                        }
+                        renderOption={(props, option) => {
+                          const { key, ...otherProps } = props;
+                          if (typeof option === 'string') return null;
+                          return (
+                            <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                              <Avatar sx={{ width: 32, height: 32 }}>
+                                {option.name?.charAt(0) || option.email.charAt(0)}
+                              </Avatar>
+                              <Box sx={{ flex: 1 }}>
+                                <Typography variant="body2">{option.name}</Typography>
+                                <Typography variant="caption" color="text.secondary">{option.email}</Typography>
+                              </Box>
+                            </Box>
+                          );
+                        }}
+                      />
+                      {requiredAttendees.length > 0 && (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                          Double-click chips to move to optional
+                        </Typography>
+                      )}
+                    </Box>
+
+                    {/* Optional Attendees */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 600, color: '#059669' }}>
+                        Optional Attendees
+                      </Typography>
+                      <Autocomplete
+                        multiple
+                        freeSolo
+                        size="small"
+                        options={mockContacts}
+                        value={optionalAttendees}
+                        onInputChange={(e, newValue) => setInputValue(newValue)}
+                        onChange={(e, newValue) => {
+                          if (!newValue) {
+                            setOptionalAttendees([]);
+                            return;
+                          }
+                          if (newValue.length < optionalAttendees.length) {
+                            setOptionalAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
+                          } else {
+                            const lastItem = newValue[newValue.length - 1];
+                            if (lastItem) {
+                              handleAddOptional(lastItem);
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && inputValue.trim()) {
+                            e.preventDefault();
+                            handleAddOptional(inputValue.trim());
+                            setInputValue('');
+                          }
+                        }}
+                        getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Add optional attendees..."
+                            inputProps={{
+                              ...params.inputProps,
+                              autoComplete: 'nope',
+                              'data-lpignore': 'true',
+                              'data-form-type': 'other',
+                            }}
+                            autoComplete="nope"
+                            name={`optional-${Math.random()}`}
+                          />
+                        )}
+                        renderTags={(value, getTagProps) =>
+                          value.map((option, index) => {
+                            if (typeof option === 'string') return null;
+                            const { key, ...tagProps } = getTagProps({ index });
+                            return (
+                              <Chip
+                                key={key}
+                                label={option.name || option.email}
+                                {...tagProps}
+                                icon={getAttendeeIcon(option)}
+                                sx={{ bgcolor: '#d1fae5', borderColor: '#059669' }}
+                                onDoubleClick={() => moveToRequired(option)}
+                              />
+                            );
+                          })
+                        }
+                        renderOption={(props, option) => {
+                          const { key, ...otherProps } = props;
+                          if (typeof option === 'string') return null;
+                          return (
+                            <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                              <Avatar sx={{ width: 32, height: 32 }}>
+                                {option.name?.charAt(0) || option.email.charAt(0)}
+                              </Avatar>
+                              <Box sx={{ flex: 1 }}>
+                                <Typography variant="body2">{option.name}</Typography>
+                                <Typography variant="caption" color="text.secondary">{option.email}</Typography>
+                              </Box>
+                            </Box>
+                          );
+                        }}
+                      />
+                      {optionalAttendees.length > 0 && (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                          Double-click chips to move to required
+                        </Typography>
+                      )}
+                    </Box>
+
+                    <Divider />
+
+                    {/* Quorum Rules - Always Visible */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 2, fontWeight: 600 }}>
+                        When should the meeting be finalized?
+                      </Typography>
+
+                      <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                        <InputLabel>Quorum Type</InputLabel>
+                        <Select
+                          value={quorumType}
+                          label="Quorum Type"
+                          onChange={(e) => setQuorumType(e.target.value as 'time' | 'percentage' | 'both')}
+                        >
+                          <MenuItem value="percentage">When % of people respond</MenuItem>
+                          <MenuItem value="time">By a specific deadline</MenuItem>
+                          <MenuItem value="both">Both % and deadline</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {(quorumType === 'percentage' || quorumType === 'both') && (
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                            Finalize when {quorumPercentage}% of required attendees respond
+                          </Typography>
+                          <Stack direction="row" spacing={1}>
+                            {[50, 66, 75, 80, 100].map((pct) => (
+                              <Button
+                                key={pct}
+                                size="small"
+                                variant={quorumPercentage === pct ? 'contained' : 'outlined'}
+                                onClick={() => setQuorumPercentage(pct)}
+                                sx={{ flex: 1, textTransform: 'none' }}
+                              >
+                                {pct}%
+                              </Button>
+                            ))}
+                          </Stack>
+                        </Box>
+                      )}
+
+                      {(quorumType === 'time' || quorumType === 'both') && (
+                        <DatePicker
+                          label="Finalize by"
+                          value={quorumDeadline}
+                          onChange={(newValue) => setQuorumDeadline(newValue)}
+                          minDate={dayjs()}
+                          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                        />
+                      )}
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
             </Box>
+
+            {/* Right: Available Times */}
+            <Box>
+              {allAttendeesV4.length === 0 ? (
+                <Card sx={{ border: '2px dashed #e5e7eb', p: 6, textAlign: 'center' }}>
+                  <GroupsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    Add attendees to see available times
+                  </Typography>
+                </Card>
+              ) : !title || !startDate || !endDate ? (
+                <Card sx={{ border: '2px dashed #e5e7eb', p: 6, textAlign: 'center' }}>
+                  <AccessTimeIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    {!title && 'Add a meeting title'}
+                    {title && !startDate && 'Select a date range'}
+                    {title && startDate && !endDate && 'Select an end date'}
+                  </Typography>
+                </Card>
+              ) : (
+                <Card sx={{ border: '1px solid #e5e7eb', position: 'sticky', top: 20 }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                      <AccessTimeIcon color="primary" sx={{ fontSize: 28 }} />
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                          Available Times
+                        </Typography>
+                        {startDate && endDate && (
+                          <Typography variant="caption" color="text.secondary">
+                            {startDate.format('MMM D')} - {endDate.format('MMM D, YYYY')}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                      {everyoneAvailable.length > 0
+                        ? `Found ${everyoneAvailable.length} perfect time${everyoneAvailable.length > 1 ? 's' : ''}!`
+                        : suggestedTimes.length > 0
+                        ? `Found ${suggestedTimes.length} available times`
+                        : 'Searching for times...'}
+                    </Typography>
+
+                    <Box sx={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto', pr: 1 }}>
+                      <Stack spacing={2}>
+                        {/* Everyone Available */}
+                        {everyoneAvailable.length > 0 && (
+                          <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#22c55e', mb: 1, display: 'block' }}>
+                              ✓ EVERYONE AVAILABLE
+                            </Typography>
+                            <Stack spacing={1}>
+                              {everyoneAvailable.map((slot) => (
+                                <Box key={slot.id}>
+                                  <Box
+                                    onClick={() => {
+                                      if (selectedSlots.includes(slot.id)) {
+                                        setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                      } else {
+                                        setSelectedSlots([...selectedSlots, slot.id]);
+                                      }
+                                    }}
+                                    sx={{
+                                      p: 2,
+                                      bgcolor: selectedSlots.includes(slot.id) ? 'primary.main' : 'white',
+                                      color: selectedSlots.includes(slot.id) ? 'white' : 'inherit',
+                                      border: '1px solid',
+                                      borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                      borderRadius: '8px',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      '&:hover': { bgcolor: selectedSlots.includes(slot.id) ? 'primary.dark' : '#f8fafc' },
+                                    }}
+                                  >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                      <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                          {slot.day} at {slot.time}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                          All {slot.total} people free
+                                        </Typography>
+                                      </Box>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <IconButton
+                                          size="small"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                          }}
+                                          sx={{ color: selectedSlots.includes(slot.id) ? 'white' : 'inherit' }}
+                                        >
+                                          {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                        </IconButton>
+                                        {selectedSlots.includes(slot.id) && <CheckCircleIcon />}
+                                      </Box>
+                                    </Box>
+                                  </Box>
+                                  <Collapse in={expandedSlot === slot.id}>
+                                    <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                      {renderParticipantStatus(slot.participants)}
+                                    </Box>
+                                  </Collapse>
+                                </Box>
+                              ))}
+                            </Stack>
+                          </Box>
+                        )}
+
+                        {/* Most Available */}
+                        {mostAvailable.length > 0 && (
+                          <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#3b82f6', mb: 1, display: 'block' }}>
+                              ◐ MOST AVAILABLE
+                            </Typography>
+                            <Stack spacing={1}>
+                              {mostAvailable.map((slot) => (
+                                <Box key={slot.id}>
+                                  <Box
+                                    onClick={() => {
+                                      if (selectedSlots.includes(slot.id)) {
+                                        setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                      } else {
+                                        setSelectedSlots([...selectedSlots, slot.id]);
+                                      }
+                                    }}
+                                    sx={{
+                                      p: 2,
+                                      bgcolor: selectedSlots.includes(slot.id) ? 'primary.main' : 'white',
+                                      color: selectedSlots.includes(slot.id) ? 'white' : 'inherit',
+                                      border: '1px solid',
+                                      borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                      borderRadius: '8px',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      '&:hover': { bgcolor: selectedSlots.includes(slot.id) ? 'primary.dark' : '#f8fafc' },
+                                    }}
+                                  >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                      <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                          {slot.day} at {slot.time}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                          {slot.available}/{slot.total} people free
+                                        </Typography>
+                                      </Box>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <IconButton
+                                          size="small"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                          }}
+                                          sx={{ color: selectedSlots.includes(slot.id) ? 'white' : 'inherit' }}
+                                        >
+                                          {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                        </IconButton>
+                                        {selectedSlots.includes(slot.id) && <CheckCircleIcon />}
+                                      </Box>
+                                    </Box>
+                                  </Box>
+                                  <Collapse in={expandedSlot === slot.id}>
+                                    <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                      {renderParticipantStatus(slot.participants)}
+                                    </Box>
+                                  </Collapse>
+                                </Box>
+                              ))}
+                            </Stack>
+                          </Box>
+                        )}
+
+                        {/* Some Conflicts */}
+                        {someConflicts.length > 0 && (
+                          <Box>
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#f59e0b', mb: 1, display: 'block' }}>
+                              ⚠ SOME CONFLICTS
+                            </Typography>
+                            <Stack spacing={1}>
+                              {someConflicts.map((slot) => (
+                                <Box key={slot.id}>
+                                  <Box
+                                    onClick={() => {
+                                      if (selectedSlots.includes(slot.id)) {
+                                        setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                      } else {
+                                        setSelectedSlots([...selectedSlots, slot.id]);
+                                      }
+                                    }}
+                                    sx={{
+                                      p: 2,
+                                      bgcolor: selectedSlots.includes(slot.id) ? 'primary.main' : 'white',
+                                      color: selectedSlots.includes(slot.id) ? 'white' : 'inherit',
+                                      border: '1px solid',
+                                      borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
+                                      borderRadius: '8px',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s',
+                                      '&:hover': { bgcolor: selectedSlots.includes(slot.id) ? 'primary.dark' : '#f8fafc' },
+                                    }}
+                                  >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                      <Box>
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                          {slot.day} at {slot.time}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                                          {slot.available}/{slot.total} people free
+                                        </Typography>
+                                      </Box>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <IconButton
+                                          size="small"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
+                                          }}
+                                          sx={{ color: selectedSlots.includes(slot.id) ? 'white' : 'inherit' }}
+                                        >
+                                          {expandedSlot === slot.id ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                                        </IconButton>
+                                        {selectedSlots.includes(slot.id) && <CheckCircleIcon />}
+                                      </Box>
+                                    </Box>
+                                  </Box>
+                                  <Collapse in={expandedSlot === slot.id}>
+                                    <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                      {renderParticipantStatus(slot.participants)}
+                                    </Box>
+                                  </Collapse>
+                                </Box>
+                              ))}
+                            </Stack>
+                          </Box>
+                        )}
+                      </Stack>
+                    </Box>
+
+                    <Button
+                      variant="contained"
+                      size="large"
+                      fullWidth
+                      disabled={!canSend}
+                      startIcon={needsUpgrade ? <LockIcon /> : <SendIcon />}
+                      onClick={() => needsUpgrade ? alert('Upgrade required') : setShowEmailPreview(true)}
+                      sx={{ mt: 3, textTransform: 'none' }}
+                    >
+                      {needsUpgrade ? 'Upgrade to Send' : `Send Invite (${selectedSlots.length} selected)`}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </Box>
           </Box>
         </Box>
+      </Box>
+    );
+  };
+
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Box sx={{ minHeight: '100vh', bgcolor: showEmailPreview ? '#f5f5f5' : '#fafbfc' }}>
+        {/* Header matching dashboard */}
+        {!showEmailPreview && (
+        <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid', borderColor: 'grey.200' }}>
+          <Toolbar sx={{ py: 1 }}>
+            <IconButton onClick={() => router.push('/home')} sx={{ mr: 2 }}>
+              <ArrowBackIcon />
+            </IconButton>
+            <Box sx={{ flexGrow: 1 }}>
+              <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
+            </Box>
+
+            {/* Version Toggle */}
+            <ButtonGroup size="small" sx={{ mr: 2 }}>
+              <Button
+                variant={version === 1 ? 'contained' : 'outlined'}
+                onClick={() => setVersion(1)}
+                sx={{ textTransform: 'none' }}
+              >
+                Wizard
+              </Button>
+              <Button
+                variant={version === 2 ? 'contained' : 'outlined'}
+                onClick={() => setVersion(2)}
+                sx={{ textTransform: 'none' }}
+              >
+                Split
+              </Button>
+              <Button
+                variant={version === 3 ? 'contained' : 'outlined'}
+                onClick={() => setVersion(3)}
+                sx={{ textTransform: 'none' }}
+              >
+                Smart
+              </Button>
+              <Button
+                variant={version === 4 ? 'contained' : 'outlined'}
+                onClick={() => setVersion(4)}
+                sx={{ textTransform: 'none' }}
+              >
+                Combined
+              </Button>
+            </ButtonGroup>
+
+            <Badge badgeContent={0} color="error" sx={{ mr: 2 }}>
+              <NotificationsIcon sx={{ color: 'text.secondary' }} />
+            </Badge>
+            <IconButton onClick={handleMenuOpen} sx={{ bgcolor: 'grey.100', '&:hover': { bgcolor: 'grey.200' } }}>
+              <AccountCircleIcon sx={{ color: 'primary.main' }} />
+            </IconButton>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+              <MenuItem onClick={handleMenuClose}>
+                <SettingsIcon sx={{ mr: 1.5, fontSize: 20 }} />
+                Settings
+              </MenuItem>
+              <MenuItem onClick={handleMenuClose}>
+                <LogoutIcon sx={{ mr: 1.5, fontSize: 20 }} />
+                Logout
+              </MenuItem>
+            </Menu>
+          </Toolbar>
+        </AppBar>
+        )}
+
+        {/* Version Content */}
+        {showEmailPreview ? (
+          renderEmailPreview()
+        ) : (
+          <>
+            {version === 1 && renderVersion1()}
+            {version === 2 && renderVersion2()}
+            {version === 3 && renderVersion3()}
+            {version === 4 && renderVersion4()}
+          </>
+        )}
       </Box>
     </LocalizationProvider>
   );
