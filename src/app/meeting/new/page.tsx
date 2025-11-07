@@ -18,6 +18,8 @@ import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import AddIcon from '@mui/icons-material/Add';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -172,14 +174,14 @@ export default function CreateMeetingPage() {
     setAnchorEl(null);
   };
 
-  // Get attendee status - just icons, no color coding
-  const getAttendeeStatus = (attendee: Attendee) => {
+  // Get attendee status with MUI icons
+  const getAttendeeIcon = (attendee: Attendee) => {
     if (attendee.isContact) {
-      return { icon: '✓' };
+      return <AccountCircleIcon sx={{ fontSize: '1rem' }} />;
     } else if (attendee.onPlatform) {
-      return { icon: '◐' };
+      return <PersonAddIcon sx={{ fontSize: '1rem' }} />;
     } else {
-      return { icon: '✉' };
+      return <EmailIcon sx={{ fontSize: '1rem' }} />;
     }
   };
 
@@ -365,7 +367,11 @@ export default function CreateMeetingPage() {
                   <Autocomplete
                     multiple
                     freeSolo
-                    options={mockContacts}
+                    options={
+                      inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
+                        ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
+                        : mockContacts
+                    }
                     value={attendees || []}
                     inputValue={inputValue}
                     onInputChange={(e, newValue) => setInputValue(newValue)}
@@ -393,27 +399,41 @@ export default function CreateMeetingPage() {
                       }
                     }}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
+                    filterOptions={(options, state) => {
+                      const filtered = options.filter(option => {
+                        if (option.id === 'add-new') return true;
+                        const searchTerm = state.inputValue.toLowerCase();
+                        return (
+                          option.email.toLowerCase().includes(searchTerm) ||
+                          option.name?.toLowerCase().includes(searchTerm)
+                        );
+                      });
+                      return filtered;
+                    }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         placeholder={attendees.length === 0 ? "Add people by name or email" : ""}
                         inputProps={{
                           ...params.inputProps,
-                          autoComplete: 'new-password',
+                          autoComplete: 'off',
+                          form: {
+                            autoComplete: 'off',
+                          },
                         }}
+                        autoComplete="off"
                       />
                     )}
                     renderTags={(value, getTagProps) =>
                       (value || []).map((option, index) => {
                         if (typeof option === 'string') return null;
                         const { key, ...tagProps } = getTagProps({ index });
-                        const status = getAttendeeStatus(option);
                         return (
                           <Chip
                             key={key}
                             label={option.name || option.email}
                             {...tagProps}
-                            icon={<Typography sx={{ fontSize: '0.875rem' }}>{status.icon}</Typography>}
+                            icon={getAttendeeIcon(option)}
                             color="primary"
                           />
                         );
@@ -422,9 +442,21 @@ export default function CreateMeetingPage() {
                     renderOption={(props, option) => {
                       const { key, ...otherProps } = props;
                       if (typeof option === 'string') return null;
+
+                      if (option.id === 'add-new') {
+                        return (
+                          <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <AddIcon sx={{ color: 'primary.main' }} />
+                            <Typography variant="body2">Add "{option.email}"</Typography>
+                          </Box>
+                        );
+                      }
+
                       return (
                         <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                          <PersonIcon sx={{ color: 'primary.main' }} />
+                          <Avatar sx={{ width: 32, height: 32 }}>
+                            {option.name?.charAt(0) || option.email.charAt(0)}
+                          </Avatar>
                           <Box sx={{ flex: 1 }}>
                             <Typography variant="body2">{option.name}</Typography>
                             <Typography variant="caption" color="text.secondary">{option.email}</Typography>
@@ -770,7 +802,11 @@ export default function CreateMeetingPage() {
                     multiple
                     size="small"
                     freeSolo
-                    options={mockContacts}
+                    options={
+                      inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
+                        ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
+                        : mockContacts
+                    }
                     value={attendees || []}
                     inputValue={inputValue}
                     onInputChange={(e, newValue) => setInputValue(newValue)}
@@ -796,28 +832,42 @@ export default function CreateMeetingPage() {
                       }
                     }}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
+                    filterOptions={(options, state) => {
+                      const filtered = options.filter(option => {
+                        if (option.id === 'add-new') return true;
+                        const searchTerm = state.inputValue.toLowerCase();
+                        return (
+                          option.email.toLowerCase().includes(searchTerm) ||
+                          option.name?.toLowerCase().includes(searchTerm)
+                        );
+                      });
+                      return filtered;
+                    }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         placeholder={attendees.length === 0 ? "Add people..." : ""}
                         inputProps={{
                           ...params.inputProps,
-                          autoComplete: 'new-password',
+                          autoComplete: 'off',
+                          form: {
+                            autoComplete: 'off',
+                          },
                         }}
+                        autoComplete="off"
                       />
                     )}
                     renderTags={(value, getTagProps) =>
                       (value || []).map((option, index) => {
                         if (typeof option === 'string') return null;
                         const { key, ...tagProps } = getTagProps({ index });
-                        const status = getAttendeeStatus(option);
                         return (
                           <Chip
                             key={key}
                             label={option.name || option.email}
                             {...tagProps}
                             size="small"
-                            icon={<Typography sx={{ fontSize: '0.75rem' }}>{status.icon}</Typography>}
+                            icon={getAttendeeIcon(option)}
                             color="primary"
                             sx={{ maxWidth: '150px' }}
                           />
@@ -827,9 +877,21 @@ export default function CreateMeetingPage() {
                     renderOption={(props, option) => {
                       const { key, ...otherProps } = props;
                       if (typeof option === 'string') return null;
+
+                      if (option.id === 'add-new') {
+                        return (
+                          <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center', fontSize: '0.875rem' }}>
+                            <AddIcon sx={{ color: 'primary.main', fontSize: '1rem' }} />
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>Add "{option.email}"</Typography>
+                          </Box>
+                        );
+                      }
+
                       return (
                         <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center', fontSize: '0.875rem' }}>
-                          <PersonIcon sx={{ color: 'primary.main', fontSize: '1rem' }} />
+                          <Avatar sx={{ width: 28, height: 28, fontSize: '0.75rem' }}>
+                            {option.name?.charAt(0) || option.email.charAt(0)}
+                          </Avatar>
                           <Box sx={{ flex: 1 }}>
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{option.name}</Typography>
                             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>{option.email}</Typography>
@@ -1162,7 +1224,11 @@ export default function CreateMeetingPage() {
               <Autocomplete
                 multiple
                 freeSolo
-                options={mockContacts}
+                options={
+                  inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
+                    ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
+                    : mockContacts
+                }
                 value={attendees || []}
                 inputValue={inputValue}
                 onInputChange={(e, newValue) => setInputValue(newValue)}
@@ -1188,27 +1254,41 @@ export default function CreateMeetingPage() {
                   }
                 }}
                 getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
+                filterOptions={(options, state) => {
+                  const filtered = options.filter(option => {
+                    if (option.id === 'add-new') return true;
+                    const searchTerm = state.inputValue.toLowerCase();
+                    return (
+                      option.email.toLowerCase().includes(searchTerm) ||
+                      option.name?.toLowerCase().includes(searchTerm)
+                    );
+                  });
+                  return filtered;
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     placeholder={attendees.length === 0 ? "Type a name or email..." : ""}
                     inputProps={{
                       ...params.inputProps,
-                      autoComplete: 'new-password',
+                      autoComplete: 'off',
+                      form: {
+                        autoComplete: 'off',
+                      },
                     }}
+                    autoComplete="off"
                   />
                 )}
                 renderTags={(value, getTagProps) =>
                   (value || []).map((option, index) => {
                     if (typeof option === 'string') return null;
                     const { key, ...tagProps } = getTagProps({ index });
-                    const status = getAttendeeStatus(option);
                     return (
                       <Chip
                         key={key}
                         label={option.name || option.email}
                         {...tagProps}
-                        icon={<Typography sx={{ fontSize: '0.875rem' }}>{status.icon}</Typography>}
+                        icon={getAttendeeIcon(option)}
                         color="primary"
                       />
                     );
@@ -1217,9 +1297,21 @@ export default function CreateMeetingPage() {
                 renderOption={(props, option) => {
                   const { key, ...otherProps } = props;
                   if (typeof option === 'string') return null;
+
+                  if (option.id === 'add-new') {
+                    return (
+                      <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <AddIcon sx={{ color: 'primary.main' }} />
+                        <Typography variant="body2">Add "{option.email}"</Typography>
+                      </Box>
+                    );
+                  }
+
                   return (
                     <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                      <PersonIcon sx={{ color: 'primary.main' }} />
+                      <Avatar sx={{ width: 32, height: 32 }}>
+                        {option.name?.charAt(0) || option.email.charAt(0)}
+                      </Avatar>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="body2">{option.name}</Typography>
                         <Typography variant="caption" color="text.secondary">{option.email}</Typography>
