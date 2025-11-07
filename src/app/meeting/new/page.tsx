@@ -331,70 +331,44 @@ export default function CreateMeetingPage() {
 
                   {/* Time Options */}
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      Select all times that work
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                      The more options you give, the easier it is to find a time
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                      Click any time that works for you:
                     </Typography>
                     <Stack spacing={2}>
-                      {selectedTimes.map((slot) => {
-                        const isSelected = selectedEmailTimes.includes(slot.id);
-                        return (
-                          <Box
-                            key={slot.id}
-                            onClick={() => handleTimeClick(slot.id)}
-                            sx={{
-                              p: 2.5,
-                              border: '2px solid',
-                              borderColor: isSelected ? 'primary.main' : '#e5e7eb',
-                              borderRadius: '8px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              transition: 'all 0.2s',
-                              cursor: 'pointer',
-                              bgcolor: isSelected ? '#f0f9ff' : 'white',
-                              '&:hover': {
-                                borderColor: 'primary.main',
-                                bgcolor: '#f0f9ff',
-                              }
-                            }}
-                          >
-                            <Box>
-                              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                {slot.day}
-                              </Typography>
-                              <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                                {slot.time}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {duration} minutes
-                              </Typography>
-                            </Box>
-                            {isSelected ? (
-                              <CheckCircleIcon color="primary" sx={{ fontSize: 32 }} />
-                            ) : (
-                              <Button variant="outlined" sx={{ textTransform: 'none' }}>
-                                Select
-                              </Button>
-                            )}
+                      {selectedTimes.map((slot) => (
+                        <Box
+                          key={slot.id}
+                          sx={{
+                            p: 2.5,
+                            border: '2px solid #e5e7eb',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            bgcolor: 'white',
+                          }}
+                        >
+                          <Box>
+                            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                              {slot.day}
+                            </Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                              {slot.time}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {duration} minutes
+                            </Typography>
                           </Box>
-                        );
-                      })}
+                          <Button
+                            variant="contained"
+                            onClick={() => setEmailResponseView('selected')}
+                            sx={{ textTransform: 'none' }}
+                          >
+                            This works for me
+                          </Button>
+                        </Box>
+                      ))}
                     </Stack>
-
-                    {selectedEmailTimes.length > 0 && (
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        size="large"
-                        onClick={() => setEmailResponseView('selected')}
-                        sx={{ mt: 3, textTransform: 'none', fontWeight: 600 }}
-                      >
-                        Submit {selectedEmailTimes.length} Time{selectedEmailTimes.length > 1 ? 's' : ''}
-                      </Button>
-                    )}
                   </Box>
 
                   {/* CTA Section */}
@@ -465,45 +439,114 @@ export default function CreateMeetingPage() {
       );
     }
 
-    // After selecting times
+    // Landing page after clicking a time (real flow would be timesekr.com/respond/meeting-id)
     if (emailResponseView === 'selected') {
-      const selectedTimeSlots = selectedTimes.filter(t => selectedEmailTimes.includes(t.id));
       return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
           <Box sx={{ maxWidth: 700, mx: 'auto', px: 3 }}>
-            <Card sx={{ boxShadow: 3, textAlign: 'center' }}>
-              <CardContent sx={{ p: 5 }}>
-                <CheckCircleIcon color="success" sx={{ fontSize: 80, mb: 2 }} />
+            <Card sx={{ boxShadow: 3 }}>
+              <CardContent sx={{ p: 4 }}>
                 <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                  Thanks! Your response has been sent
+                  Respond to: {title}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                  {meAttendee.name} will be notified that these times work for you:
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  from {meAttendee.name}
                 </Typography>
-                <Stack spacing={1.5} sx={{ mb: 4 }}>
-                  {selectedTimeSlots.map(slot => (
-                    <Box key={slot.id} sx={{ p: 2, bgcolor: '#f8fafc', borderRadius: '8px' }}>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {slot.day} at {slot.time}
+
+                <Divider sx={{ mb: 3 }} />
+
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                  Select all times that work for you:
+                </Typography>
+
+                <Stack spacing={2}>
+                  {selectedTimes.map((slot) => {
+                    const isSelected = selectedEmailTimes.includes(slot.id);
+                    return (
+                      <Box
+                        key={slot.id}
+                        onClick={() => handleTimeClick(slot.id)}
+                        sx={{
+                          p: 2.5,
+                          border: '2px solid',
+                          borderColor: isSelected ? 'primary.main' : '#e5e7eb',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          cursor: 'pointer',
+                          bgcolor: isSelected ? '#f0f9ff' : 'white',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                          }
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            {slot.day}
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                            {slot.time}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {duration} minutes
+                          </Typography>
+                        </Box>
+                        {isSelected && <CheckCircleIcon color="primary" sx={{ fontSize: 32 }} />}
+                      </Box>
+                    );
+                  })}
+                </Stack>
+
+                {selectedEmailTimes.length > 0 ? (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    sx={{ mt: 3, textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Submit Response ({selectedEmailTimes.length} time{selectedEmailTimes.length > 1 ? 's' : ''})
+                  </Button>
+                ) : (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 3, textAlign: 'center' }}>
+                    Select at least one time to continue
+                  </Typography>
+                )}
+
+                <Divider sx={{ my: 3 }} />
+
+                <Box sx={{ p: 3, bgcolor: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2 }}>
+                    <AutoAwesomeIcon sx={{ color: 'primary.main', mt: 0.5 }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        None of these work?
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Connect your calendar and suggest better times - it takes 30 seconds
                       </Typography>
                     </Box>
-                  ))}
-                </Stack>
-                <Divider sx={{ my: 3 }} />
-                <Box sx={{ p: 3, bgcolor: '#f0f9ff', borderRadius: '12px' }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                    Want to make scheduling even easier?
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Connect your calendar to timesēkr and never play email tag again
-                  </Typography>
+                  </Box>
                   <Button
                     variant="contained"
                     fullWidth
                     onClick={() => setEmailResponseView('signup')}
                     sx={{ textTransform: 'none' }}
                   >
-                    Get Started - It's Free
+                    Join & Suggest Other Times
+                  </Button>
+                </Box>
+
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Button
+                    variant="text"
+                    color="error"
+                    size="small"
+                    onClick={() => setEmailResponseView('declined')}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    I can't attend
                   </Button>
                 </Box>
               </CardContent>
