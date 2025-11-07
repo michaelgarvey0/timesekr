@@ -87,35 +87,18 @@ export default function Home() {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
-      {/* SUPER OBVIOUS MESSAGE */}
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Left side - Sign In Form */}
       <Box
         sx={{
-          bgcolor: '#FF6B35',
-          color: 'white',
-          p: 3,
-          textAlign: 'center',
-          fontSize: '28px',
-          fontWeight: 'bold',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          borderBottom: '5px solid #FF4500',
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 4,
+          position: 'relative',
         }}
       >
-        🚀 THIS IS A CLONED PROTOTYPE BRANCH - SUPER OBVIOUS MESSAGE! 🚀
-      </Box>
-
-      <Box sx={{ display: 'flex', flex: 1 }}>
-        {/* Left side - Sign In Form */}
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            p: 4,
-            position: 'relative',
-          }}
-        >
         {(showSignup || showVerify || showCalendar || showContacts) && (
           <IconButton
             onClick={() => {
@@ -274,7 +257,6 @@ export default function Home() {
             </Typography>
           </Box>
         </Box>
-      </Box>
       </Box>
     </Box>
   );
