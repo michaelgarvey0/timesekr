@@ -20,11 +20,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import SendIcon from '@mui/icons-material/Send';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CancelIcon from '@mui/icons-material/Cancel';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-const SIDEBAR_WIDTH = 240;
+const SIDEBAR_WIDTH_EXPANDED = 240;
+const SIDEBAR_WIDTH_COLLAPSED = 72;
 
 export default function NoCalendarHomePage() {
   const router = useRouter();
@@ -33,6 +36,7 @@ export default function NoCalendarHomePage() {
   const [selectedNav, setSelectedNav] = useState('home');
   const [showMeetingModal, setShowMeetingModal] = useState(false);
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Default to collapsed
 
   const handleLogout = () => {
     router.push('/');
@@ -102,52 +106,84 @@ export default function NoCalendarHomePage() {
     ]
   };
 
+  const sidebarWidth = sidebarCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED;
+
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       {/* Left Sidebar */}
       <Drawer
         variant="permanent"
         sx={{
-          width: SIDEBAR_WIDTH,
+          width: sidebarWidth,
           flexShrink: 0,
+          transition: 'width 0.3s ease',
           '& .MuiDrawer-paper': {
-            width: SIDEBAR_WIDTH,
+            width: sidebarWidth,
             boxSizing: 'border-box',
             borderRight: '1px solid #e5e7eb',
             bgcolor: 'white',
+            transition: 'width 0.3s ease',
+            overflowX: 'hidden',
           },
         }}
       >
-        {/* Logo */}
-        <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
-          <Image
-            src="/images/logomark.svg"
-            alt="timesēkr"
-            width={120}
-            height={32}
-            priority
-          />
+        {/* Logo / Toggle */}
+        <Box sx={{ p: sidebarCollapsed ? 1.5 : 3, borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: sidebarCollapsed ? 'center' : 'space-between' }}>
+          {!sidebarCollapsed && (
+            <Image
+              src="/images/logomark.svg"
+              alt="timesēkr"
+              width={120}
+              height={32}
+              priority
+            />
+          )}
+          <IconButton
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            size="small"
+            sx={{ color: 'text.secondary' }}
+          >
+            {sidebarCollapsed ? <MenuIcon /> : <ChevronLeftIcon />}
+          </IconButton>
         </Box>
 
         {/* New Meeting Button */}
         <Box sx={{ px: 2, py: 2 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            startIcon={<EventIcon />}
-            onClick={() => router.push('/meeting/new')}
-            sx={{
-              textTransform: 'none',
-              py: 1.5,
-              fontWeight: 600,
-              bgcolor: 'primary.main',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              }
-            }}
-          >
-            New Meeting
-          </Button>
+          {sidebarCollapsed ? (
+            <IconButton
+              onClick={() => router.push('/meeting/new')}
+              sx={{
+                width: '100%',
+                height: 48,
+                bgcolor: 'primary.main',
+                color: 'white',
+                borderRadius: '8px',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                }
+              }}
+            >
+              <EventIcon />
+            </IconButton>
+          ) : (
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<EventIcon />}
+              onClick={() => router.push('/meeting/new')}
+              sx={{
+                textTransform: 'none',
+                py: 1.5,
+                fontWeight: 600,
+                bgcolor: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                }
+              }}
+            >
+              New Meeting
+            </Button>
+          )}
         </Box>
 
         <Divider />
@@ -160,6 +196,7 @@ export default function NoCalendarHomePage() {
               onClick={() => setSelectedNav('home')}
               sx={{
                 borderRadius: '8px',
+                justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                 '&.Mui-selected': {
                   bgcolor: '#f0f9ff',
                   color: 'primary.main',
@@ -172,10 +209,10 @@ export default function NoCalendarHomePage() {
                 },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ minWidth: sidebarCollapsed ? 'auto' : 40 }}>
                 <HomeIcon />
               </ListItemIcon>
-              <ListItemText primary="Home" />
+              {!sidebarCollapsed && <ListItemText primary="Home" />}
             </ListItemButton>
           </ListItem>
 
@@ -185,6 +222,7 @@ export default function NoCalendarHomePage() {
               onClick={() => setSelectedNav('contacts')}
               sx={{
                 borderRadius: '8px',
+                justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                 '&.Mui-selected': {
                   bgcolor: '#f0f9ff',
                   color: 'primary.main',
@@ -197,10 +235,10 @@ export default function NoCalendarHomePage() {
                 },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ minWidth: sidebarCollapsed ? 'auto' : 40 }}>
                 <ContactsIcon />
               </ListItemIcon>
-              <ListItemText primary="Contacts" />
+              {!sidebarCollapsed && <ListItemText primary="Contacts" />}
             </ListItemButton>
           </ListItem>
 
@@ -210,6 +248,7 @@ export default function NoCalendarHomePage() {
               onClick={() => setSelectedNav('calendars')}
               sx={{
                 borderRadius: '8px',
+                justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                 '&.Mui-selected': {
                   bgcolor: '#f0f9ff',
                   color: 'primary.main',
@@ -222,10 +261,10 @@ export default function NoCalendarHomePage() {
                 },
               }}
             >
-              <ListItemIcon>
+              <ListItemIcon sx={{ minWidth: sidebarCollapsed ? 'auto' : 40 }}>
                 <CalendarTodayIcon />
               </ListItemIcon>
-              <ListItemText primary="My Calendars" />
+              {!sidebarCollapsed && <ListItemText primary="My Calendars" />}
             </ListItemButton>
           </ListItem>
         </List>
@@ -239,6 +278,7 @@ export default function NoCalendarHomePage() {
                 onClick={() => setSelectedNav('settings')}
                 sx={{
                   borderRadius: '8px',
+                  justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                   '&.Mui-selected': {
                     bgcolor: 'primary.main',
                     color: 'white',
@@ -251,38 +291,52 @@ export default function NoCalendarHomePage() {
                   },
                 }}
               >
-                <ListItemIcon>
+                <ListItemIcon sx={{ minWidth: sidebarCollapsed ? 'auto' : 40 }}>
                   <SettingsIcon />
                 </ListItemIcon>
-                <ListItemText primary="Settings" />
+                {!sidebarCollapsed && <ListItemText primary="Settings" />}
               </ListItemButton>
             </ListItem>
 
             <ListItem disablePadding>
-              <ListItemButton onClick={handleLogout} sx={{ borderRadius: '8px' }}>
-                <ListItemIcon>
+              <ListItemButton
+                onClick={handleLogout}
+                sx={{
+                  borderRadius: '8px',
+                  justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: sidebarCollapsed ? 'auto' : 40 }}>
                   <LogoutIcon />
                 </ListItemIcon>
-                <ListItemText primary="Logout" />
+                {!sidebarCollapsed && <ListItemText primary="Logout" />}
               </ListItemButton>
             </ListItem>
           </List>
 
           {/* User Profile */}
           <Box sx={{ p: 2, borderTop: '1px solid #e5e7eb' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
-                M
-              </Avatar>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }} noWrap>
-                  Michael Garvey
-                </Typography>
-                <Typography variant="caption" color="text.secondary" noWrap>
-                  michael@example.com
-                </Typography>
+            {sidebarCollapsed ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
+                  M
+                </Avatar>
               </Box>
-            </Box>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
+                  M
+                </Avatar>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }} noWrap>
+                    Michael Garvey
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    michael@example.com
+                  </Typography>
+                </Box>
+              </Box>
+            )}
           </Box>
         </Box>
       </Drawer>
