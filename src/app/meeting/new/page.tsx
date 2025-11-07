@@ -31,6 +31,7 @@ interface Attendee {
   email: string;
   name?: string;
   isContact: boolean;
+  onPlatform: boolean; // true if they're on timesēkr, false if they need email invite
 }
 
 interface ParticipantStatus {
@@ -50,9 +51,15 @@ interface TimeSlot {
 }
 
 const mockContacts: Attendee[] = [
-  { id: 'contact-1', email: 'john@example.com', name: 'John Doe', isContact: true },
-  { id: 'contact-2', email: 'jane@example.com', name: 'Jane Smith', isContact: true },
-  { id: 'contact-3', email: 'bob@company.com', name: 'Bob Johnson', isContact: true },
+  { id: 'contact-1', email: 'john@example.com', name: 'John Doe', isContact: true, onPlatform: true },
+  { id: 'contact-2', email: 'jane@example.com', name: 'Jane Smith', isContact: true, onPlatform: true },
+  { id: 'contact-3', email: 'bob@company.com', name: 'Bob Johnson', isContact: true, onPlatform: true },
+];
+
+// Mock users on platform but not in contacts
+const mockPlatformUsers: Attendee[] = [
+  { id: 'platform-1', email: 'sarah@startup.io', name: 'Sarah Chen', isContact: false, onPlatform: true },
+  { id: 'platform-2', email: 'mike@tech.com', name: 'Mike Wilson', isContact: false, onPlatform: true },
 ];
 
 export default function CreateMeetingPage() {
@@ -153,17 +160,43 @@ export default function CreateMeetingPage() {
     setAnchorEl(null);
   };
 
+  // Get attendee status
+  const getAttendeeStatus = (attendee: Attendee) => {
+    if (attendee.isContact) {
+      return { label: 'Contact', color: '#22c55e', icon: '✓' };
+    } else if (attendee.onPlatform) {
+      return { label: 'On Platform', color: '#3b82f6', icon: '◐' };
+    } else {
+      return { label: 'Email Invite', color: '#94a3b8', icon: '✉' };
+    }
+  };
+
   const handleAddAttendee = (value: string | Attendee | null) => {
     if (!value) return;
 
     let newAttendee: Attendee;
     if (typeof value === 'string') {
-      const matchingContact = mockContacts.find(c => c.email.toLowerCase() === value.trim().toLowerCase());
-      newAttendee = matchingContact || {
-        id: Date.now().toString(),
-        email: value.trim(),
-        isContact: false,
-      };
+      const email = value.trim().toLowerCase();
+
+      // Check if in contacts first
+      const matchingContact = mockContacts.find(c => c.email.toLowerCase() === email);
+      if (matchingContact) {
+        newAttendee = matchingContact;
+      } else {
+        // Check if on platform but not in contacts
+        const matchingPlatformUser = mockPlatformUsers.find(u => u.email.toLowerCase() === email);
+        if (matchingPlatformUser) {
+          newAttendee = matchingPlatformUser;
+        } else {
+          // Not on platform - will get email invite
+          newAttendee = {
+            id: Date.now().toString(),
+            email: value.trim(),
+            isContact: false,
+            onPlatform: false,
+          };
+        }
+      }
     } else {
       newAttendee = { ...value, id: Date.now().toString() };
     }
@@ -318,58 +351,63 @@ export default function CreateMeetingPage() {
                   </Box>
 
                   <Autocomplete
+                    multiple
                     freeSolo
-                    options={mockContacts}
+                    options={[...mockContacts, ...mockPlatformUsers]}
+                    value={attendees}
                     inputValue={inputValue}
                     onInputChange={(e, newValue) => setInputValue(newValue)}
-                    onChange={(e, newValue) => handleAddAttendee(newValue)}
+                    onChange={(e, newValue) => {
+                      // Handle removing
+                      if (newValue.length < attendees.length) {
+                        setAttendees(newValue as Attendee[]);
+                      } else {
+                        // Handle adding
+                        const lastItem = newValue[newValue.length - 1];
+                        if (lastItem) {
+                          handleAddAttendee(lastItem);
+                        }
+                      }
+                    }}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
                     renderInput={(params) => (
-                      <TextField {...params} placeholder="Add people by name or email" />
+                      <TextField {...params} placeholder={attendees.length === 0 ? "Add people by name or email" : ""} />
                     )}
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => {
+                        const { key, ...tagProps } = getTagProps({ index });
+                        const status = getAttendeeStatus(option);
+                        return (
+                          <Chip
+                            key={key}
+                            label={option.name || option.email}
+                            {...tagProps}
+                            icon={<Typography sx={{ fontSize: '0.875rem' }}>{status.icon}</Typography>}
+                            sx={{ bgcolor: status.color, color: 'white' }}
+                          />
+                        );
+                      })
+                    }
                     renderOption={(props, option) => {
                       const { key, ...otherProps } = props;
                       if (typeof option === 'string') return null;
+                      const status = getAttendeeStatus(option);
                       return (
-                        <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1 }}>
+                        <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                           <PersonIcon sx={{ color: 'primary.main' }} />
-                          <Box>
+                          <Box sx={{ flex: 1 }}>
                             <Typography variant="body2">{option.name}</Typography>
                             <Typography variant="caption" color="text.secondary">{option.email}</Typography>
                           </Box>
+                          <Chip
+                            label={status.label}
+                            size="small"
+                            sx={{ bgcolor: status.color, color: 'white', fontSize: '0.7rem', height: '20px' }}
+                          />
                         </Box>
                       );
                     }}
                   />
-
-                  {attendees.length > 0 && (
-                    <Stack spacing={1}>
-                      {attendees.map((attendee) => (
-                        <Box
-                          key={attendee.id}
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            p: 2,
-                            bgcolor: '#f8fafc',
-                            borderRadius: '8px',
-                          }}
-                        >
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ width: 32, height: 32 }}>{attendee.name?.charAt(0) || attendee.email.charAt(0)}</Avatar>
-                            <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>{attendee.name || attendee.email}</Typography>
-                              {attendee.name && <Typography variant="caption" color="text.secondary">{attendee.email}</Typography>}
-                            </Box>
-                          </Box>
-                          <IconButton size="small" onClick={() => setAttendees(attendees.filter(a => a.id !== attendee.id))}>
-                            <ArrowForwardIcon sx={{ transform: 'rotate(45deg)' }} />
-                          </IconButton>
-                        </Box>
-                      ))}
-                    </Stack>
-                  )}
 
                   <Stack direction="row" spacing={2}>
                     <Button variant="outlined" onClick={() => setActiveStep(0)} sx={{ textTransform: 'none' }}>
@@ -704,28 +742,61 @@ export default function CreateMeetingPage() {
                 <Box>
                   <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>Attendees</Typography>
                   <Autocomplete
+                    multiple
                     size="small"
                     freeSolo
-                    options={mockContacts}
+                    options={[...mockContacts, ...mockPlatformUsers]}
+                    value={attendees}
                     inputValue={inputValue}
                     onInputChange={(e, newValue) => setInputValue(newValue)}
-                    onChange={(e, newValue) => handleAddAttendee(newValue)}
+                    onChange={(e, newValue) => {
+                      if (newValue.length < attendees.length) {
+                        setAttendees(newValue as Attendee[]);
+                      } else {
+                        const lastItem = newValue[newValue.length - 1];
+                        if (lastItem) {
+                          handleAddAttendee(lastItem);
+                        }
+                      }
+                    }}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
-                    renderInput={(params) => <TextField {...params} placeholder="Add people..." />}
+                    renderInput={(params) => <TextField {...params} placeholder={attendees.length === 0 ? "Add people..." : ""} />}
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => {
+                        const { key, ...tagProps } = getTagProps({ index });
+                        const status = getAttendeeStatus(option);
+                        return (
+                          <Chip
+                            key={key}
+                            label={option.name || option.email}
+                            {...tagProps}
+                            size="small"
+                            icon={<Typography sx={{ fontSize: '0.75rem' }}>{status.icon}</Typography>}
+                            sx={{ bgcolor: status.color, color: 'white', maxWidth: '150px' }}
+                          />
+                        );
+                      })
+                    }
+                    renderOption={(props, option) => {
+                      const { key, ...otherProps } = props;
+                      if (typeof option === 'string') return null;
+                      const status = getAttendeeStatus(option);
+                      return (
+                        <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center', fontSize: '0.875rem' }}>
+                          <PersonIcon sx={{ color: 'primary.main', fontSize: '1rem' }} />
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{option.name}</Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>{option.email}</Typography>
+                          </Box>
+                          <Chip
+                            label={status.label}
+                            size="small"
+                            sx={{ bgcolor: status.color, color: 'white', fontSize: '0.65rem', height: '18px' }}
+                          />
+                        </Box>
+                      );
+                    }}
                   />
-
-                  {attendees.length > 0 && (
-                    <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: 'wrap', gap: 0.5 }}>
-                      {attendees.map((attendee) => (
-                        <Chip
-                          key={attendee.id}
-                          label={attendee.name || attendee.email}
-                          onDelete={() => setAttendees(attendees.filter(a => a.id !== attendee.id))}
-                          size="small"
-                        />
-                      ))}
-                    </Stack>
-                  )}
                 </Box>
               </Stack>
             </CardContent>
@@ -1048,67 +1119,99 @@ export default function CreateMeetingPage() {
             <CardContent sx={{ p: 3 }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>Who should attend?</Typography>
               <Autocomplete
+                multiple
                 freeSolo
-                options={mockContacts}
+                options={[...mockContacts, ...mockPlatformUsers]}
+                value={attendees}
                 inputValue={inputValue}
                 onInputChange={(e, newValue) => setInputValue(newValue)}
-                onChange={(e, newValue) => handleAddAttendee(newValue)}
+                onChange={(e, newValue) => {
+                  if (newValue.length < attendees.length) {
+                    setAttendees(newValue as Attendee[]);
+                  } else {
+                    const lastItem = newValue[newValue.length - 1];
+                    if (lastItem) {
+                      handleAddAttendee(lastItem);
+                    }
+                  }
+                }}
                 getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
                 renderInput={(params) => (
-                  <TextField {...params} placeholder="Type a name or email..." />
+                  <TextField {...params} placeholder={attendees.length === 0 ? "Type a name or email..." : ""} />
                 )}
-              />
-
-              {attendees.length > 0 && (
-                <Box sx={{ mt: 2 }}>
-                  {attendees.map((attendee) => (
-                    <Box
-                      key={attendee.id}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        p: 1.5,
-                        mb: 1,
-                        bgcolor: '#f8fafc',
-                        borderRadius: '8px',
-                      }}
-                    >
-                      <Avatar sx={{ width: 32, height: 32 }}>{attendee.name?.charAt(0) || attendee.email.charAt(0)}</Avatar>
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => {
+                    const { key, ...tagProps } = getTagProps({ index });
+                    const status = getAttendeeStatus(option);
+                    return (
+                      <Chip
+                        key={key}
+                        label={option.name || option.email}
+                        {...tagProps}
+                        icon={<Typography sx={{ fontSize: '0.875rem' }}>{status.icon}</Typography>}
+                        sx={{ bgcolor: status.color, color: 'white' }}
+                      />
+                    );
+                  })
+                }
+                renderOption={(props, option) => {
+                  const { key, ...otherProps } = props;
+                  if (typeof option === 'string') return null;
+                  const status = getAttendeeStatus(option);
+                  return (
+                    <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                      <PersonIcon sx={{ color: 'primary.main' }} />
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {attendee.name || attendee.email}
-                        </Typography>
+                        <Typography variant="body2">{option.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">{option.email}</Typography>
                       </Box>
-                      <IconButton size="small" onClick={() => setAttendees(attendees.filter(a => a.id !== attendee.id))}>
-                        ×
-                      </IconButton>
+                      <Chip
+                        label={status.label}
+                        size="small"
+                        sx={{ bgcolor: status.color, color: 'white', fontSize: '0.7rem', height: '20px' }}
+                      />
                     </Box>
-                  ))}
-                </Box>
-              )}
+                  );
+                }}
+              />
             </CardContent>
           </Card>
 
           {/* Smart Results */}
-          {attendees.length > 0 && title && startDate && endDate && (
+          {attendees.length > 0 && (
             <Card sx={{ border: '2px solid', borderColor: 'primary.main', bgcolor: '#f0f9ff' }}>
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <CheckCircleIcon color="primary" />
+                  <AccessTimeIcon color="primary" />
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {everyoneAvailable.length > 0
-                      ? `Found ${everyoneAvailable.length} perfect time${everyoneAvailable.length > 1 ? 's' : ''}!`
-                      : suggestedTimes.length > 0
-                      ? `Found ${suggestedTimes.length} available times`
-                      : 'Searching for times...'}
+                    Available Times
                   </Typography>
                 </Box>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                  {startDate.format('MMM D')} - {endDate.format('MMM D, YYYY')}
-                </Typography>
+                {startDate && endDate && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                    {startDate.format('MMM D')} - {endDate.format('MMM D, YYYY')}
+                  </Typography>
+                )}
 
-                <Stack spacing={2}>
+                {!title || !startDate || !endDate ? (
+                  <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'white', borderRadius: '8px' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      {!title && 'Add a meeting title to continue'}
+                      {title && !startDate && 'Select a date range to search'}
+                      {title && startDate && !endDate && 'Select an end date to search'}
+                    </Typography>
+                  </Box>
+                ) : (
+                  <>
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                      {everyoneAvailable.length > 0
+                        ? `Found ${everyoneAvailable.length} perfect time${everyoneAvailable.length > 1 ? 's' : ''}!`
+                        : suggestedTimes.length > 0
+                        ? `Found ${suggestedTimes.length} available times`
+                        : 'Searching for times...'}
+                    </Typography>
+
+                    <Stack spacing={2}>
                   {/* Everyone Available */}
                   {everyoneAvailable.length > 0 && (
                     <Box>
@@ -1293,16 +1396,18 @@ export default function CreateMeetingPage() {
                   )}
                 </Stack>
 
-                <Button
-                  variant="contained"
-                  size="large"
-                  fullWidth
-                  disabled={selectedSlots.length === 0}
-                  onClick={() => router.push('/home')}
-                  sx={{ mt: 3, textTransform: 'none', bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f8fafc' } }}
-                >
-                  Send Invite ({selectedSlots.length} time{selectedSlots.length > 1 ? 's' : ''} selected)
-                </Button>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      fullWidth
+                      disabled={selectedSlots.length === 0}
+                      onClick={() => router.push('/home')}
+                      sx={{ mt: 3, textTransform: 'none', bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f8fafc' } }}
+                    >
+                      Send Invite ({selectedSlots.length} time{selectedSlots.length > 1 ? 's' : ''} selected)
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
