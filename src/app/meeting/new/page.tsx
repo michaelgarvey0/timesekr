@@ -78,7 +78,9 @@ export default function CreateMeetingPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [duration, setDuration] = useState(60);
-  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [attendees, setAttendees] = useState<Attendee[]>([]); // Keep for backwards compatibility
+  const [requiredAttendees, setRequiredAttendees] = useState<Attendee[]>([]);
+  const [optionalAttendees, setOptionalAttendees] = useState<Attendee[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
 
@@ -119,63 +121,70 @@ export default function CreateMeetingPage() {
   // All participants including me if attending
   const allParticipants = isAttending ? [meAttendee, ...attendees] : attendees;
 
+  // For version 4: combine required and optional
+  const allAttendeesV4 = [...requiredAttendees, ...optionalAttendees];
+  const allParticipantsV4 = isAttending ? [meAttendee, ...allAttendeesV4] : allAttendeesV4;
+
+  // Use appropriate participant list based on version
+  const activeParticipants = version === 4 ? allParticipantsV4 : allParticipants;
+
   // Mock suggested times with detailed participant availability
-  const suggestedTimes: TimeSlot[] = allParticipants.length > 0 ? [
+  const suggestedTimes: TimeSlot[] = activeParticipants.length > 0 ? [
     {
       id: 1,
       day: 'Wed, Jan 15',
       time: '10:00 AM',
-      available: allParticipants.length,
-      total: allParticipants.length,
+      available: activeParticipants.length,
+      total: activeParticipants.length,
       type: 'perfect',
-      participants: allParticipants.map(a => ({ attendee: a, available: true, status: 'available' as const }))
+      participants: activeParticipants.map(a => ({ attendee: a, available: true, status: 'available' as const }))
     },
     {
       id: 2,
       day: 'Thu, Jan 16',
       time: '2:00 PM',
-      available: allParticipants.length,
-      total: allParticipants.length,
+      available: activeParticipants.length,
+      total: activeParticipants.length,
       type: 'perfect',
-      participants: allParticipants.map(a => ({ attendee: a, available: true, status: 'available' as const }))
+      participants: activeParticipants.map(a => ({ attendee: a, available: true, status: 'available' as const }))
     },
     {
       id: 3,
       day: 'Fri, Jan 17',
       time: '1:00 PM',
-      available: Math.floor(allParticipants.length * 0.8),
-      total: allParticipants.length,
+      available: Math.floor(activeParticipants.length * 0.8),
+      total: activeParticipants.length,
       type: 'good',
-      participants: allParticipants.map((a, i) => ({
+      participants: activeParticipants.map((a, i) => ({
         attendee: a,
-        available: i < Math.floor(allParticipants.length * 0.8),
-        status: i < Math.floor(allParticipants.length * 0.8) ? 'available' as const : 'busy' as const
+        available: i < Math.floor(activeParticipants.length * 0.8),
+        status: i < Math.floor(activeParticipants.length * 0.8) ? 'available' as const : 'busy' as const
       }))
     },
     {
       id: 4,
       day: 'Tue, Jan 14',
       time: '3:00 PM',
-      available: Math.floor(allParticipants.length * 0.6),
-      total: allParticipants.length,
+      available: Math.floor(activeParticipants.length * 0.6),
+      total: activeParticipants.length,
       type: 'partial',
-      participants: allParticipants.map((a, i) => ({
+      participants: activeParticipants.map((a, i) => ({
         attendee: a,
-        available: i < Math.floor(allParticipants.length * 0.6),
-        status: i < Math.floor(allParticipants.length * 0.6) ? 'available' as const : 'busy' as const
+        available: i < Math.floor(activeParticipants.length * 0.6),
+        status: i < Math.floor(activeParticipants.length * 0.6) ? 'available' as const : 'busy' as const
       }))
     },
     {
       id: 5,
       day: 'Mon, Jan 13',
       time: '4:00 PM',
-      available: Math.floor(allParticipants.length * 0.5),
-      total: allParticipants.length,
+      available: Math.floor(activeParticipants.length * 0.5),
+      total: activeParticipants.length,
       type: 'partial',
-      participants: allParticipants.map((a, i) => ({
+      participants: activeParticipants.map((a, i) => ({
         attendee: a,
-        available: i < Math.floor(allParticipants.length * 0.5),
-        status: i < Math.floor(allParticipants.length * 0.5) ? 'available' as const : 'busy' as const
+        available: i < Math.floor(activeParticipants.length * 0.5),
+        status: i < Math.floor(activeParticipants.length * 0.5) ? 'available' as const : 'busy' as const
       }))
     },
   ] : [];
@@ -250,8 +259,94 @@ export default function CreateMeetingPage() {
     ));
   };
 
+  // V4: Add attendee to required list
+  const handleAddRequired = (value: string | Attendee | null) => {
+    if (!value) return;
+
+    let newAttendee: Attendee;
+    if (typeof value === 'string') {
+      const email = value.trim().toLowerCase();
+      const matchingContact = mockContacts.find(c => c.email.toLowerCase() === email);
+      if (matchingContact) {
+        newAttendee = { ...matchingContact, required: true };
+      } else {
+        const matchingPlatformUser = mockPlatformUsers.find(u => u.email.toLowerCase() === email);
+        if (matchingPlatformUser) {
+          newAttendee = { ...matchingPlatformUser, required: true };
+        } else {
+          newAttendee = {
+            id: Date.now().toString(),
+            email: value.trim(),
+            isContact: false,
+            onPlatform: false,
+            required: true,
+          };
+        }
+      }
+    } else {
+      newAttendee = { ...value, id: Date.now().toString(), required: true };
+    }
+
+    // Don't add if already in either list
+    if (requiredAttendees.some(a => a.email === newAttendee.email) ||
+        optionalAttendees.some(a => a.email === newAttendee.email)) {
+      return;
+    }
+
+    setRequiredAttendees([...requiredAttendees, newAttendee]);
+  };
+
+  // V4: Add attendee to optional list
+  const handleAddOptional = (value: string | Attendee | null) => {
+    if (!value) return;
+
+    let newAttendee: Attendee;
+    if (typeof value === 'string') {
+      const email = value.trim().toLowerCase();
+      const matchingContact = mockContacts.find(c => c.email.toLowerCase() === email);
+      if (matchingContact) {
+        newAttendee = { ...matchingContact, required: false };
+      } else {
+        const matchingPlatformUser = mockPlatformUsers.find(u => u.email.toLowerCase() === email);
+        if (matchingPlatformUser) {
+          newAttendee = { ...matchingPlatformUser, required: false };
+        } else {
+          newAttendee = {
+            id: Date.now().toString(),
+            email: value.trim(),
+            isContact: false,
+            onPlatform: false,
+            required: false,
+          };
+        }
+      }
+    } else {
+      newAttendee = { ...value, id: Date.now().toString(), required: false };
+    }
+
+    // Don't add if already in either list
+    if (requiredAttendees.some(a => a.email === newAttendee.email) ||
+        optionalAttendees.some(a => a.email === newAttendee.email)) {
+      return;
+    }
+
+    setOptionalAttendees([...optionalAttendees, newAttendee]);
+  };
+
+  // V4: Move attendee between required and optional
+  const moveToRequired = (attendee: Attendee) => {
+    setOptionalAttendees(optionalAttendees.filter(a => a.id !== attendee.id));
+    setRequiredAttendees([...requiredAttendees, { ...attendee, required: true }]);
+  };
+
+  const moveToOptional = (attendee: Attendee) => {
+    setRequiredAttendees(requiredAttendees.filter(a => a.id !== attendee.id));
+    setOptionalAttendees([...optionalAttendees, { ...attendee, required: false }]);
+  };
+
   // Check if user needs upgrade
   const needsUpgrade = !isPremium && allParticipants.length >= 5 && freeMeetingsUsed >= 3;
+  const needsUpgradeV4 = !isPremium && allParticipantsV4.length >= 5 && freeMeetingsUsed >= 3;
 
   // Render participant status for a time slot
   const renderParticipantStatus = (participants: ParticipantStatus[]) => {
@@ -1937,16 +2032,29 @@ export default function CreateMeetingPage() {
 
   // Version 4: Combined Smart + Split with monetization and quorum rules
   const renderVersion4 = () => {
-    const showUpgradeWarning = !isPremium && allParticipants.length >= 5;
-    const canSend = !needsUpgrade && selectedSlots.length > 0;
+    const showUpgradeWarning = !isPremium && allParticipantsV4.length >= 5;
+    const canSend = !needsUpgradeV4 && selectedSlots.length > 0;
 
     return (
       <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
-        <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, py: 4 }}>
+        {/* Header Above Everything */}
+        <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, pt: 4, pb: 2 }}>
+          <Box sx={{ mb: 1 }}>
+            <AutoAwesomeIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              Schedule a Meeting
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Find the perfect time for everyone
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, pb: 4 }}>
           {/* Upgrade Warning */}
           {showUpgradeWarning && (
             <Alert
-              severity={needsUpgrade ? "error" : "warning"}
+              severity={needsUpgradeV4 ? "error" : "warning"}
               sx={{ mb: 3 }}
               action={
                 <Button
@@ -1959,7 +2067,7 @@ export default function CreateMeetingPage() {
                 </Button>
               }
             >
-              {needsUpgrade ? (
+              {needsUpgradeV4 ? (
                 <Typography variant="body2">
                   <strong>Upgrade required:</strong> You've used your 3 free meetings with 5+ people. Upgrade to continue scheduling large meetings.
                 </Typography>
@@ -1974,16 +2082,6 @@ export default function CreateMeetingPage() {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '500px 1fr' }, gap: 3 }}>
             {/* Left: Single Consolidated Form */}
             <Box>
-              {/* Smart Header */}
-              <Box sx={{ mb: 3 }}>
-                <AutoAwesomeIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                  Schedule a Meeting
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Find the perfect time for everyone
-                </Typography>
-              </Box>
 
               {/* Single Consolidated Card */}
               <Card sx={{ border: '1px solid #e5e7eb' }}>
@@ -2073,51 +2171,44 @@ export default function CreateMeetingPage() {
 
                     <Divider />
 
-                    {/* Attendees */}
+                    {/* Required Attendees */}
                     <Box>
-                      <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 600 }}>
-                        Who should attend?
+                      <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 600, color: '#dc2626' }}>
+                        Required Attendees
                       </Typography>
                       <Autocomplete
                         multiple
                         freeSolo
                         size="small"
-                        options={
-                          inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
-                            ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
-                            : mockContacts
-                        }
-                        value={attendees || []}
-                        inputValue={inputValue}
+                        options={mockContacts}
+                        value={requiredAttendees}
                         onInputChange={(e, newValue) => setInputValue(newValue)}
                         onChange={(e, newValue) => {
                           if (!newValue) {
-                            setAttendees([]);
+                            setRequiredAttendees([]);
                             return;
                           }
-                          if (newValue.length < attendees.length) {
-                            setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
+                          if (newValue.length < requiredAttendees.length) {
+                            setRequiredAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
                           } else {
                             const lastItem = newValue[newValue.length - 1];
                             if (lastItem) {
-                              handleAddAttendee(lastItem);
+                              handleAddRequired(lastItem);
                             }
                           }
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && inputValue.trim()) {
                             e.preventDefault();
-                            handleAddAttendee(inputValue.trim());
+                            handleAddRequired(inputValue.trim());
+                            setInputValue('');
                           }
                         }}
-                        getOptionLabel={(option) => {
-                          if (typeof option === 'string') return option;
-                          return option.name || option.email;
-                        }}
+                        getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            placeholder="Add attendees..."
+                            placeholder="Add required attendees..."
                             inputProps={{
                               ...params.inputProps,
                               autoComplete: 'nope',
@@ -2125,40 +2216,21 @@ export default function CreateMeetingPage() {
                               'data-form-type': 'other',
                             }}
                             autoComplete="nope"
-                            name={`attendee-${Math.random()}`}
+                            name={`required-${Math.random()}`}
                           />
                         )}
                         renderTags={(value, getTagProps) =>
-                          (value || []).map((option, index) => {
+                          value.map((option, index) => {
                             if (typeof option === 'string') return null;
                             const { key, ...tagProps } = getTagProps({ index });
                             return (
                               <Chip
                                 key={key}
-                                label={
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    {option.name || option.email}
-                                    <Tooltip title={option.required ? "Required attendee" : "Optional attendee"}>
-                                      <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          toggleRequired(option.id);
-                                        }}
-                                        sx={{ p: 0.2, ml: 0.5 }}
-                                      >
-                                        {option.required ? (
-                                          <StarIcon sx={{ fontSize: 14, color: '#f59e0b' }} />
-                                        ) : (
-                                          <StarOutlineIcon sx={{ fontSize: 14 }} />
-                                        )}
-                                      </IconButton>
-                                    </Tooltip>
-                                  </Box>
-                                }
+                                label={option.name || option.email}
                                 {...tagProps}
                                 icon={getAttendeeIcon(option)}
-                                color="primary"
+                                sx={{ bgcolor: '#fee2e2', borderColor: '#dc2626' }}
+                                onDoubleClick={() => moveToOptional(option)}
                               />
                             );
                           })
@@ -2166,14 +2238,6 @@ export default function CreateMeetingPage() {
                         renderOption={(props, option) => {
                           const { key, ...otherProps } = props;
                           if (typeof option === 'string') return null;
-                          if (option.id === 'add-new') {
-                            return (
-                              <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                <AddIcon sx={{ color: 'primary.main' }} />
-                                <Typography variant="body2">Add "{option.email}"</Typography>
-                              </Box>
-                            );
-                          }
                           return (
                             <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                               <Avatar sx={{ width: 32, height: 32 }}>
@@ -2187,11 +2251,96 @@ export default function CreateMeetingPage() {
                           );
                         }}
                       />
+                      {requiredAttendees.length > 0 && (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                          Double-click chips to move to optional
+                        </Typography>
+                      )}
+                    </Box>
 
-                      {attendees.length > 0 && (
-                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
-                          <StarIcon sx={{ fontSize: 12, color: '#f59e0b', verticalAlign: 'middle' }} /> = Required •
-                          <StarOutlineIcon sx={{ fontSize: 12, verticalAlign: 'middle', ml: 0.5 }} /> = Optional (click stars to toggle)
+                    {/* Optional Attendees */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 600, color: '#059669' }}>
+                        Optional Attendees
+                      </Typography>
+                      <Autocomplete
+                        multiple
+                        freeSolo
+                        size="small"
+                        options={mockContacts}
+                        value={optionalAttendees}
+                        onInputChange={(e, newValue) => setInputValue(newValue)}
+                        onChange={(e, newValue) => {
+                          if (!newValue) {
+                            setOptionalAttendees([]);
+                            return;
+                          }
+                          if (newValue.length < optionalAttendees.length) {
+                            setOptionalAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
+                          } else {
+                            const lastItem = newValue[newValue.length - 1];
+                            if (lastItem) {
+                              handleAddOptional(lastItem);
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && inputValue.trim()) {
+                            e.preventDefault();
+                            handleAddOptional(inputValue.trim());
+                            setInputValue('');
+                          }
+                        }}
+                        getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Add optional attendees..."
+                            inputProps={{
+                              ...params.inputProps,
+                              autoComplete: 'nope',
+                              'data-lpignore': 'true',
+                              'data-form-type': 'other',
+                            }}
+                            autoComplete="nope"
+                            name={`optional-${Math.random()}`}
+                          />
+                        )}
+                        renderTags={(value, getTagProps) =>
+                          value.map((option, index) => {
+                            if (typeof option === 'string') return null;
+                            const { key, ...tagProps } = getTagProps({ index });
+                            return (
+                              <Chip
+                                key={key}
+                                label={option.name || option.email}
+                                {...tagProps}
+                                icon={getAttendeeIcon(option)}
+                                sx={{ bgcolor: '#d1fae5', borderColor: '#059669' }}
+                                onDoubleClick={() => moveToRequired(option)}
+                              />
+                            );
+                          })
+                        }
+                        renderOption={(props, option) => {
+                          const { key, ...otherProps } = props;
+                          if (typeof option === 'string') return null;
+                          return (
+                            <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                              <Avatar sx={{ width: 32, height: 32 }}>
+                                {option.name?.charAt(0) || option.email.charAt(0)}
+                              </Avatar>
+                              <Box sx={{ flex: 1 }}>
+                                <Typography variant="body2">{option.name}</Typography>
+                                <Typography variant="caption" color="text.secondary">{option.email}</Typography>
+                              </Box>
+                            </Box>
+                          );
+                        }}
+                      />
+                      {optionalAttendees.length > 0 && (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                          Double-click chips to move to required
                         </Typography>
                       )}
                     </Box>
@@ -2255,7 +2404,7 @@ export default function CreateMeetingPage() {
 
             {/* Right: Available Times */}
             <Box>
-              {attendees.length === 0 ? (
+              {allAttendeesV4.length === 0 ? (
                 <Card sx={{ border: '2px dashed #e5e7eb', p: 6, textAlign: 'center' }}>
                   <GroupsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                   <Typography variant="h6" color="text.secondary">
