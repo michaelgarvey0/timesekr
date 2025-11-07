@@ -467,8 +467,8 @@ export default function NoCalendarHomePage() {
                             </Typography>
                           }
                           secondary={
-                            <Box>
-                              <Typography variant="body2" color="text.secondary">
+                            <Box component="span" sx={{ display: 'block' }}>
+                              <Typography variant="body2" color="text.secondary" component="span" sx={{ display: 'block' }}>
                                 {contact.email}
                               </Typography>
                               {/* Calendar Sharing Status */}
@@ -505,6 +505,7 @@ export default function NoCalendarHomePage() {
                               )}
                             </Box>
                           }
+                          secondaryTypographyProps={{ component: 'div' }}
                         />
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           {contact.calendarStatus === 'none' && (
