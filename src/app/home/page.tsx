@@ -1,96 +1,35 @@
 'use client';
 
-import { Box, Typography, Button, Stack } from '@mui/material';
-import EventIcon from '@mui/icons-material/Event';
-import ContactsIcon from '@mui/icons-material/Contacts';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import SettingsIcon from '@mui/icons-material/Settings';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Box, Button, ButtonGroup } from '@mui/material';
+import EmptyHomePage from './empty-state';
+import PopulatedHomePage from './populated-state';
 
 export default function HomePage() {
-  const router = useRouter();
+  const [showEmpty, setShowEmpty] = useState(true);
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', p: 4 }}>
-      <Box sx={{ maxWidth: 400, width: '100%' }}>
-        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
-          <Image
-            src="/images/logomark.svg"
-            alt="timesēkr"
-            width={150}
-            height={40}
-            priority
-          />
-        </Box>
-
-        <Typography variant="h5" sx={{ mb: 1, textAlign: 'center', fontWeight: 500 }}>
-          Welcome to timesēkr
-        </Typography>
-
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-          Let&apos;s get started
-        </Typography>
-
-        <Stack spacing={2}>
+    <Box>
+      {/* Toggle Controls */}
+      <Box sx={{ position: 'fixed', bottom: 20, right: 20, zIndex: 1000 }}>
+        <ButtonGroup variant="contained" size="small">
           <Button
-            variant="contained"
-            size="large"
-            startIcon={<EventIcon />}
-            fullWidth
-            onClick={() => router.push('/meeting/new')}
-            sx={{
-              textTransform: 'none',
-              justifyContent: 'flex-start',
-              px: 3,
-            }}
+            onClick={() => setShowEmpty(true)}
+            variant={showEmpty ? 'contained' : 'outlined'}
           >
-            Schedule Meeting
+            Empty
           </Button>
-
           <Button
-            variant="outlined"
-            size="large"
-            startIcon={<ContactsIcon />}
-            fullWidth
-            sx={{
-              textTransform: 'none',
-              justifyContent: 'flex-start',
-              px: 3,
-            }}
+            onClick={() => setShowEmpty(false)}
+            variant={!showEmpty ? 'contained' : 'outlined'}
           >
-            Manage Contacts
+            Populated
           </Button>
-
-          <Button
-            variant="outlined"
-            size="large"
-            startIcon={<AccessTimeIcon />}
-            fullWidth
-            sx={{
-              textTransform: 'none',
-              justifyContent: 'flex-start',
-              px: 3,
-            }}
-          >
-            Add Availability
-          </Button>
-
-          <Button
-            variant="outlined"
-            size="large"
-            startIcon={<SettingsIcon />}
-            fullWidth
-            sx={{
-              textTransform: 'none',
-              justifyContent: 'flex-start',
-              px: 3,
-            }}
-          >
-            Preferences
-          </Button>
-        </Stack>
+        </ButtonGroup>
       </Box>
+
+      {/* Content */}
+      {showEmpty ? <EmptyHomePage /> : <PopulatedHomePage />}
     </Box>
   );
 }

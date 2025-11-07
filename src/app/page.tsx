@@ -52,7 +52,7 @@ export default function Home() {
   };
 
   const handleVerify = () => {
-    setShowCalendar(true);
+    window.location.href = '/onboarding/calendars';
   };
 
   const handleResend = () => {
