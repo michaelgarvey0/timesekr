@@ -1972,232 +1972,235 @@ export default function CreateMeetingPage() {
           )}
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '500px 1fr' }, gap: 3 }}>
-            {/* Left: Smart View Style Form */}
+            {/* Left: Single Consolidated Form */}
             <Box>
-              <Stack spacing={3}>
-                {/* Smart Header */}
-                <Box sx={{ mb: 2 }}>
-                  <AutoAwesomeIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                  <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                    Let's schedule your meeting
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    I'll find the perfect time for everyone
-                  </Typography>
-                </Box>
+              {/* Smart Header */}
+              <Box sx={{ mb: 3 }}>
+                <AutoAwesomeIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                  Let's schedule your meeting
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  I'll find the perfect time for everyone
+                </Typography>
+              </Box>
 
-                {/* Question Cards */}
-                <Card sx={{ border: '1px solid #e5e7eb' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      What's this meeting about?
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      placeholder="e.g., Sprint Planning, Coffee Chat..."
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      sx={{ '& .MuiOutlinedInput-root': { fontSize: '1.25rem', fontWeight: 600 } }}
-                    />
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ border: '1px solid #e5e7eb' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      How long do you need?
-                    </Typography>
-                    <Stack direction="row" spacing={1}>
-                      {[15, 30, 45, 60, 90].map((mins) => (
-                        <Button
-                          key={mins}
-                          variant={duration === mins ? 'contained' : 'outlined'}
-                          onClick={() => setDuration(mins)}
-                          sx={{ flex: 1, textTransform: 'none' }}
-                        >
-                          {mins < 60 ? `${mins}m` : `${mins / 60}h`}
-                        </Button>
-                      ))}
-                    </Stack>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{ border: '1px solid #e5e7eb' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                      When should I search?
-                    </Typography>
-                    <Stack spacing={2}>
-                      <DatePicker
-                        label="Start Date"
-                        value={startDate}
-                        onChange={(newValue) => setStartDate(newValue)}
-                        slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+              {/* Single Consolidated Card */}
+              <Card sx={{ border: '1px solid #e5e7eb' }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Stack spacing={3}>
+                    {/* Meeting Title */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+                        What's this meeting about?
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        placeholder="e.g., Sprint Planning, Coffee Chat..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        sx={{ '& .MuiOutlinedInput-root': { fontSize: '1.1rem', fontWeight: 500 } }}
                       />
-                      <DatePicker
-                        label="End Date"
-                        value={endDate}
-                        onChange={(newValue) => setEndDate(newValue)}
-                        minDate={startDate || undefined}
-                        slotProps={{ textField: { fullWidth: true, size: 'small' } }}
-                      />
-                    </Stack>
-                  </CardContent>
-                </Card>
+                    </Box>
 
-                <Card sx={{ border: '1px solid #e5e7eb' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={isAttending}
-                          onChange={(e) => setIsAttending(e.target.checked)}
-                          color="primary"
+                    <Divider />
+
+                    {/* Duration */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+                        How long do you need?
+                      </Typography>
+                      <Stack direction="row" spacing={1}>
+                        {[15, 30, 45, 60, 90].map((mins) => (
+                          <Button
+                            key={mins}
+                            variant={duration === mins ? 'contained' : 'outlined'}
+                            onClick={() => setDuration(mins)}
+                            sx={{ flex: 1, textTransform: 'none' }}
+                          >
+                            {mins < 60 ? `${mins}m` : `${mins / 60}h`}
+                          </Button>
+                        ))}
+                      </Stack>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Date Range - Side by Side */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 600 }}>
+                        When should I search?
+                      </Typography>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                        <DatePicker
+                          label="Start Date"
+                          value={startDate}
+                          onChange={(newValue) => setStartDate(newValue)}
+                          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
                         />
-                      }
-                      label={
-                        <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            Will you be attending?
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            This helps us find times that work for everyone
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                  </CardContent>
-                </Card>
+                        <DatePicker
+                          label="End Date"
+                          value={endDate}
+                          onChange={(newValue) => setEndDate(newValue)}
+                          minDate={startDate || undefined}
+                          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+                        />
+                      </Box>
+                    </Box>
 
-                <Card sx={{ border: '1px solid #e5e7eb' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                      Who should attend?
-                    </Typography>
-                    <Autocomplete
-                      multiple
-                      freeSolo
-                      size="small"
-                      options={
-                        inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
-                          ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
-                          : mockContacts
-                      }
-                      value={attendees || []}
-                      inputValue={inputValue}
-                      onInputChange={(e, newValue) => setInputValue(newValue)}
-                      onChange={(e, newValue) => {
-                        if (!newValue) {
-                          setAttendees([]);
-                          return;
+                    <Divider />
+
+                    {/* Attending Switch */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+                        Will you be attending?
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={isAttending}
+                            onChange={(e) => setIsAttending(e.target.checked)}
+                            color="primary"
+                          />
                         }
-                        if (newValue.length < attendees.length) {
-                          setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
-                        } else {
-                          const lastItem = newValue[newValue.length - 1];
-                          if (lastItem) {
-                            handleAddAttendee(lastItem);
+                        label={
+                          <Typography variant="body2" color="text.secondary">
+                            Include my availability in the search
+                          </Typography>
+                        }
+                      />
+                    </Box>
+
+                    <Divider />
+
+                    {/* Attendees */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 600 }}>
+                        Who should attend?
+                      </Typography>
+                      <Autocomplete
+                        multiple
+                        freeSolo
+                        size="small"
+                        options={
+                          inputValue.trim() && !mockContacts.some(c => c.email.toLowerCase().includes(inputValue.toLowerCase()) || c.name?.toLowerCase().includes(inputValue.toLowerCase()))
+                            ? [...mockContacts, { id: 'add-new', email: inputValue.trim(), isContact: false, onPlatform: false }]
+                            : mockContacts
+                        }
+                        value={attendees || []}
+                        inputValue={inputValue}
+                        onInputChange={(e, newValue) => setInputValue(newValue)}
+                        onChange={(e, newValue) => {
+                          if (!newValue) {
+                            setAttendees([]);
+                            return;
                           }
+                          if (newValue.length < attendees.length) {
+                            setAttendees(newValue.filter((item): item is Attendee => typeof item !== 'string'));
+                          } else {
+                            const lastItem = newValue[newValue.length - 1];
+                            if (lastItem) {
+                              handleAddAttendee(lastItem);
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && inputValue.trim()) {
+                            e.preventDefault();
+                            handleAddAttendee(inputValue.trim());
+                          }
+                        }}
+                        getOptionLabel={(option) => {
+                          if (typeof option === 'string') return option;
+                          return option.name || option.email;
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Add attendees..."
+                            inputProps={{
+                              ...params.inputProps,
+                              autoComplete: 'nope',
+                              'data-lpignore': 'true',
+                              'data-form-type': 'other',
+                            }}
+                            autoComplete="nope"
+                            name={`attendee-${Math.random()}`}
+                          />
+                        )}
+                        renderTags={(value, getTagProps) =>
+                          (value || []).map((option, index) => {
+                            if (typeof option === 'string') return null;
+                            const { key, ...tagProps } = getTagProps({ index });
+                            return (
+                              <Chip
+                                key={key}
+                                label={
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    {option.name || option.email}
+                                    <Tooltip title={option.required ? "Required attendee" : "Optional attendee"}>
+                                      <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toggleRequired(option.id);
+                                        }}
+                                        sx={{ p: 0.2, ml: 0.5 }}
+                                      >
+                                        {option.required ? (
+                                          <StarIcon sx={{ fontSize: 14, color: '#f59e0b' }} />
+                                        ) : (
+                                          <StarOutlineIcon sx={{ fontSize: 14 }} />
+                                        )}
+                                      </IconButton>
+                                    </Tooltip>
+                                  </Box>
+                                }
+                                {...tagProps}
+                                icon={getAttendeeIcon(option)}
+                                color="primary"
+                              />
+                            );
+                          })
                         }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && inputValue.trim()) {
-                          e.preventDefault();
-                          handleAddAttendee(inputValue.trim());
-                        }
-                      }}
-                      getOptionLabel={(option) => {
-                        if (typeof option === 'string') return option;
-                        return option.name || option.email;
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          placeholder="Add attendees..."
-                          inputProps={{
-                            ...params.inputProps,
-                            autoComplete: 'nope',
-                            'data-lpignore': 'true',
-                            'data-form-type': 'other',
-                          }}
-                          autoComplete="nope"
-                          name={`attendee-${Math.random()}`}
-                        />
-                      )}
-                      renderTags={(value, getTagProps) =>
-                        (value || []).map((option, index) => {
+                        renderOption={(props, option) => {
+                          const { key, ...otherProps } = props;
                           if (typeof option === 'string') return null;
-                          const { key, ...tagProps } = getTagProps({ index });
-                          return (
-                            <Chip
-                              key={key}
-                              label={
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  {option.name || option.email}
-                                  <Tooltip title={option.required ? "Required attendee" : "Optional attendee"}>
-                                    <IconButton
-                                      size="small"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleRequired(option.id);
-                                      }}
-                                      sx={{ p: 0.2, ml: 0.5 }}
-                                    >
-                                      {option.required ? (
-                                        <StarIcon sx={{ fontSize: 14, color: '#f59e0b' }} />
-                                      ) : (
-                                        <StarOutlineIcon sx={{ fontSize: 14 }} />
-                                      )}
-                                    </IconButton>
-                                  </Tooltip>
-                                </Box>
-                              }
-                              {...tagProps}
-                              icon={getAttendeeIcon(option)}
-                              color="primary"
-                            />
-                          );
-                        })
-                      }
-                      renderOption={(props, option) => {
-                        const { key, ...otherProps } = props;
-                        if (typeof option === 'string') return null;
-                        if (option.id === 'add-new') {
+                          if (option.id === 'add-new') {
+                            return (
+                              <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                <AddIcon sx={{ color: 'primary.main' }} />
+                                <Typography variant="body2">Add "{option.email}"</Typography>
+                              </Box>
+                            );
+                          }
                           return (
                             <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                              <AddIcon sx={{ color: 'primary.main' }} />
-                              <Typography variant="body2">Add "{option.email}"</Typography>
+                              <Avatar sx={{ width: 32, height: 32 }}>
+                                {option.name?.charAt(0) || option.email.charAt(0)}
+                              </Avatar>
+                              <Box sx={{ flex: 1 }}>
+                                <Typography variant="body2">{option.name}</Typography>
+                                <Typography variant="caption" color="text.secondary">{option.email}</Typography>
+                              </Box>
                             </Box>
                           );
-                        }
-                        return (
-                          <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                            <Avatar sx={{ width: 32, height: 32 }}>
-                              {option.name?.charAt(0) || option.email.charAt(0)}
-                            </Avatar>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="body2">{option.name}</Typography>
-                              <Typography variant="caption" color="text.secondary">{option.email}</Typography>
-                            </Box>
-                          </Box>
-                        );
-                      }}
-                    />
+                        }}
+                      />
 
-                    {attendees.length > 0 && (
-                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
-                        <StarIcon sx={{ fontSize: 12, color: '#f59e0b', verticalAlign: 'middle' }} /> = Required •
-                        <StarOutlineIcon sx={{ fontSize: 12, verticalAlign: 'middle', ml: 0.5 }} /> = Optional (click stars to toggle)
-                      </Typography>
-                    )}
-                  </CardContent>
-                </Card>
+                      {attendees.length > 0 && (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
+                          <StarIcon sx={{ fontSize: 12, color: '#f59e0b', verticalAlign: 'middle' }} /> = Required •
+                          <StarOutlineIcon sx={{ fontSize: 12, verticalAlign: 'middle', ml: 0.5 }} /> = Optional (click stars to toggle)
+                        </Typography>
+                      )}
+                    </Box>
 
-                {/* Quorum Rules */}
-                {attendees.length > 0 && (
-                  <Card sx={{ border: '1px solid #e5e7eb' }}>
-                    <CardContent sx={{ p: 3 }}>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    <Divider />
+
+                    {/* Quorum Rules - Always Visible */}
+                    <Box>
+                      <Typography variant="body1" sx={{ mb: 2, fontWeight: 600 }}>
                         When should the meeting be finalized?
                       </Typography>
 
@@ -2244,10 +2247,10 @@ export default function CreateMeetingPage() {
                           slotProps={{ textField: { fullWidth: true, size: 'small' } }}
                         />
                       )}
-                    </CardContent>
-                  </Card>
-                )}
-              </Stack>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
             </Box>
 
             {/* Right: Available Times */}
