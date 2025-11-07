@@ -85,6 +85,9 @@ export default function CreateMeetingPage() {
   // Version 1: Stepper state
   const [activeStep, setActiveStep] = useState(0);
 
+  // Email preview state
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
+
   // Expanded slot details
   const [expandedSlot, setExpandedSlot] = useState<number | null>(null);
 
@@ -259,6 +262,163 @@ export default function CreateMeetingPage() {
           </Box>
         ))}
       </Stack>
+    );
+  };
+
+  // EMAIL PREVIEW FOR NON-REGISTERED USERS
+  const renderEmailPreview = () => {
+    const selectedTimes = suggestedTimes.filter(t => selectedSlots.includes(t.id));
+
+    return (
+      <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 4 }}>
+        <Box sx={{ maxWidth: 700, mx: 'auto', px: 3 }}>
+          {/* Email Client Header */}
+          <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton onClick={() => setShowEmailPreview(false)}>
+              <ArrowBackIcon />
+            </IconButton>
+            <Box>
+              <Typography variant="caption" color="text.secondary">Preview: Email to non-registered users</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>Meeting Request: {title}</Typography>
+            </Box>
+          </Box>
+
+          {/* Email Card */}
+          <Card sx={{ boxShadow: 3 }}>
+            <CardContent sx={{ p: 4 }}>
+              {/* Email Header */}
+              <Box sx={{ borderBottom: '2px solid #f0f0f0', pb: 3, mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Avatar sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
+                    <EventIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                      You're invited: {title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      from {meAttendee.name || meAttendee.email}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Email Body */}
+              <Stack spacing={3}>
+                <Typography variant="body1">
+                  Hi there,
+                </Typography>
+
+                <Typography variant="body1">
+                  I'd like to schedule a meeting with you. Please vote on the times that work best for you:
+                </Typography>
+
+                {/* Time Options */}
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>
+                    Which times work for you? (Select all that work)
+                  </Typography>
+                  <Stack spacing={2}>
+                    {selectedTimes.map((slot) => (
+                      <Box
+                        key={slot.id}
+                        sx={{
+                          p: 2.5,
+                          border: '2px solid #e5e7eb',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          transition: 'all 0.2s',
+                          cursor: 'pointer',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            bgcolor: '#f0f9ff',
+                          }
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            {slot.day}
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                            {slot.time}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {duration} minutes
+                          </Typography>
+                        </Box>
+                        <Button variant="contained" sx={{ textTransform: 'none' }}>
+                          This works
+                        </Button>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                {/* CTA Section */}
+                <Box sx={{ mt: 3, p: 3, bgcolor: '#f0f9ff', borderRadius: '12px', border: '1px solid #e0f2fe' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2 }}>
+                    <AutoAwesomeIcon sx={{ color: 'primary.main', mt: 0.5 }} />
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Can't make any of these times?
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Connect your calendar and suggest times that work better for you.
+                        It takes 30 seconds and makes scheduling so much easier.
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                  >
+                    Join timesēkr & Suggest Other Times
+                  </Button>
+                </Box>
+
+                {/* Decline */}
+                <Box sx={{ textAlign: 'center' }}>
+                  <Button
+                    variant="text"
+                    color="error"
+                    sx={{ textTransform: 'none' }}
+                  >
+                    I can't attend this meeting
+                  </Button>
+                </Box>
+
+                {/* Footer */}
+                <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid #e5e7eb' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                    Meeting details:
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Duration: {duration} minutes
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Attendees: {allParticipants.length} people
+                  </Typography>
+                  {description && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {description}
+                    </Typography>
+                  )}
+                </Box>
+
+                <Box sx={{ textAlign: 'center', py: 2 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Sent via timesēkr - Multi-party scheduling made simple
+                  </Typography>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
     );
   };
 
@@ -709,7 +869,7 @@ export default function CreateMeetingPage() {
                     variant="contained"
                     size="large"
                     startIcon={<SendIcon />}
-                    onClick={() => router.push('/home')}
+                    onClick={() => setShowEmailPreview(true)}
                     sx={{ textTransform: 'none' }}
                   >
                     Send Meeting Request
@@ -1564,8 +1724,9 @@ export default function CreateMeetingPage() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
+      <Box sx={{ minHeight: '100vh', bgcolor: showEmailPreview ? '#f5f5f5' : '#fafbfc' }}>
         {/* Header matching dashboard */}
+        {!showEmailPreview && (
         <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid', borderColor: 'grey.200' }}>
           <Toolbar sx={{ py: 1 }}>
             <IconButton onClick={() => router.push('/home')} sx={{ mr: 2 }}>
@@ -1618,11 +1779,18 @@ export default function CreateMeetingPage() {
             </Menu>
           </Toolbar>
         </AppBar>
+        )}
 
         {/* Version Content */}
-        {version === 1 && renderVersion1()}
-        {version === 2 && renderVersion2()}
-        {version === 3 && renderVersion3()}
+        {showEmailPreview ? (
+          renderEmailPreview()
+        ) : (
+          <>
+            {version === 1 && renderVersion1()}
+            {version === 2 && renderVersion2()}
+            {version === 3 && renderVersion3()}
+          </>
+        )}
       </Box>
     </LocalizationProvider>
   );
