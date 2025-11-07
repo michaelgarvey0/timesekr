@@ -86,63 +86,75 @@ export default function CreateMeetingPage() {
   // Expanded slot details
   const [expandedSlot, setExpandedSlot] = useState<number | null>(null);
 
+  // "Me" attendee
+  const meAttendee: Attendee = {
+    id: 'me',
+    email: 'me@timesekr.com',
+    name: 'Me',
+    isContact: true,
+    onPlatform: true,
+  };
+
+  // All participants including me if attending
+  const allParticipants = isAttending ? [meAttendee, ...attendees] : attendees;
+
   // Mock suggested times with detailed participant availability
-  const suggestedTimes: TimeSlot[] = attendees.length > 0 ? [
+  const suggestedTimes: TimeSlot[] = allParticipants.length > 0 ? [
     {
       id: 1,
       day: 'Wed, Jan 15',
       time: '10:00 AM',
-      available: attendees.length,
-      total: attendees.length,
+      available: allParticipants.length,
+      total: allParticipants.length,
       type: 'perfect',
-      participants: attendees.map(a => ({ attendee: a, available: true, status: 'available' as const }))
+      participants: allParticipants.map(a => ({ attendee: a, available: true, status: 'available' as const }))
     },
     {
       id: 2,
       day: 'Thu, Jan 16',
       time: '2:00 PM',
-      available: attendees.length,
-      total: attendees.length,
+      available: allParticipants.length,
+      total: allParticipants.length,
       type: 'perfect',
-      participants: attendees.map(a => ({ attendee: a, available: true, status: 'available' as const }))
+      participants: allParticipants.map(a => ({ attendee: a, available: true, status: 'available' as const }))
     },
     {
       id: 3,
       day: 'Fri, Jan 17',
       time: '1:00 PM',
-      available: Math.floor(attendees.length * 0.8),
-      total: attendees.length,
+      available: Math.floor(allParticipants.length * 0.8),
+      total: allParticipants.length,
       type: 'good',
-      participants: attendees.map((a, i) => ({
+      participants: allParticipants.map((a, i) => ({
         attendee: a,
-        available: i < Math.floor(attendees.length * 0.8),
-        status: (i < Math.floor(attendees.length * 0.8) ? 'available' : 'busy') as const
+        available: i < Math.floor(allParticipants.length * 0.8),
+        status: (i < Math.floor(allParticipants.length * 0.8) ? 'available' : 'busy') as const
       }))
     },
     {
       id: 4,
       day: 'Tue, Jan 14',
       time: '3:00 PM',
-      available: Math.floor(attendees.length * 0.6),
-      total: attendees.length,
+      available: Math.floor(allParticipants.length * 0.6),
+      total: allParticipants.length,
       type: 'partial',
-      participants: attendees.map((a, i) => ({
+      participants: allParticipants.map((a, i) => ({
         attendee: a,
-        available: i < Math.floor(attendees.length * 0.6),
-        status: (i < Math.floor(attendees.length * 0.6) ? 'available' : 'busy') as const
+        available: i < Math.floor(allParticipants.length * 0.6),
+        status: (i < Math.floor(allParticipants.length * 0.6) ? 'available' : 'busy') as const
       }))
     },
     {
       id: 5,
       day: 'Mon, Jan 13',
       time: '4:00 PM',
-      available: Math.floor(attendees.length * 0.5),
-      total: attendees.length,
+      available: Math.floor(allParticipants.length * 0.5),
+      total: allParticipants.length,
       type: 'partial',
-      participants: attendees.map((a, i) => ({
+      participants: allParticipants.map((a, i) => ({
         attendee: a,
-        available: i < Math.floor(attendees.length * 0.5),
-        status: (i < Math.floor(attendees.length * 0.5) ? 'available' : 'busy') as const
+        available: i < Math.floor(allParticipants.length * 0.5),
+        status: (i < Math.floor(allParticipants.length * 0.5) ? 'available' : 'busy') as const
       }))
     },
   ] : [];
@@ -160,14 +172,14 @@ export default function CreateMeetingPage() {
     setAnchorEl(null);
   };
 
-  // Get attendee status
+  // Get attendee status - just icons, no color coding
   const getAttendeeStatus = (attendee: Attendee) => {
     if (attendee.isContact) {
-      return { label: 'Contact', color: '#22c55e', icon: '✓' };
+      return { icon: '✓' };
     } else if (attendee.onPlatform) {
-      return { label: 'On Platform', color: '#3b82f6', icon: '◐' };
+      return { icon: '◐' };
     } else {
-      return { label: 'Email Invite', color: '#94a3b8', icon: '✉' };
+      return { icon: '✉' };
     }
   };
 
@@ -353,7 +365,7 @@ export default function CreateMeetingPage() {
                   <Autocomplete
                     multiple
                     freeSolo
-                    options={[...mockContacts, ...mockPlatformUsers]}
+                    options={mockContacts}
                     value={attendees || []}
                     inputValue={inputValue}
                     onInputChange={(e, newValue) => setInputValue(newValue)}
@@ -387,7 +399,7 @@ export default function CreateMeetingPage() {
                         placeholder={attendees.length === 0 ? "Add people by name or email" : ""}
                         inputProps={{
                           ...params.inputProps,
-                          autoComplete: 'new-password', // Disable browser autocomplete
+                          autoComplete: 'new-password',
                         }}
                       />
                     )}
@@ -402,7 +414,7 @@ export default function CreateMeetingPage() {
                             label={option.name || option.email}
                             {...tagProps}
                             icon={<Typography sx={{ fontSize: '0.875rem' }}>{status.icon}</Typography>}
-                            sx={{ bgcolor: status.color, color: 'white' }}
+                            color="primary"
                           />
                         );
                       })
@@ -410,7 +422,6 @@ export default function CreateMeetingPage() {
                     renderOption={(props, option) => {
                       const { key, ...otherProps } = props;
                       if (typeof option === 'string') return null;
-                      const status = getAttendeeStatus(option);
                       return (
                         <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                           <PersonIcon sx={{ color: 'primary.main' }} />
@@ -418,11 +429,6 @@ export default function CreateMeetingPage() {
                             <Typography variant="body2">{option.name}</Typography>
                             <Typography variant="caption" color="text.secondary">{option.email}</Typography>
                           </Box>
-                          <Chip
-                            label={status.label}
-                            size="small"
-                            sx={{ bgcolor: status.color, color: 'white', fontSize: '0.7rem', height: '20px' }}
-                          />
                         </Box>
                       );
                     }}
@@ -764,7 +770,7 @@ export default function CreateMeetingPage() {
                     multiple
                     size="small"
                     freeSolo
-                    options={[...mockContacts, ...mockPlatformUsers]}
+                    options={mockContacts}
                     value={attendees || []}
                     inputValue={inputValue}
                     onInputChange={(e, newValue) => setInputValue(newValue)}
@@ -812,7 +818,8 @@ export default function CreateMeetingPage() {
                             {...tagProps}
                             size="small"
                             icon={<Typography sx={{ fontSize: '0.75rem' }}>{status.icon}</Typography>}
-                            sx={{ bgcolor: status.color, color: 'white', maxWidth: '150px' }}
+                            color="primary"
+                            sx={{ maxWidth: '150px' }}
                           />
                         );
                       })
@@ -820,7 +827,6 @@ export default function CreateMeetingPage() {
                     renderOption={(props, option) => {
                       const { key, ...otherProps } = props;
                       if (typeof option === 'string') return null;
-                      const status = getAttendeeStatus(option);
                       return (
                         <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center', fontSize: '0.875rem' }}>
                           <PersonIcon sx={{ color: 'primary.main', fontSize: '1rem' }} />
@@ -828,11 +834,6 @@ export default function CreateMeetingPage() {
                             <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{option.name}</Typography>
                             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>{option.email}</Typography>
                           </Box>
-                          <Chip
-                            label={status.label}
-                            size="small"
-                            sx={{ bgcolor: status.color, color: 'white', fontSize: '0.65rem', height: '18px' }}
-                          />
                         </Box>
                       );
                     }}
@@ -1161,7 +1162,7 @@ export default function CreateMeetingPage() {
               <Autocomplete
                 multiple
                 freeSolo
-                options={[...mockContacts, ...mockPlatformUsers]}
+                options={mockContacts}
                 value={attendees || []}
                 inputValue={inputValue}
                 onInputChange={(e, newValue) => setInputValue(newValue)}
@@ -1208,7 +1209,7 @@ export default function CreateMeetingPage() {
                         label={option.name || option.email}
                         {...tagProps}
                         icon={<Typography sx={{ fontSize: '0.875rem' }}>{status.icon}</Typography>}
-                        sx={{ bgcolor: status.color, color: 'white' }}
+                        color="primary"
                       />
                     );
                   })
@@ -1216,7 +1217,6 @@ export default function CreateMeetingPage() {
                 renderOption={(props, option) => {
                   const { key, ...otherProps } = props;
                   if (typeof option === 'string') return null;
-                  const status = getAttendeeStatus(option);
                   return (
                     <Box component="li" key={key} {...otherProps} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                       <PersonIcon sx={{ color: 'primary.main' }} />
@@ -1224,11 +1224,6 @@ export default function CreateMeetingPage() {
                         <Typography variant="body2">{option.name}</Typography>
                         <Typography variant="caption" color="text.secondary">{option.email}</Typography>
                       </Box>
-                      <Chip
-                        label={status.label}
-                        size="small"
-                        sx={{ bgcolor: status.color, color: 'white', fontSize: '0.7rem', height: '20px' }}
-                      />
                     </Box>
                   );
                 }}
