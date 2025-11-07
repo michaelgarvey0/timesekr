@@ -374,9 +374,22 @@ export default function CreateMeetingPage() {
                         }
                       }
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && inputValue.trim()) {
+                        e.preventDefault();
+                        handleAddAttendee(inputValue.trim());
+                      }
+                    }}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
                     renderInput={(params) => (
-                      <TextField {...params} placeholder={attendees.length === 0 ? "Add people by name or email" : ""} />
+                      <TextField
+                        {...params}
+                        placeholder={attendees.length === 0 ? "Add people by name or email" : ""}
+                        inputProps={{
+                          ...params.inputProps,
+                          autoComplete: 'new-password', // Disable browser autocomplete
+                        }}
+                      />
                     )}
                     renderTags={(value, getTagProps) =>
                       (value || []).map((option, index) => {
@@ -770,8 +783,23 @@ export default function CreateMeetingPage() {
                         }
                       }
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && inputValue.trim()) {
+                        e.preventDefault();
+                        handleAddAttendee(inputValue.trim());
+                      }
+                    }}
                     getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
-                    renderInput={(params) => <TextField {...params} placeholder={attendees.length === 0 ? "Add people..." : ""} />}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder={attendees.length === 0 ? "Add people..." : ""}
+                        inputProps={{
+                          ...params.inputProps,
+                          autoComplete: 'new-password',
+                        }}
+                      />
+                    )}
                     renderTags={(value, getTagProps) =>
                       (value || []).map((option, index) => {
                         if (typeof option === 'string') return null;
@@ -1152,9 +1180,22 @@ export default function CreateMeetingPage() {
                     }
                   }
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && inputValue.trim()) {
+                    e.preventDefault();
+                    handleAddAttendee(inputValue.trim());
+                  }
+                }}
                 getOptionLabel={(option) => typeof option === 'string' ? option : option.name || option.email}
                 renderInput={(params) => (
-                  <TextField {...params} placeholder={attendees.length === 0 ? "Type a name or email..." : ""} />
+                  <TextField
+                    {...params}
+                    placeholder={attendees.length === 0 ? "Type a name or email..." : ""}
+                    inputProps={{
+                      ...params.inputProps,
+                      autoComplete: 'new-password',
+                    }}
+                  />
                 )}
                 renderTags={(value, getTagProps) =>
                   (value || []).map((option, index) => {
