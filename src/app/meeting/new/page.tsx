@@ -1272,7 +1272,7 @@ export default function CreateMeetingPage() {
                       variant="contained"
                       size="large"
                       fullWidth
-                      onClick={() => router.push('/home')}
+                      onClick={() => setShowEmailPreview(true)}
                       sx={{ textTransform: 'none', position: 'sticky', bottom: 0, bgcolor: 'primary.main' }}
                     >
                       Send {selectedSlots.length} Time Option{selectedSlots.length > 1 ? 's' : ''}
@@ -1707,7 +1707,7 @@ export default function CreateMeetingPage() {
                       size="large"
                       fullWidth
                       disabled={selectedSlots.length === 0}
-                      onClick={() => router.push('/home')}
+                      onClick={() => setShowEmailPreview(true)}
                       sx={{ mt: 3, textTransform: 'none', bgcolor: 'white', color: 'primary.main', '&:hover': { bgcolor: '#f8fafc' } }}
                     >
                       Send Invite ({selectedSlots.length} time{selectedSlots.length > 1 ? 's' : ''} selected)
