@@ -473,6 +473,10 @@ export default function DesignOption1() {
                     <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#f3f4f6' }}>
                       <RemoveIcon sx={{ fontSize: 14, color: '#9ca3af' }} />
                     </Box>
+                    <Typography variant="caption" color="text.secondary">Not Selected</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, border: '1px solid #e5e7eb' }} />
                     <Typography variant="caption" color="text.secondary">No Response</Typography>
                   </Box>
                 </Box>
@@ -572,10 +576,13 @@ export default function DesignOption1() {
                                     <ClearIcon sx={{ fontSize: 18, color: '#dc2626' }} />
                                   </Box>
                                 )}
-                                {!availability && (
+                                {!availability && attendee.responded && (
                                   <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', bgcolor: '#f3f4f6' }}>
                                     <RemoveIcon sx={{ fontSize: 18, color: '#9ca3af' }} />
                                   </Box>
+                                )}
+                                {!availability && !attendee.responded && (
+                                  <Box sx={{ width: 32, height: 32 }} />
                                 )}
                               </TableCell>
                             );
