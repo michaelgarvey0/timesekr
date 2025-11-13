@@ -616,23 +616,9 @@ export default function DesignOption3() {
                             </Box>
                           </TableCell>
                           <TableCell align="center" sx={{ borderBottom: '1px solid #f3f4f6' }}>
-                            <Chip
-                              icon={attendee.responded ? <CheckCircleIcon /> : <HourglassEmptyIcon />}
-                              label={attendee.responded ? 'Responded' : 'Pending'}
-                              size="small"
-                              variant="outlined"
-                              sx={{
-                                height: 24,
-                                fontSize: '0.75rem',
-                                fontWeight: 500,
-                                borderColor: attendee.responded ? '#86efac' : '#fcd34d',
-                                color: attendee.responded ? '#16a34a' : '#d97706',
-                                bgcolor: attendee.responded ? '#f0fdf4' : '#fffbeb',
-                                '& .MuiChip-icon': {
-                                  color: attendee.responded ? '#16a34a' : '#d97706',
-                                }
-                              }}
-                            />
+                            <Typography variant="body2" color="text.secondary">
+                              {attendee.responded ? 'Responded' : 'Pending'}
+                            </Typography>
                           </TableCell>
                           {selectedMeeting.proposedTimes.map((time) => {
                             const availability = attendee.availability?.[time.id];
@@ -666,16 +652,17 @@ export default function DesignOption3() {
                           })}
                           <TableCell align="center" sx={{ borderBottom: '1px solid #f3f4f6' }}>
                             {!attendee.responded && (
-                              <IconButton
+                              <Button
                                 size="small"
-                                color="primary"
+                                variant="outlined"
+                                sx={{ textTransform: 'none', minWidth: 80 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   alert(`Nudging ${getAttendeeDisplayName(attendee)}`);
                                 }}
                               >
-                                <EmailIcon fontSize="small" />
-                              </IconButton>
+                                Nudge
+                              </Button>
                             )}
                           </TableCell>
                         </TableRow>
