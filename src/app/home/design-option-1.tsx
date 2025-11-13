@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Tabs, Tab, AppBar, Toolbar, IconButton, Avatar, Card, CardContent, Chip, Stack, LinearProgress, AvatarGroup, Modal, Divider, List, ListItem, ListItemText, Table, TableHead, TableBody, TableRow, TableCell, Radio, RadioGroup, FormControlLabel, FormControl, Checkbox, FormGroup } from '@mui/material';
+import { Box, Typography, Button, Tabs, Tab, AppBar, Toolbar, IconButton, Avatar, Card, CardContent, Chip, Stack, LinearProgress, AvatarGroup, Modal, Divider, List, ListItem, ListItemText, Table, TableHead, TableBody, TableRow, TableCell, ToggleButtonGroup, ToggleButton, Checkbox, FormGroup, FormControlLabel } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -380,27 +380,56 @@ export default function DesignOption1() {
                                   )}
                                 </Box>
 
-                                <FormControl component="fieldset" disabled={isSubmitted}>
-                                  <RadioGroup
-                                    value={inviteeResponses[meeting.id]?.[time.id] || ''}
-                                    onChange={(e) => {
-                                      const value = e.target.value;
-                                      handleInviteeResponse(meeting.id, time.id, value === 'available' ? 'available' : 'unavailable');
+                                <ToggleButtonGroup
+                                  value={inviteeResponses[meeting.id]?.[time.id] || null}
+                                  exclusive
+                                  onChange={(e, value) => {
+                                    if (value !== null) {
+                                      handleInviteeResponse(meeting.id, time.id, value);
+                                    }
+                                  }}
+                                  disabled={isSubmitted || cannotMakeAny[meeting.id]}
+                                  fullWidth
+                                  orientation="vertical"
+                                  sx={{ gap: 0.5 }}
+                                >
+                                  <ToggleButton
+                                    value="available"
+                                    sx={{
+                                      textTransform: 'none',
+                                      fontSize: '0.75rem',
+                                      py: 0.75,
+                                      '&.Mui-selected': {
+                                        bgcolor: '#dcfce7',
+                                        color: '#16a34a',
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                          bgcolor: '#bbf7d0'
+                                        }
+                                      }
                                     }}
                                   >
-                                    <FormControlLabel
-                                      value="available"
-                                      control={<Radio disabled={isSubmitted || cannotMakeAny[meeting.id]} size="small" />}
-                                      label={<Typography variant="caption">Available</Typography>}
-                                      sx={{ mb: 0.5 }}
-                                    />
-                                    <FormControlLabel
-                                      value="unavailable"
-                                      control={<Radio disabled={isSubmitted || cannotMakeAny[meeting.id]} size="small" />}
-                                      label={<Typography variant="caption">Not Available</Typography>}
-                                    />
-                                  </RadioGroup>
-                                </FormControl>
+                                    Available
+                                  </ToggleButton>
+                                  <ToggleButton
+                                    value="unavailable"
+                                    sx={{
+                                      textTransform: 'none',
+                                      fontSize: '0.75rem',
+                                      py: 0.75,
+                                      '&.Mui-selected': {
+                                        bgcolor: '#fee2e2',
+                                        color: '#dc2626',
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                          bgcolor: '#fecaca'
+                                        }
+                                      }
+                                    }}
+                                  >
+                                    Not Available
+                                  </ToggleButton>
+                                </ToggleButtonGroup>
                               </Box>
                             );
                           })}
