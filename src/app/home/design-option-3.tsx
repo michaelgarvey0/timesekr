@@ -210,9 +210,9 @@ export default function DesignOption3() {
                     sx={{
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1)',
                       '&:hover': {
-                        boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.15)',
+                        boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.3)',
                         transform: 'translateY(-2px)',
                       }
                     }}
