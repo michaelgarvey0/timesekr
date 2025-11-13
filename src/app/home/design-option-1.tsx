@@ -495,7 +495,7 @@ export default function DesignOption1() {
                       borderBottom: idx < selectedMeeting.attendees.length - 1 ? '1px solid #f3f4f6' : 'none',
                     }}
                   >
-                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 36, height: 36 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 36, height: 36, fontSize: '0.75rem' }}>
                       {attendee.avatar}
                     </Avatar>
                     <ListItemText
