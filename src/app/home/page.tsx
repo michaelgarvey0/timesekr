@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { Box, Button, ButtonGroup } from '@mui/material';
-import EmptyHomePage from './empty-state';
-import PopulatedHomePage from './populated-state';
-import NoCalendarHomePage from './no-calendar-state';
+import DesignOption1 from './design-option-1';
+import DesignOption2 from './design-option-2';
+import DesignOption3 from './design-option-3';
 
 export default function HomePage() {
-  const [viewState, setViewState] = useState<'no-calendar' | 'empty' | 'populated'>('no-calendar');
+  const [viewState, setViewState] = useState<'option1' | 'option2' | 'option3'>('option1');
 
   return (
     <Box>
@@ -15,30 +15,30 @@ export default function HomePage() {
       <Box sx={{ position: 'fixed', bottom: 20, right: 20, zIndex: 1000 }}>
         <ButtonGroup variant="contained" size="small">
           <Button
-            onClick={() => setViewState('no-calendar')}
-            variant={viewState === 'no-calendar' ? 'contained' : 'outlined'}
+            onClick={() => setViewState('option1')}
+            variant={viewState === 'option1' ? 'contained' : 'outlined'}
           >
-            No Calendar
+            Design 1: Tabs
           </Button>
           <Button
-            onClick={() => setViewState('empty')}
-            variant={viewState === 'empty' ? 'contained' : 'outlined'}
+            onClick={() => setViewState('option2')}
+            variant={viewState === 'option2' ? 'contained' : 'outlined'}
           >
-            Empty
+            Design 2: Grid
           </Button>
           <Button
-            onClick={() => setViewState('populated')}
-            variant={viewState === 'populated' ? 'contained' : 'outlined'}
+            onClick={() => setViewState('option3')}
+            variant={viewState === 'option3' ? 'contained' : 'outlined'}
           >
-            Populated
+            Design 3: Sidebar
           </Button>
         </ButtonGroup>
       </Box>
 
       {/* Content */}
-      {viewState === 'no-calendar' && <NoCalendarHomePage />}
-      {viewState === 'empty' && <EmptyHomePage />}
-      {viewState === 'populated' && <PopulatedHomePage />}
+      {viewState === 'option1' && <DesignOption1 />}
+      {viewState === 'option2' && <DesignOption2 />}
+      {viewState === 'option3' && <DesignOption3 />}
     </Box>
   );
 }
