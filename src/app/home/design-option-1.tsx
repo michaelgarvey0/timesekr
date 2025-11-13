@@ -19,6 +19,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import Image from 'next/image';
 import { useState } from 'react';
 import MeetingDetailsModal from './MeetingDetailsModal';
+import InviteeResponseModal from './InviteeResponseModal';
 
 // DESIGN OPTION 1: Clean Horizontal Tabs
 // All sections accessible via top-level tabs
@@ -363,8 +364,16 @@ export default function DesignOption1() {
       </Box>
 
       {/* Meeting Details Modal */}
-      {selectedMeeting && (
+      {selectedMeeting && viewMode === 'organizer' && (
         <MeetingDetailsModal
+          meeting={selectedMeeting}
+          onClose={() => setSelectedMeeting(null)}
+        />
+      )}
+
+      {/* Invitee Response Modal */}
+      {selectedMeeting && viewMode === 'invitee' && (
+        <InviteeResponseModal
           meeting={selectedMeeting}
           onClose={() => setSelectedMeeting(null)}
         />
