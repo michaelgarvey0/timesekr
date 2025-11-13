@@ -452,16 +452,17 @@ export default function DesignOption3() {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: { xs: '90%', sm: 600 },
+              width: { xs: '90%', sm: 900 },
               maxHeight: '90vh',
-              overflow: 'auto',
               bgcolor: 'background.paper',
               borderRadius: '12px',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
-            {/* Modal Header */}
-            <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+            {/* Fixed Modal Header */}
+            <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexShrink: 0 }}>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {selectedMeeting.title}
@@ -482,76 +483,81 @@ export default function DesignOption3() {
               </IconButton>
             </Box>
 
-            {/* Response Progress */}
-            <Box sx={{ p: 3, bgcolor: '#f8fafc' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>Response Progress</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {selectedMeeting.responded}/{selectedMeeting.totalAttendees} responded
-                </Typography>
+            {/* Scrollable Content Area */}
+            <Box sx={{ overflowY: 'auto', flex: 1 }}>
+              {/* Response Progress */}
+              <Box sx={{ p: 3, bgcolor: '#f8fafc' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Response Progress</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {selectedMeeting.responded}/{selectedMeeting.totalAttendees} responded
+                  </Typography>
+                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={(selectedMeeting.responded / selectedMeeting.totalAttendees) * 100}
+                  sx={{
+                    height: 8,
+                    borderRadius: 1,
+                    bgcolor: '#e5e7eb',
+                    '& .MuiLinearProgress-bar': {
+                      bgcolor: selectedMeeting.status === 'Ready' ? '#22c55e' : '#f59e0b',
+                    }
+                  }}
+                />
               </Box>
-              <LinearProgress
-                variant="determinate"
-                value={(selectedMeeting.responded / selectedMeeting.totalAttendees) * 100}
-                sx={{
-                  height: 8,
-                  borderRadius: 1,
-                  bgcolor: '#e5e7eb',
-                  '& .MuiLinearProgress-bar': {
-                    bgcolor: selectedMeeting.status === 'Ready' ? '#22c55e' : '#f59e0b',
-                  }
-                }}
-              />
-            </Box>
 
-            {/* Proposed Times */}
-            <Box sx={{ p: 3 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-                Proposed Times
-              </Typography>
-              <Stack spacing={1.5}>
-                {selectedMeeting.proposedTimes.map((time) => (
-                  <Box
-                    key={time.id}
-                    sx={{
-                      p: 2,
-                      bgcolor: time.id === selectedMeeting.winningTime.id ? '#f0f9ff' : '#f8fafc',
-                      border: time.id === selectedMeeting.winningTime.id ? '2px solid #3b82f6' : '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {time.day} @ {time.time}
-                      </Typography>
-                      {time.id === selectedMeeting.winningTime.id && (
-                        <Chip
-                          icon={<ThumbUpIcon />}
-                          label="Winning"
-                          size="small"
-                          color="primary"
-                          sx={{ mt: 0.5, height: 20, fontSize: '0.75rem' }}
-                        />
-                      )}
-                    </Box>
-                    <Chip
-                      label={`${time.votes} votes`}
-                      size="small"
+              {/* Proposed Times with Granular Availability */}
+              <Box sx={{ p: 3 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                  Proposed Times
+                </Typography>
+                <Stack spacing={2}>
+                  {selectedMeeting.proposedTimes.map((time) => (
+                    <Box
+                      key={time.id}
                       sx={{
-                        bgcolor: time.id === selectedMeeting.winningTime.id ? '#3b82f6' : '#e5e7eb',
-                        color: time.id === selectedMeeting.winningTime.id ? 'white' : 'text.secondary',
-                        fontWeight: 600,
+                        p: 2.5,
+                        bgcolor: time.id === selectedMeeting.winningTime.id ? '#f0f9ff' : '#f8fafc',
+                        border: time.id === selectedMeeting.winningTime.id ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                        borderRadius: '8px',
                       }}
-                    />
-                  </Box>
-                ))}
-              </Stack>
-            </Box>
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Box>
+                          <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                            {time.day} @ {time.time}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {time.votes}/{selectedMeeting.totalAttendees} available
+                          </Typography>
+                        </Box>
+                        {time.id === selectedMeeting.winningTime.id && (
+                          <Chip
+                            label="Most Available"
+                            size="small"
+                            color="primary"
+                            sx={{ fontWeight: 600 }}
+                          />
+                        )}
+                      </Box>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}>
+                        {selectedMeeting.attendees.slice(0, time.votes).map((attendee, idx) => (
+                          <Chip
+                            key={idx}
+                            avatar={<Avatar sx={{ bgcolor: 'primary.main', fontSize: '0.7rem' }}>{attendee.avatar}</Avatar>}
+                            label={attendee.name}
+                            size="small"
+                            sx={{ bgcolor: 'white', border: '1px solid #e5e7eb' }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
 
-            <Divider />
+              <Divider />
 
             {/* Attendees */}
             <Box sx={{ p: 3 }}>
@@ -585,7 +591,7 @@ export default function DesignOption3() {
                       borderBottom: idx < selectedMeeting.attendees.length - 1 ? '1px solid #f3f4f6' : 'none',
                     }}
                   >
-                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 36, height: 36, fontSize: '0.75rem' }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 36, height: 36, fontSize: '0.875rem' }}>
                       {attendee.avatar}
                     </Avatar>
                     <ListItemText
@@ -622,48 +628,33 @@ export default function DesignOption3() {
                 ))}
               </List>
             </Box>
+            </Box>
 
-            {/* Modal Actions */}
-            <Box sx={{ p: 3, borderTop: '1px solid #e5e7eb', bgcolor: '#fafbfc' }}>
-              <Stack spacing={1.5}>
-                {selectedMeeting.status === 'Ready' && (
-                  <Button
-                    variant="contained"
-                    color="success"
-                    fullWidth
-                    startIcon={<CheckCircleIcon />}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Send Invitations
-                  </Button>
-                )}
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    startIcon={<EditIcon />}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    startIcon={<EmailIcon />}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Send Reminder
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    color="error"
-                    startIcon={<CloseIcon />}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Close Meeting
-                  </Button>
-                </Stack>
+            {/* Fixed Modal Footer */}
+            <Box sx={{ p: 3, borderTop: '1px solid #e5e7eb', bgcolor: '#fafbfc', flexShrink: 0 }}>
+              <Stack direction="row" spacing={1.5}>
+                <Button
+                  variant="outlined"
+                  startIcon={<EditIcon />}
+                  sx={{ textTransform: 'none', flex: 1 }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<EmailIcon />}
+                  sx={{ textTransform: 'none', flex: 1 }}
+                >
+                  Send Reminder
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<CloseIcon />}
+                  sx={{ textTransform: 'none', flex: 1 }}
+                >
+                  Close Meeting
+                </Button>
               </Stack>
             </Box>
           </Box>
