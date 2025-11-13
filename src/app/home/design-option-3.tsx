@@ -37,16 +37,16 @@ const mockOrganizingMeetings = [
       { id: 3, day: 'Fri, Jan 19', time: '3:00 PM', votes: 1 },
     ],
     attendees: [
-      { name: 'Sarah Chen', avatar: 'SC', responded: true },
-      { name: 'David Kim', avatar: 'DK', responded: true },
-      { name: 'Emma Wilson', avatar: 'EW', responded: true },
-      { name: 'James Rodriguez', avatar: 'JR', responded: false },
-      { name: 'Lisa Anderson', avatar: 'LA', responded: true },
-      { name: 'Michael Brown', avatar: 'MB', responded: false },
-      { name: 'Sophie Taylor', avatar: 'ST', responded: true },
-      { name: 'Robert Lee', avatar: 'RL', responded: false },
-      { name: 'Amanda White', avatar: 'AW', responded: true },
-      { name: 'Chris Martin', avatar: 'CM', responded: false },
+      { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true },
+      { email: 'david.kim@company.com', firstName: 'David', lastName: 'Kim', onPlatform: true, responded: true },
+      { email: 'emma.wilson@company.com', firstName: 'Emma', lastName: 'Wilson', onPlatform: true, responded: true },
+      { email: 'james.rodriguez@client.com', onPlatform: false, responded: false },
+      { email: 'lisa.anderson@company.com', firstName: 'Lisa', lastName: 'Anderson', onPlatform: true, responded: true },
+      { email: 'mike.brown@partner.com', onPlatform: false, responded: false },
+      { email: 'sophie.taylor@company.com', firstName: 'Sophie', lastName: 'Taylor', onPlatform: true, responded: true },
+      { email: 'robert.lee@external.com', onPlatform: false, responded: false },
+      { email: 'amanda.white@company.com', firstName: 'Amanda', lastName: 'White', onPlatform: true, responded: true },
+      { email: 'chris.martin@vendor.com', onPlatform: false, responded: true },
     ]
   },
   {
@@ -63,11 +63,11 @@ const mockOrganizingMeetings = [
       { id: 2, day: 'Mon, Jan 15', time: '2:00 PM', votes: 3 },
     ],
     attendees: [
-      { name: 'Sarah Chen', avatar: 'SC', responded: true },
-      { name: 'David Kim', avatar: 'DK', responded: true },
-      { name: 'Emma Wilson', avatar: 'EW', responded: true },
-      { name: 'James Rodriguez', avatar: 'JR', responded: true },
-      { name: 'Lisa Anderson', avatar: 'LA', responded: true },
+      { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true },
+      { email: 'david.kim@company.com', firstName: 'David', lastName: 'Kim', onPlatform: true, responded: true },
+      { email: 'emma.wilson@company.com', firstName: 'Emma', lastName: 'Wilson', onPlatform: true, responded: true },
+      { email: 'james@external.com', onPlatform: false, responded: true },
+      { email: 'lisa.anderson@company.com', firstName: 'Lisa', lastName: 'Anderson', onPlatform: true, responded: true },
     ]
   },
 ];
@@ -90,14 +90,14 @@ const mockInvitedMeetings = [
       { id: 3, day: 'Thu, Jan 18', time: '4:00 PM', votes: 1 },
     ],
     attendees: [
-      { name: 'Sarah Chen', avatar: 'SC', responded: true },
-      { name: 'David Kim', avatar: 'DK', responded: true },
-      { name: 'Emma Wilson', avatar: 'EW', responded: true },
-      { name: 'James Rodriguez', avatar: 'JR', responded: false },
-      { name: 'Lisa Anderson', avatar: 'LA', responded: true },
-      { name: 'Michael Brown', avatar: 'MB', responded: false },
-      { name: 'Sophie Taylor', avatar: 'ST', responded: true },
-      { name: 'Robert Lee', avatar: 'RL', responded: false },
+      { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true },
+      { email: 'david.kim@company.com', firstName: 'David', lastName: 'Kim', onPlatform: true, responded: true },
+      { email: 'emma.wilson@company.com', firstName: 'Emma', lastName: 'Wilson', onPlatform: true, responded: true },
+      { email: 'james.rodriguez@client.com', onPlatform: false, responded: false },
+      { email: 'lisa.anderson@company.com', firstName: 'Lisa', lastName: 'Anderson', onPlatform: true, responded: true },
+      { email: 'mike.brown@partner.com', onPlatform: false, responded: false },
+      { email: 'sophie.taylor@company.com', firstName: 'Sophie', lastName: 'Taylor', onPlatform: true, responded: true },
+      { email: 'robert.lee@external.com', onPlatform: false, responded: false },
     ]
   },
 ];
@@ -107,6 +107,21 @@ export default function DesignOption3() {
   const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
+
+  // Helper functions for attendee display
+  const getAttendeeDisplayName = (attendee: any) => {
+    if (attendee.onPlatform && attendee.firstName && attendee.lastName) {
+      return `${attendee.firstName} ${attendee.lastName}`;
+    }
+    return attendee.email;
+  };
+
+  const getAttendeeInitials = (attendee: any) => {
+    if (attendee.onPlatform && attendee.firstName && attendee.lastName) {
+      return `${attendee.firstName[0]}${attendee.lastName[0]}`;
+    }
+    return attendee.email[0].toUpperCase();
+  };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -249,8 +264,8 @@ export default function DesignOption3() {
                         </Box>
                         <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
                           {meeting.attendees.map((attendee, idx) => (
-                            <Avatar key={idx}>
-                              {attendee.avatar}
+                            <Avatar key={idx} sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8' }}>
+                              {getAttendeeInitials(attendee)}
                             </Avatar>
                           ))}
                         </AvatarGroup>
@@ -545,8 +560,8 @@ export default function DesignOption3() {
                         {selectedMeeting.attendees.slice(0, time.votes).map((attendee, idx) => (
                           <Chip
                             key={idx}
-                            avatar={<Avatar sx={{ bgcolor: 'primary.main', fontSize: '0.7rem' }}>{attendee.avatar}</Avatar>}
-                            label={attendee.name}
+                            avatar={<Avatar sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8', fontSize: '0.7rem' }}>{getAttendeeInitials(attendee)}</Avatar>}
+                            label={getAttendeeDisplayName(attendee)}
                             size="small"
                             sx={{ bgcolor: 'white', border: '1px solid #e5e7eb' }}
                           />
@@ -591,14 +606,21 @@ export default function DesignOption3() {
                       borderBottom: idx < selectedMeeting.attendees.length - 1 ? '1px solid #f3f4f6' : 'none',
                     }}
                   >
-                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 36, height: 36, fontSize: '0.875rem' }}>
-                      {attendee.avatar}
+                    <Avatar sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8', mr: 2, width: 36, height: 36, fontSize: '0.875rem' }}>
+                      {getAttendeeInitials(attendee)}
                     </Avatar>
                     <ListItemText
                       primary={
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {attendee.name}
+                          {getAttendeeDisplayName(attendee)}
                         </Typography>
+                      }
+                      secondary={
+                        attendee.onPlatform ? undefined : (
+                          <Typography variant="caption" color="text.secondary">
+                            Email only
+                          </Typography>
+                        )
                       }
                     />
                     <Stack direction="row" spacing={1} alignItems="center">
