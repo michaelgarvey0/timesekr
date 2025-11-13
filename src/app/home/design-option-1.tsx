@@ -20,15 +20,17 @@ export default function DesignOption1() {
     <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
       {/* Top Nav */}
       <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
-        <Toolbar>
-          <Box sx={{ flexGrow: 1 }}>
-            <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
-          </Box>
-          <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none', mr: 2 }}>
-            New Meeting
-          </Button>
-          <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>M</Avatar>
-        </Toolbar>
+        <Box sx={{ maxWidth: 1400, mx: 'auto', width: '100%', px: 3 }}>
+          <Toolbar sx={{ px: 0 }}>
+            <Box sx={{ flexGrow: 1 }}>
+              <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
+            </Box>
+            <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none', mr: 2 }}>
+              New Meeting
+            </Button>
+            <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>M</Avatar>
+          </Toolbar>
+        </Box>
       </AppBar>
 
       {/* Main Tabs */}
