@@ -527,9 +527,25 @@ export default function DesignOption3() {
 
               {/* Availability Grid */}
               <Box sx={{ p: 3 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-                  Availability Grid
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    Availability Grid
+                  </Typography>
+                  {selectedMeeting.responded < selectedMeeting.totalAttendees && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<EmailIcon />}
+                      sx={{ textTransform: 'none' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        alert(`Nudging ${selectedMeeting.totalAttendees - selectedMeeting.responded} non-responders`);
+                      }}
+                    >
+                      Nudge All Pending ({selectedMeeting.totalAttendees - selectedMeeting.responded})
+                    </Button>
+                  )}
+                </Box>
                 <Box sx={{ overflowX: 'auto' }}>
                   <Table sx={{ minWidth: 650 }}>
                     <TableHead>
@@ -566,6 +582,9 @@ export default function DesignOption3() {
                             </Box>
                           </TableCell>
                         ))}
+                        <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', minWidth: 100 }} align="center">
+                          Action
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -624,6 +643,20 @@ export default function DesignOption3() {
                               </TableCell>
                             );
                           })}
+                          <TableCell align="center" sx={{ borderBottom: '1px solid #f3f4f6' }}>
+                            {!attendee.responded && (
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  alert(`Nudging ${getAttendeeDisplayName(attendee)}`);
+                                }}
+                              >
+                                <EmailIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
