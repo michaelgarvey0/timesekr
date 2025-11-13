@@ -236,7 +236,7 @@ export default function DesignOption3() {
                           <Stack direction="row" spacing={2}>
                             {viewMode === 'invitee' && 'organizer' in meeting && (
                               <Typography variant="body2" color="text.secondary">
-                                Organized by {meeting.organizer}
+                                Organized by {(meeting as typeof mockInvitedMeetings[0]).organizer}
                               </Typography>
                             )}
                             <Typography variant="body2" color="text.secondary">
