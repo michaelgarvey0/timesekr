@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
+import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell, Radio, RadioGroup, FormControlLabel, FormControl, Checkbox, FormGroup } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import GroupsIcon from '@mui/icons-material/Groups';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -18,7 +18,6 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import Image from 'next/image';
 import { useState } from 'react';
 import MeetingDetailsModal from './MeetingDetailsModal';
-import InviteeResponseModal from './InviteeResponseModal';
 
 // DESIGN OPTION 3: Sidebar Navigation
 // Left sidebar navigation with main content area
@@ -113,12 +112,44 @@ export default function DesignOption3() {
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
 
+  // Invitee response state
+  const [inviteeResponses, setInviteeResponses] = useState<{ [meetingId: number]: { [timeId: number]: 'available' | 'unavailable' | null } }>({});
+  const [cannotMakeAny, setCannotMakeAny] = useState<{ [meetingId: number]: boolean }>({});
+
   // Helper functions for attendee display (used in card avatars)
   const getAttendeeInitials = (attendee: any) => {
     if (attendee.onPlatform && attendee.firstName && attendee.lastName) {
       return `${attendee.firstName[0]}${attendee.lastName[0]}`;
     }
     return attendee.email ? attendee.email[0].toUpperCase() : '?';
+  };
+
+  const handleInviteeResponse = (meetingId: number, timeId: number, value: 'available' | 'unavailable' | null) => {
+    setInviteeResponses(prev => ({
+      ...prev,
+      [meetingId]: {
+        ...(prev[meetingId] || {}),
+        [timeId]: value
+      }
+    }));
+    if (cannotMakeAny[meetingId]) {
+      setCannotMakeAny(prev => ({ ...prev, [meetingId]: false }));
+    }
+  };
+
+  const handleCannotMakeAny = (meetingId: number, checked: boolean) => {
+    setCannotMakeAny(prev => ({ ...prev, [meetingId]: checked }));
+    if (checked) {
+      setInviteeResponses(prev => ({ ...prev, [meetingId]: {} }));
+    }
+  };
+
+  const handleSubmitResponse = (meeting: any) => {
+    console.log('Submitting response for meeting:', meeting.id, {
+      responses: inviteeResponses[meeting.id],
+      cannotMakeAny: cannotMakeAny[meeting.id]
+    });
+    alert('Response submitted!');
   };
 
   return (
@@ -221,15 +252,15 @@ export default function DesignOption3() {
                   <Card
                     key={meeting.id}
                     sx={{
-                      cursor: 'pointer',
+                      cursor: viewMode === 'organizer' ? 'pointer' : 'default',
                       transition: 'all 0.2s',
                       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1)',
-                      '&:hover': {
+                      '&:hover': viewMode === 'organizer' ? {
                         boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.3)',
                         transform: 'translateY(-2px)',
-                      }
+                      } : {}
                     }}
-                    onClick={() => setSelectedMeeting(meeting)}
+                    onClick={viewMode === 'organizer' ? () => setSelectedMeeting(meeting) : undefined}
                   >
                     <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
                       {/* Status Chip at Top Left */}
@@ -242,121 +273,229 @@ export default function DesignOption3() {
                         />
                       </Box>
 
-                      {/* Title and Avatars */}
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2.5 }}>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-                            {meeting.title}
-                          </Typography>
-                          <Stack direction="row" spacing={2}>
-                            {viewMode === 'invitee' && 'organizer' in meeting && (
-                              <Typography variant="body2" color="text.secondary">
-                                Organized by {(meeting as typeof mockInvitedMeetings[0]).organizer}
-                              </Typography>
-                            )}
+                      {/* Title */}
+                      <Box sx={{ mb: 2.5 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          {meeting.title}
+                        </Typography>
+                        <Stack direction="row" spacing={2}>
+                          {viewMode === 'invitee' && 'organizer' in meeting && (
+                            <Typography variant="body2" color="text.secondary">
+                              Organized by {(meeting as typeof mockInvitedMeetings[0]).organizer}
+                            </Typography>
+                          )}
+                          {viewMode === 'organizer' && (
                             <Typography variant="body2" color="text.secondary">
                               <GroupsIcon sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
                               {meeting.totalAttendees} attendees
                             </Typography>
-                          </Stack>
-                        </Box>
-                        <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
-                          {meeting.attendees.map((attendee, idx) => (
-                            <Avatar key={idx} sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8' }}>
-                              {getAttendeeInitials(attendee)}
-                            </Avatar>
-                          ))}
-                        </AvatarGroup>
-                      </Box>
-
-                      {/* Proposed Times */}
-                      <Box sx={{ mb: 2.5 }}>
-                        <Stack direction="row" spacing={1.5}>
-                          {meeting.proposedTimes.map((time) => {
-                            const isWinningTime = time.id === meeting.winningTime.id;
-                            return (
-                              <Box
-                                key={time.id}
-                                sx={{
-                                  flex: 1,
-                                  py: 1.5,
-                                  px: 1.5,
-                                  bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
-                                  border: isWinningTime ? '2px solid #3b82f6' : '1px solid transparent',
-                                  borderRadius: '6px',
-                                  textAlign: 'center',
-                                  position: 'relative',
-                                }}
-                              >
-                                <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? '#1e40af' : 'inherit' }}>
-                                  {time.day} @ {time.time}
-                                </Typography>
-                                <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'} sx={{ display: 'block', fontWeight: isWinningTime ? 600 : 400 }}>
-                                  {time.votes}/{meeting.totalAttendees} available
-                                </Typography>
-                                {isWinningTime && (
-                                  <Chip
-                                    label="Best"
-                                    size="small"
-                                    color="primary"
-                                    sx={{ position: 'absolute', top: -8, right: -8, height: 20, fontSize: '0.7rem', fontWeight: 600 }}
-                                  />
-                                )}
-                              </Box>
-                            );
-                          })}
+                          )}
                         </Stack>
                       </Box>
 
-                      {/* Progress Bar */}
-                      <Box sx={{ mb: 2.5 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                          <Typography variant="caption" color="text.secondary">
-                            Response Progress
-                          </Typography>
-                          <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                            {meeting.responded}/{meeting.totalAttendees}
-                          </Typography>
-                        </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={(meeting.responded / meeting.totalAttendees) * 100}
-                          sx={{
-                            height: 6,
-                            borderRadius: 1,
-                            bgcolor: '#e5e7eb',
-                            '& .MuiLinearProgress-bar': {
-                              bgcolor: meeting.status === 'Ready' ? '#22c55e' : '#f59e0b',
-                            }
-                          }}
-                        />
-                      </Box>
+                      {viewMode === 'organizer' ? (
+                        <>
+                          {/* Organizer View: Avatars */}
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2.5 }}>
+                            <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
+                              {meeting.attendees.map((attendee, idx) => (
+                                <Avatar key={idx} sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8' }}>
+                                  {getAttendeeInitials(attendee)}
+                                </Avatar>
+                              ))}
+                            </AvatarGroup>
+                          </Box>
 
-                      {/* Action Buttons at Bottom */}
-                      <Stack direction="row" spacing={1.5}>
-                        <Button
-                          variant="outlined"
-                          fullWidth
-                          sx={{ textTransform: 'none', minHeight: '42px' }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedMeeting(meeting);
-                          }}
-                        >
-                          View Details
-                        </Button>
-                        <Button
-                          variant="contained"
-                          fullWidth
-                          sx={{ textTransform: 'none', minHeight: '42px' }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setConfirmInviteMeeting(meeting);
-                          }}
-                        >
-                          Send Invite
-                        </Button>
-                      </Stack>
+                          {/* Proposed Times (Read-only for organizer) */}
+                          <Box sx={{ mb: 2.5 }}>
+                            <Stack direction="row" spacing={1.5}>
+                              {meeting.proposedTimes.map((time) => {
+                                const isWinningTime = time.id === meeting.winningTime.id;
+                                return (
+                                  <Box
+                                    key={time.id}
+                                    sx={{
+                                      flex: 1,
+                                      py: 1.5,
+                                      px: 1.5,
+                                      bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
+                                      border: isWinningTime ? '2px solid #3b82f6' : '1px solid transparent',
+                                      borderRadius: '6px',
+                                      textAlign: 'center',
+                                      position: 'relative',
+                                    }}
+                                  >
+                                    <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                                      {time.day} @ {time.time}
+                                    </Typography>
+                                    <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'} sx={{ display: 'block', fontWeight: isWinningTime ? 600 : 400 }}>
+                                      {time.votes}/{meeting.totalAttendees} available
+                                    </Typography>
+                                    {isWinningTime && (
+                                      <Chip
+                                        label="Best"
+                                        size="small"
+                                        color="primary"
+                                        sx={{ position: 'absolute', top: -8, right: -8, height: 20, fontSize: '0.7rem', fontWeight: 600 }}
+                                      />
+                                    )}
+                                  </Box>
+                                );
+                              })}
+                            </Stack>
+                          </Box>
+
+                          {/* Progress Bar */}
+                          <Box sx={{ mb: 2.5 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                              <Typography variant="caption" color="text.secondary">
+                                Response Progress
+                              </Typography>
+                              <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                {meeting.responded}/{meeting.totalAttendees}
+                              </Typography>
+                            </Box>
+                            <LinearProgress
+                              variant="determinate"
+                              value={(meeting.responded / meeting.totalAttendees) * 100}
+                              sx={{
+                                height: 6,
+                                borderRadius: 1,
+                                bgcolor: '#e5e7eb',
+                                '& .MuiLinearProgress-bar': {
+                                  bgcolor: meeting.status === 'Ready' ? '#22c55e' : '#f59e0b',
+                                }
+                              }}
+                            />
+                          </Box>
+
+                          {/* Action Buttons at Bottom */}
+                          <Stack direction="row" spacing={1.5}>
+                            <Button
+                              variant="outlined"
+                              fullWidth
+                              sx={{ textTransform: 'none', minHeight: '42px' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedMeeting(meeting);
+                              }}
+                            >
+                              View Details
+                            </Button>
+                            <Button
+                              variant="contained"
+                              fullWidth
+                              sx={{ textTransform: 'none', minHeight: '42px' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmInviteMeeting(meeting);
+                              }}
+                            >
+                              Send Invite
+                            </Button>
+                          </Stack>
+                        </>
+                      ) : (
+                        <>
+                          {/* Invitee View: Response Form */}
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                            Please select which times work for you:
+                          </Typography>
+
+                          {/* Proposed Times with Radio Buttons */}
+                          <Stack spacing={2} sx={{ mb: 2 }}>
+                            {meeting.proposedTimes.map((time) => {
+                              const isWinningTime = time.id === meeting.winningTime.id;
+                              return (
+                                <Box
+                                  key={time.id}
+                                  sx={{
+                                    p: 2,
+                                    bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
+                                    border: isWinningTime ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                                    borderRadius: '8px',
+                                  }}
+                                >
+                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
+                                    <Box>
+                                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                                        {time.day} @ {time.time}
+                                      </Typography>
+                                      <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'}>
+                                        {time.votes}/{meeting.totalAttendees} people available
+                                      </Typography>
+                                    </Box>
+                                    {isWinningTime && (
+                                      <Chip
+                                        label="Most Popular"
+                                        size="small"
+                                        color="primary"
+                                        sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }}
+                                      />
+                                    )}
+                                  </Box>
+
+                                  <FormControl component="fieldset">
+                                    <RadioGroup
+                                      row
+                                      value={inviteeResponses[meeting.id]?.[time.id] || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        handleInviteeResponse(meeting.id, time.id, value === 'available' ? 'available' : 'unavailable');
+                                      }}
+                                    >
+                                      <FormControlLabel
+                                        value="available"
+                                        control={<Radio disabled={cannotMakeAny[meeting.id]} />}
+                                        label="Available"
+                                        sx={{ mr: 3 }}
+                                      />
+                                      <FormControlLabel
+                                        value="unavailable"
+                                        control={<Radio disabled={cannotMakeAny[meeting.id]} />}
+                                        label="Not Available"
+                                      />
+                                    </RadioGroup>
+                                  </FormControl>
+                                </Box>
+                              );
+                            })}
+                          </Stack>
+
+                          {/* Cannot Make Any Option */}
+                          <Box sx={{ p: 2, bgcolor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', mb: 2.5 }}>
+                            <FormGroup>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={cannotMakeAny[meeting.id] || false}
+                                    onChange={(e) => handleCannotMakeAny(meeting.id, e.target.checked)}
+                                  />
+                                }
+                                label={
+                                  <Typography variant="body2" sx={{ fontWeight: cannotMakeAny[meeting.id] ? 600 : 400 }}>
+                                    I cannot make any of these times
+                                  </Typography>
+                                }
+                              />
+                            </FormGroup>
+                          </Box>
+
+                          {/* Submit Button */}
+                          <Button
+                            variant="contained"
+                            fullWidth
+                            startIcon={<CheckIcon />}
+                            sx={{ textTransform: 'none', minHeight: '42px' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSubmitResponse(meeting);
+                            }}
+                          >
+                            Submit Response
+                          </Button>
+                        </>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -456,14 +595,6 @@ export default function DesignOption3() {
       {/* Meeting Details Modal */}
       {selectedMeeting && viewMode === 'organizer' && (
         <MeetingDetailsModal
-          meeting={selectedMeeting}
-          onClose={() => setSelectedMeeting(null)}
-        />
-      )}
-
-      {/* Invitee Response Modal */}
-      {selectedMeeting && viewMode === 'invitee' && (
-        <InviteeResponseModal
           meeting={selectedMeeting}
           onClose={() => setSelectedMeeting(null)}
         />
