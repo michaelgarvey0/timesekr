@@ -210,8 +210,8 @@ export default function DesignOption1() {
                     {/* Status Chip at Top Left */}
                     <Box sx={{ mb: 2 }}>
                       <Chip
-                        label={meeting.status}
-                        color={meeting.statusColor as any}
+                        label={viewMode === 'invitee' && submittedMeetings[meeting.id] ? 'Responded' : meeting.status}
+                        color={viewMode === 'invitee' && submittedMeetings[meeting.id] ? 'success' : meeting.statusColor as any}
                         size="small"
                         sx={{ fontWeight: 600 }}
                       />
