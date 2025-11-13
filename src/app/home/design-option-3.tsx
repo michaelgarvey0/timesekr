@@ -639,7 +639,7 @@ export default function DesignOption3() {
                           onClick={(e) => {
                             e.stopPropagation();
                             // Handle individual nudge logic here
-                            alert(`Nudging ${attendee.name}`);
+                            alert(`Nudging ${getAttendeeDisplayName(attendee)}`);
                           }}
                         >
                           <EmailIcon fontSize="small" />

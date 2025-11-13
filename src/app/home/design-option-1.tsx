@@ -112,14 +112,14 @@ export default function DesignOption1() {
     if (attendee.onPlatform && attendee.firstName && attendee.lastName) {
       return `${attendee.firstName} ${attendee.lastName}`;
     }
-    return attendee.email;
+    return attendee.email || 'Unknown';
   };
 
   const getAttendeeInitials = (attendee: any) => {
     if (attendee.onPlatform && attendee.firstName && attendee.lastName) {
       return `${attendee.firstName[0]}${attendee.lastName[0]}`;
     }
-    return attendee.email[0].toUpperCase();
+    return attendee.email ? attendee.email[0].toUpperCase() : '?';
   };
 
   return (
@@ -549,7 +549,7 @@ export default function DesignOption1() {
                           onClick={(e) => {
                             e.stopPropagation();
                             // Handle individual nudge logic here
-                            alert(`Nudging ${attendee.name}`);
+                            alert(`Nudging ${getAttendeeDisplayName(attendee)}`);
                           }}
                         >
                           <EmailIcon fontSize="small" />
