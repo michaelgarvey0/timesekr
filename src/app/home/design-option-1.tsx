@@ -487,9 +487,6 @@ export default function DesignOption1() {
                         <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', position: 'sticky', left: 0, bgcolor: '#f8fafc', zIndex: 1 }}>
                           Attendee
                         </TableCell>
-                        <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', minWidth: 120 }} align="center">
-                          Status
-                        </TableCell>
                         {selectedMeeting.proposedTimes.map((time) => (
                           <TableCell
                             key={time.id}
@@ -548,11 +545,6 @@ export default function DesignOption1() {
                                 )}
                               </Box>
                             </Box>
-                          </TableCell>
-                          <TableCell align="center" sx={{ borderBottom: '1px solid #f3f4f6' }}>
-                            <Typography variant="body2" color="text.secondary">
-                              {attendee.responded ? 'Responded' : 'Pending'}
-                            </Typography>
                           </TableCell>
                           {selectedMeeting.proposedTimes.map((time) => {
                             const availability = attendee.availability?.[time.id];
