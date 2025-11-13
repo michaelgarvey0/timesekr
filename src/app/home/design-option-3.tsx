@@ -37,16 +37,16 @@ const mockOrganizingMeetings = [
       { id: 3, day: 'Fri, Jan 19', time: '3:00 PM', votes: 1 },
     ],
     attendees: [
-      { name: 'Sarah Chen', avatar: 'S', color: '#3b82f6', responded: true },
-      { name: 'David Kim', avatar: 'D', color: '#8b5cf6', responded: true },
-      { name: 'Emma Wilson', avatar: 'E', color: '#f59e0b', responded: true },
-      { name: 'James Rodriguez', avatar: 'J', color: '#ef4444', responded: false },
-      { name: 'Lisa Anderson', avatar: 'L', color: '#10b981', responded: true },
-      { name: 'Michael Brown', avatar: 'M', color: '#06b6d4', responded: false },
-      { name: 'Sophie Taylor', avatar: 'S', color: '#8b5cf6', responded: true },
-      { name: 'Robert Lee', avatar: 'R', color: '#f97316', responded: false },
-      { name: 'Amanda White', avatar: 'A', color: '#ec4899', responded: true },
-      { name: 'Chris Martin', avatar: 'C', color: '#6366f1', responded: false },
+      { name: 'Sarah Chen', avatar: 'SC', responded: true },
+      { name: 'David Kim', avatar: 'DK', responded: true },
+      { name: 'Emma Wilson', avatar: 'EW', responded: true },
+      { name: 'James Rodriguez', avatar: 'JR', responded: false },
+      { name: 'Lisa Anderson', avatar: 'LA', responded: true },
+      { name: 'Michael Brown', avatar: 'MB', responded: false },
+      { name: 'Sophie Taylor', avatar: 'ST', responded: true },
+      { name: 'Robert Lee', avatar: 'RL', responded: false },
+      { name: 'Amanda White', avatar: 'AW', responded: true },
+      { name: 'Chris Martin', avatar: 'CM', responded: false },
     ]
   },
   {
@@ -63,11 +63,11 @@ const mockOrganizingMeetings = [
       { id: 2, day: 'Mon, Jan 15', time: '2:00 PM', votes: 3 },
     ],
     attendees: [
-      { name: 'Sarah Chen', avatar: 'S', color: '#3b82f6', responded: true },
-      { name: 'David Kim', avatar: 'D', color: '#8b5cf6', responded: true },
-      { name: 'Emma Wilson', avatar: 'E', color: '#f59e0b', responded: true },
-      { name: 'James Rodriguez', avatar: 'J', color: '#ef4444', responded: true },
-      { name: 'Lisa Anderson', avatar: 'L', color: '#10b981', responded: true },
+      { name: 'Sarah Chen', avatar: 'SC', responded: true },
+      { name: 'David Kim', avatar: 'DK', responded: true },
+      { name: 'Emma Wilson', avatar: 'EW', responded: true },
+      { name: 'James Rodriguez', avatar: 'JR', responded: true },
+      { name: 'Lisa Anderson', avatar: 'LA', responded: true },
     ]
   },
 ];
@@ -261,7 +261,7 @@ export default function DesignOption3() {
                               <Avatar
                                 key={idx}
                                 sx={{
-                                  bgcolor: attendee.color,
+                                  bgcolor: 'primary.main',
                                   opacity: attendee.responded ? 1 : 0.4,
                                 }}
                               >
@@ -513,7 +513,7 @@ export default function DesignOption3() {
                       borderBottom: idx < selectedMeeting.attendees.length - 1 ? '1px solid #f3f4f6' : 'none',
                     }}
                   >
-                    <Avatar sx={{ bgcolor: attendee.color, mr: 2, width: 36, height: 36 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 36, height: 36 }}>
                       {attendee.avatar}
                     </Avatar>
                     <ListItemText
