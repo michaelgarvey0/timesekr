@@ -19,6 +19,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import Image from 'next/image';
 import { useState } from 'react';
 import MeetingDetailsModal from './MeetingDetailsModal';
+import InviteeResponseForm from './InviteeResponseForm';
 
 // DESIGN OPTION 1: Clean Horizontal Tabs
 // All sections accessible via top-level tabs
@@ -339,120 +340,17 @@ export default function DesignOption1() {
                         </Stack>
                       </>
                     ) : (
-                      <>
-                        {/* Invitee View: Response Form */}
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                          Please select which times work for you:
-                        </Typography>
-
-                        {/* Proposed Times with Checkboxes - Horizontal Layout */}
-                        <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
-                          {meeting.proposedTimes.map((time) => {
-                            const isWinningTime = time.id === meeting.winningTime.id;
-                            const isSubmitted = submittedMeetings[meeting.id];
-                            const isEditing = editMode[meeting.id] || !isSubmitted;
-                            return (
-                              <Box
-                                key={time.id}
-                                sx={{
-                                  flex: 1,
-                                  p: 2,
-                                  bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
-                                  border: isWinningTime ? '2px solid #3b82f6' : '1px solid #e5e7eb',
-                                  borderRadius: '8px',
-                                  position: 'relative',
-                                  minHeight: 120,
-                                }}
-                              >
-                                {/* Checkbox in top right */}
-                                <Checkbox
-                                  checked={inviteeResponses[meeting.id]?.[time.id] || false}
-                                  onChange={(e) => handleInviteeResponse(meeting.id, time.id, e.target.checked)}
-                                  disabled={cannotMakeAny[meeting.id] || !isEditing}
-                                  sx={{
-                                    position: 'absolute',
-                                    top: 4,
-                                    right: 4,
-                                    '& .MuiSvgIcon-root': { fontSize: 28 }
-                                  }}
-                                />
-
-                                {/* Most Popular chip in top left */}
-                                {isWinningTime && (
-                                  <Chip
-                                    label="Most Popular"
-                                    size="small"
-                                    color="primary"
-                                    sx={{ position: 'absolute', top: 8, left: 8, height: 20, fontSize: '0.65rem', fontWeight: 600 }}
-                                  />
-                                )}
-
-                                {/* Centered time info */}
-                                <Box sx={{ textAlign: 'center', pt: isWinningTime ? 4 : 1 }}>
-                                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
-                                    {time.day}
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
-                                    {time.time}
-                                  </Typography>
-                                  <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'}>
-                                    {time.votes}/{meeting.totalAttendees} available
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            );
-                          })}
-                        </Stack>
-
-                        {/* Cannot Make Any Option */}
-                        <Box sx={{ p: 2, bgcolor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', mb: 2.5 }}>
-                          <FormGroup>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={cannotMakeAny[meeting.id] || false}
-                                  onChange={(e) => handleCannotMakeAny(meeting.id, e.target.checked)}
-                                  disabled={submittedMeetings[meeting.id] && !editMode[meeting.id]}
-                                />
-                              }
-                              label={
-                                <Typography variant="body2" sx={{ fontWeight: cannotMakeAny[meeting.id] ? 600 : 400 }}>
-                                  I cannot make any of these times
-                                </Typography>
-                              }
-                            />
-                          </FormGroup>
-                        </Box>
-
-                        {/* Submit/Edit Buttons */}
-                        {submittedMeetings[meeting.id] && !editMode[meeting.id] ? (
-                          <Button
-                            variant="outlined"
-                            fullWidth
-                            startIcon={<EditIcon />}
-                            sx={{ textTransform: 'none', minHeight: '42px' }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditMode(prev => ({ ...prev, [meeting.id]: true }));
-                            }}
-                          >
-                            Edit Response
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            fullWidth
-                            startIcon={<CheckIcon />}
-                            sx={{ textTransform: 'none', minHeight: '42px' }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSubmitResponse(meeting);
-                            }}
-                          >
-                            {submittedMeetings[meeting.id] ? 'Update Response' : 'Submit Response'}
-                          </Button>
-                        )}
-                      </>
+                      <InviteeResponseForm
+                        meeting={meeting}
+                        inviteeResponses={inviteeResponses[meeting.id] || {}}
+                        cannotMakeAny={cannotMakeAny[meeting.id] || false}
+                        isSubmitted={submittedMeetings[meeting.id] || false}
+                        isEditing={editMode[meeting.id] || !submittedMeetings[meeting.id]}
+                        onResponseChange={(timeId, checked) => handleInviteeResponse(meeting.id, timeId, checked)}
+                        onCannotMakeAnyChange={(checked) => handleCannotMakeAny(meeting.id, checked)}
+                        onEdit={() => setEditMode(prev => ({ ...prev, [meeting.id]: true }))}
+                        onSubmit={() => handleSubmitResponse(meeting)}
+                      />
                     )}
                   </CardContent>
                 </Card>
