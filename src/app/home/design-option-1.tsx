@@ -114,6 +114,7 @@ export default function DesignOption1() {
   // Invitee response state
   const [inviteeResponses, setInviteeResponses] = useState<{ [meetingId: number]: { [timeId: number]: 'available' | 'unavailable' | null } }>({});
   const [cannotMakeAny, setCannotMakeAny] = useState<{ [meetingId: number]: boolean }>({});
+  const [submittedMeetings, setSubmittedMeetings] = useState<{ [meetingId: number]: boolean }>({});
 
   // Helper functions for attendee display (used in card avatars)
   const getAttendeeInitials = (attendee: any) => {
@@ -148,7 +149,7 @@ export default function DesignOption1() {
       responses: inviteeResponses[meeting.id],
       cannotMakeAny: cannotMakeAny[meeting.id]
     });
-    alert('Response submitted!');
+    setSubmittedMeetings(prev => ({ ...prev, [meeting.id]: true }));
   };
 
   return (
@@ -339,13 +340,14 @@ export default function DesignOption1() {
                       <>
                         {/* Invitee View: Response Form */}
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                          Please select which times work for you:
+                          {submittedMeetings[meeting.id] ? 'Your response:' : 'Please select which times work for you:'}
                         </Typography>
 
                         {/* Proposed Times with Radio Buttons - Horizontal Layout */}
                         <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
                           {meeting.proposedTimes.map((time) => {
                             const isWinningTime = time.id === meeting.winningTime.id;
+                            const isSubmitted = submittedMeetings[meeting.id];
                             return (
                               <Box
                                 key={time.id}
@@ -355,6 +357,7 @@ export default function DesignOption1() {
                                   bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
                                   border: isWinningTime ? '2px solid #3b82f6' : '1px solid #e5e7eb',
                                   borderRadius: '8px',
+                                  opacity: isSubmitted ? 0.8 : 1,
                                 }}
                               >
                                 <Box sx={{ mb: 1.5 }}>
@@ -377,7 +380,7 @@ export default function DesignOption1() {
                                   )}
                                 </Box>
 
-                                <FormControl component="fieldset">
+                                <FormControl component="fieldset" disabled={isSubmitted}>
                                   <RadioGroup
                                     value={inviteeResponses[meeting.id]?.[time.id] || ''}
                                     onChange={(e) => {
@@ -387,13 +390,13 @@ export default function DesignOption1() {
                                   >
                                     <FormControlLabel
                                       value="available"
-                                      control={<Radio disabled={cannotMakeAny[meeting.id]} size="small" />}
+                                      control={<Radio disabled={isSubmitted || cannotMakeAny[meeting.id]} size="small" />}
                                       label={<Typography variant="caption">Available</Typography>}
                                       sx={{ mb: 0.5 }}
                                     />
                                     <FormControlLabel
                                       value="unavailable"
-                                      control={<Radio disabled={cannotMakeAny[meeting.id]} size="small" />}
+                                      control={<Radio disabled={isSubmitted || cannotMakeAny[meeting.id]} size="small" />}
                                       label={<Typography variant="caption">Not Available</Typography>}
                                     />
                                   </RadioGroup>
@@ -404,13 +407,14 @@ export default function DesignOption1() {
                         </Stack>
 
                         {/* Cannot Make Any Option */}
-                        <Box sx={{ p: 2, bgcolor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', mb: 2.5 }}>
+                        <Box sx={{ p: 2, bgcolor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', mb: 2.5, opacity: submittedMeetings[meeting.id] ? 0.8 : 1 }}>
                           <FormGroup>
                             <FormControlLabel
                               control={
                                 <Checkbox
                                   checked={cannotMakeAny[meeting.id] || false}
                                   onChange={(e) => handleCannotMakeAny(meeting.id, e.target.checked)}
+                                  disabled={submittedMeetings[meeting.id]}
                                 />
                               }
                               label={
@@ -423,18 +427,26 @@ export default function DesignOption1() {
                         </Box>
 
                         {/* Submit Button */}
-                        <Button
-                          variant="contained"
-                          fullWidth
-                          startIcon={<CheckIcon />}
-                          sx={{ textTransform: 'none', minHeight: '42px' }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSubmitResponse(meeting);
-                          }}
-                        >
-                          Submit Response
-                        </Button>
+                        {submittedMeetings[meeting.id] ? (
+                          <Box sx={{ p: 2, bgcolor: '#dcfce7', border: '1px solid #16a34a', borderRadius: '8px', textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#16a34a' }}>
+                              ✓ Response Submitted
+                            </Typography>
+                          </Box>
+                        ) : (
+                          <Button
+                            variant="contained"
+                            fullWidth
+                            startIcon={<CheckIcon />}
+                            sx={{ textTransform: 'none', minHeight: '42px' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSubmitResponse(meeting);
+                            }}
+                          >
+                            Submit Response
+                          </Button>
+                        )}
                       </>
                     )}
                   </CardContent>
