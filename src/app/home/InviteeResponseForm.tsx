@@ -38,14 +38,15 @@ export default function InviteeResponseForm({
       <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
         {meeting.proposedTimes.map((time: any) => {
           const isWinningTime = time.id === meeting.winningTime.id;
+          const isSelected = inviteeResponses[time.id] || false;
           return (
             <Box
               key={time.id}
               sx={{
                 flex: 1,
                 p: 2,
-                bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
-                border: isWinningTime ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                bgcolor: isSelected ? '#f0f9ff' : '#f8fafc',
+                border: isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb',
                 borderRadius: '8px',
                 position: 'relative',
                 minHeight: 120,
@@ -66,7 +67,7 @@ export default function InviteeResponseForm({
                   <Box />
                 )}
                 <Checkbox
-                  checked={inviteeResponses[time.id] || false}
+                  checked={isSelected}
                   onChange={(e) => onResponseChange(time.id, e.target.checked)}
                   disabled={cannotMakeAny || !isEditing}
                   sx={{
@@ -78,13 +79,13 @@ export default function InviteeResponseForm({
 
               {/* Bottom aligned time info */}
               <Box sx={{ textAlign: 'center', mt: 'auto' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {time.day}
                 </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {time.time}
                 </Typography>
-                <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'}>
+                <Typography variant="caption" color="text.secondary">
                   {time.votes}/{meeting.totalAttendees} available
                 </Typography>
               </Box>
