@@ -49,33 +49,35 @@ export default function InviteeResponseForm({
                 borderRadius: '8px',
                 position: 'relative',
                 minHeight: 120,
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              {/* Checkbox in top right */}
-              <Checkbox
-                checked={inviteeResponses[time.id] || false}
-                onChange={(e) => onResponseChange(time.id, e.target.checked)}
-                disabled={cannotMakeAny || !isEditing}
-                sx={{
-                  position: 'absolute',
-                  top: 4,
-                  right: 4,
-                  '& .MuiSvgIcon-root': { fontSize: 28 }
-                }}
-              />
-
-              {/* Most Popular chip in top left */}
-              {isWinningTime && (
-                <Chip
-                  label="Most Popular"
-                  size="small"
-                  color="primary"
-                  sx={{ position: 'absolute', top: 8, left: 8, height: 20, fontSize: '0.65rem', fontWeight: 600 }}
+              {/* Top row: Most Popular chip and Checkbox aligned */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 'auto' }}>
+                {isWinningTime ? (
+                  <Chip
+                    label="Most Popular"
+                    size="small"
+                    color="primary"
+                    sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }}
+                  />
+                ) : (
+                  <Box />
+                )}
+                <Checkbox
+                  checked={inviteeResponses[time.id] || false}
+                  onChange={(e) => onResponseChange(time.id, e.target.checked)}
+                  disabled={cannotMakeAny || !isEditing}
+                  sx={{
+                    p: 0,
+                    '& .MuiSvgIcon-root': { fontSize: 28 }
+                  }}
                 />
-              )}
+              </Box>
 
-              {/* Centered time info */}
-              <Box sx={{ textAlign: 'center', pt: isWinningTime ? 4 : 1 }}>
+              {/* Bottom aligned time info */}
+              <Box sx={{ textAlign: 'center', mt: 'auto' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
                   {time.day}
                 </Typography>
