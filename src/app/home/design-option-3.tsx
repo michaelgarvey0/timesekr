@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell, ToggleButtonGroup, ToggleButton, Checkbox, FormGroup, FormControlLabel } from '@mui/material';
+import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import GroupsIcon from '@mui/icons-material/Groups';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -400,7 +400,7 @@ export default function DesignOption3() {
                         <>
                           {/* Invitee View: Response Form */}
                           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                            {submittedMeetings[meeting.id] ? 'Your response:' : 'Please select which times work for you:'}
+                            Please select which times work for you:
                           </Typography>
 
                           {/* Proposed Times with Radio Buttons - Horizontal Layout */}
@@ -417,7 +417,6 @@ export default function DesignOption3() {
                                     bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
                                     border: isWinningTime ? '2px solid #3b82f6' : '1px solid #e5e7eb',
                                     borderRadius: '8px',
-                                    opacity: isSubmitted ? 0.8 : 1,
                                   }}
                                 >
                                   <Box sx={{ mb: 1.5 }}>
@@ -440,70 +439,55 @@ export default function DesignOption3() {
                                     )}
                                   </Box>
 
-                                  <ToggleButtonGroup
-                                    value={inviteeResponses[meeting.id]?.[time.id] || null}
-                                    exclusive
-                                    onChange={(e, value) => {
-                                      if (value !== null) {
-                                        handleInviteeResponse(meeting.id, time.id, value);
+                                  <Stack spacing={0.5}>
+                                    <FormControlLabel
+                                      control={
+                                        <Checkbox
+                                          checked={inviteeResponses[meeting.id]?.[time.id] === 'available'}
+                                          onChange={(e) => {
+                                            if (e.target.checked) {
+                                              handleInviteeResponse(meeting.id, time.id, 'available');
+                                            } else {
+                                              handleInviteeResponse(meeting.id, time.id, null);
+                                            }
+                                          }}
+                                          disabled={cannotMakeAny[meeting.id]}
+                                          size="small"
+                                        />
                                       }
-                                    }}
-                                    disabled={isSubmitted || cannotMakeAny[meeting.id]}
-                                    fullWidth
-                                    orientation="vertical"
-                                    sx={{ gap: 0.5 }}
-                                  >
-                                    <ToggleButton
-                                      value="available"
-                                      sx={{
-                                        textTransform: 'none',
-                                        fontSize: '0.75rem',
-                                        py: 0.75,
-                                        '&.Mui-selected': {
-                                          bgcolor: '#dcfce7',
-                                          color: '#16a34a',
-                                          fontWeight: 600,
-                                          '&:hover': {
-                                            bgcolor: '#bbf7d0'
-                                          }
-                                        }
-                                      }}
-                                    >
-                                      Available
-                                    </ToggleButton>
-                                    <ToggleButton
-                                      value="unavailable"
-                                      sx={{
-                                        textTransform: 'none',
-                                        fontSize: '0.75rem',
-                                        py: 0.75,
-                                        '&.Mui-selected': {
-                                          bgcolor: '#fee2e2',
-                                          color: '#dc2626',
-                                          fontWeight: 600,
-                                          '&:hover': {
-                                            bgcolor: '#fecaca'
-                                          }
-                                        }
-                                      }}
-                                    >
-                                      Not Available
-                                    </ToggleButton>
-                                  </ToggleButtonGroup>
+                                      label={<Typography variant="caption">Available</Typography>}
+                                    />
+                                    <FormControlLabel
+                                      control={
+                                        <Checkbox
+                                          checked={inviteeResponses[meeting.id]?.[time.id] === 'unavailable'}
+                                          onChange={(e) => {
+                                            if (e.target.checked) {
+                                              handleInviteeResponse(meeting.id, time.id, 'unavailable');
+                                            } else {
+                                              handleInviteeResponse(meeting.id, time.id, null);
+                                            }
+                                          }}
+                                          disabled={cannotMakeAny[meeting.id]}
+                                          size="small"
+                                        />
+                                      }
+                                      label={<Typography variant="caption">Not Available</Typography>}
+                                    />
+                                  </Stack>
                                 </Box>
                               );
                             })}
                           </Stack>
 
                           {/* Cannot Make Any Option */}
-                          <Box sx={{ p: 2, bgcolor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', mb: 2.5, opacity: submittedMeetings[meeting.id] ? 0.8 : 1 }}>
+                          <Box sx={{ p: 2, bgcolor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', mb: 2.5 }}>
                             <FormGroup>
                               <FormControlLabel
                                 control={
                                   <Checkbox
                                     checked={cannotMakeAny[meeting.id] || false}
                                     onChange={(e) => handleCannotMakeAny(meeting.id, e.target.checked)}
-                                    disabled={submittedMeetings[meeting.id]}
                                   />
                                 }
                                 label={
@@ -516,26 +500,18 @@ export default function DesignOption3() {
                           </Box>
 
                           {/* Submit Button */}
-                          {submittedMeetings[meeting.id] ? (
-                            <Box sx={{ p: 2, bgcolor: '#dcfce7', border: '1px solid #16a34a', borderRadius: '8px', textAlign: 'center' }}>
-                              <Typography variant="body2" sx={{ fontWeight: 600, color: '#16a34a' }}>
-                                ✓ Response Submitted
-                              </Typography>
-                            </Box>
-                          ) : (
-                            <Button
-                              variant="contained"
-                              fullWidth
-                              startIcon={<CheckIcon />}
-                              sx={{ textTransform: 'none', minHeight: '42px' }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSubmitResponse(meeting);
-                              }}
-                            >
-                              Submit Response
-                            </Button>
-                          )}
+                          <Button
+                            variant="contained"
+                            fullWidth
+                            startIcon={<CheckIcon />}
+                            sx={{ textTransform: 'none', minHeight: '42px' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSubmitResponse(meeting);
+                            }}
+                          >
+                            {submittedMeetings[meeting.id] ? 'Update Response' : 'Submit Response'}
+                          </Button>
                         </>
                       )}
                     </CardContent>
