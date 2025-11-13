@@ -216,9 +216,9 @@ export default function DesignOption3() {
                     }}
                     onClick={() => setSelectedMeeting(meeting)}
                   >
-                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                    <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
                       {/* Status Chip at Top Left */}
-                      <Box sx={{ mb: 1 }}>
+                      <Box sx={{ mb: 2 }}>
                         <Chip
                           label={meeting.status}
                           color={meeting.statusColor as any}
@@ -228,7 +228,7 @@ export default function DesignOption3() {
                       </Box>
 
                       {/* Title and Avatars */}
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2.5 }}>
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                             {meeting.title}
@@ -255,15 +255,15 @@ export default function DesignOption3() {
                       </Box>
 
                       {/* Proposed Times */}
-                      <Box sx={{ mb: 1.5 }}>
-                        <Stack direction="row" spacing={1}>
+                      <Box sx={{ mb: 2.5 }}>
+                        <Stack direction="row" spacing={1.5}>
                           {meeting.proposedTimes.map((time) => (
                             <Box
                               key={time.id}
                               sx={{
                                 flex: 1,
-                                py: 1,
-                                px: 1.25,
+                                py: 1.5,
+                                px: 1.5,
                                 bgcolor: '#f8fafc',
                                 borderRadius: '6px',
                                 textAlign: 'center',
@@ -281,7 +281,7 @@ export default function DesignOption3() {
                       </Box>
 
                       {/* Progress Bar */}
-                      <Box sx={{ mb: 1.5 }}>
+                      <Box sx={{ mb: 2.5 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                           <Typography variant="caption" color="text.secondary">
                             Response Progress
@@ -305,20 +305,18 @@ export default function DesignOption3() {
                       </Box>
 
                       {/* Action Buttons at Bottom */}
-                      <Stack direction="row" spacing={1}>
+                      <Stack direction="row" spacing={1.5}>
                         <Button
                           variant="outlined"
-                          size="small"
                           fullWidth
-                          sx={{ textTransform: 'none' }}
+                          sx={{ textTransform: 'none', minHeight: '42px' }}
                         >
                           View Details
                         </Button>
                         <Button
                           variant="contained"
-                          size="small"
                           fullWidth
-                          sx={{ textTransform: 'none' }}
+                          sx={{ textTransform: 'none', minHeight: '42px' }}
                         >
                           Send Invite
                         </Button>
