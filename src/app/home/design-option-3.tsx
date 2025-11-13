@@ -601,10 +601,19 @@ export default function DesignOption3() {
                               <Avatar sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8', width: 32, height: 32, fontSize: '0.75rem' }}>
                                 {getAttendeeInitials(attendee)}
                               </Avatar>
-                              <Box>
-                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                  {getAttendeeDisplayName(attendee)}
-                                </Typography>
+                              <Box sx={{ flex: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                    {getAttendeeDisplayName(attendee)}
+                                  </Typography>
+                                  <Chip
+                                    icon={attendee.responded ? <CheckCircleIcon /> : <HourglassEmptyIcon />}
+                                    label={attendee.responded ? 'Responded' : 'Pending'}
+                                    size="small"
+                                    color={attendee.responded ? 'success' : 'warning'}
+                                    sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }}
+                                  />
+                                </Box>
                                 {!attendee.onPlatform && (
                                   <Typography variant="caption" color="text.secondary">
                                     Email only
