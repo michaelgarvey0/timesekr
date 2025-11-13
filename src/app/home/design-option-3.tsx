@@ -420,12 +420,35 @@ export default function DesignOption3() {
                                     bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
                                     border: isWinningTime ? '2px solid #3b82f6' : '1px solid #e5e7eb',
                                     borderRadius: '8px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
+                                    position: 'relative',
+                                    minHeight: 120,
                                   }}
                                 >
-                                  <Box sx={{ mb: 1.5, textAlign: 'center' }}>
+                                  {/* Checkbox in top right */}
+                                  <Checkbox
+                                    checked={inviteeResponses[meeting.id]?.[time.id] || false}
+                                    onChange={(e) => handleInviteeResponse(meeting.id, time.id, e.target.checked)}
+                                    disabled={cannotMakeAny[meeting.id] || !isEditing}
+                                    sx={{
+                                      position: 'absolute',
+                                      top: 4,
+                                      right: 4,
+                                      '& .MuiSvgIcon-root': { fontSize: 28 }
+                                    }}
+                                  />
+
+                                  {/* Most Popular chip in top left */}
+                                  {isWinningTime && (
+                                    <Chip
+                                      label="Most Popular"
+                                      size="small"
+                                      color="primary"
+                                      sx={{ position: 'absolute', top: 8, left: 8, height: 20, fontSize: '0.65rem', fontWeight: 600 }}
+                                    />
+                                  )}
+
+                                  {/* Centered time info */}
+                                  <Box sx={{ textAlign: 'center', pt: isWinningTime ? 4 : 1 }}>
                                     <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
                                       {time.day}
                                     </Typography>
@@ -435,24 +458,7 @@ export default function DesignOption3() {
                                     <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'}>
                                       {time.votes}/{meeting.totalAttendees} available
                                     </Typography>
-                                    {isWinningTime && (
-                                      <Chip
-                                        label="Most Popular"
-                                        size="small"
-                                        color="primary"
-                                        sx={{ mt: 0.5, height: 20, fontSize: '0.65rem', fontWeight: 600 }}
-                                      />
-                                    )}
                                   </Box>
-
-                                  <Checkbox
-                                    checked={inviteeResponses[meeting.id]?.[time.id] || false}
-                                    onChange={(e) => handleInviteeResponse(meeting.id, time.id, e.target.checked)}
-                                    disabled={cannotMakeAny[meeting.id] || !isEditing}
-                                    sx={{
-                                      '& .MuiSvgIcon-root': { fontSize: 32 }
-                                    }}
-                                  />
                                 </Box>
                               );
                             })}
