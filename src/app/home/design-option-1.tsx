@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Tabs, Tab, AppBar, Toolbar, IconButton, Avatar, Card, CardContent, Chip, Stack, LinearProgress, AvatarGroup, Modal, Divider, List, ListItem, ListItemText } from '@mui/material';
+import { Box, Typography, Button, Tabs, Tab, AppBar, Toolbar, IconButton, Avatar, Card, CardContent, Chip, Stack, LinearProgress, AvatarGroup, Modal, Divider, List, ListItem, ListItemText, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -13,6 +13,9 @@ import EmailIcon from '@mui/icons-material/Email';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
+import RemoveIcon from '@mui/icons-material/Remove';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -36,16 +39,16 @@ const mockOrganizingMeetings = [
       { id: 3, day: 'Fri, Jan 19', time: '3:00 PM', votes: 1 },
     ],
     attendees: [
-      { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true },
-      { email: 'david.kim@company.com', firstName: 'David', lastName: 'Kim', onPlatform: true, responded: true },
-      { email: 'emma.wilson@company.com', firstName: 'Emma', lastName: 'Wilson', onPlatform: true, responded: true },
-      { email: 'james.rodriguez@client.com', onPlatform: false, responded: false },
-      { email: 'lisa.anderson@company.com', firstName: 'Lisa', lastName: 'Anderson', onPlatform: true, responded: true },
-      { email: 'mike.brown@partner.com', onPlatform: false, responded: false },
-      { email: 'sophie.taylor@company.com', firstName: 'Sophie', lastName: 'Taylor', onPlatform: true, responded: true },
-      { email: 'robert.lee@external.com', onPlatform: false, responded: false },
-      { email: 'amanda.white@company.com', firstName: 'Amanda', lastName: 'White', onPlatform: true, responded: true },
-      { email: 'chris.martin@vendor.com', onPlatform: false, responded: true },
+      { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'unavailable', 3: null } },
+      { email: 'david.kim@company.com', firstName: 'David', lastName: 'Kim', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'available', 3: null } },
+      { email: 'emma.wilson@company.com', firstName: 'Emma', lastName: 'Wilson', onPlatform: true, responded: true, availability: { 1: 'available', 2: null, 3: 'unavailable' } },
+      { email: 'james.rodriguez@client.com', onPlatform: false, responded: false, availability: { 1: null, 2: null, 3: null } },
+      { email: 'lisa.anderson@company.com', firstName: 'Lisa', lastName: 'Anderson', onPlatform: true, responded: true, availability: { 1: 'available', 2: null, 3: 'available' } },
+      { email: 'mike.brown@partner.com', onPlatform: false, responded: false, availability: { 1: null, 2: null, 3: null } },
+      { email: 'sophie.taylor@company.com', firstName: 'Sophie', lastName: 'Taylor', onPlatform: true, responded: true, availability: { 1: 'unavailable', 2: 'available', 3: null } },
+      { email: 'robert.lee@external.com', onPlatform: false, responded: false, availability: { 1: null, 2: null, 3: null } },
+      { email: 'amanda.white@company.com', firstName: 'Amanda', lastName: 'White', onPlatform: true, responded: true, availability: { 1: 'unavailable', 2: 'unavailable', 3: null } },
+      { email: 'chris.martin@vendor.com', onPlatform: false, responded: true, availability: { 1: 'available', 2: null, 3: null } },
     ]
   },
   {
@@ -62,11 +65,11 @@ const mockOrganizingMeetings = [
       { id: 2, day: 'Mon, Jan 15', time: '2:00 PM', votes: 3 },
     ],
     attendees: [
-      { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true },
-      { email: 'david.kim@company.com', firstName: 'David', lastName: 'Kim', onPlatform: true, responded: true },
-      { email: 'emma.wilson@company.com', firstName: 'Emma', lastName: 'Wilson', onPlatform: true, responded: true },
-      { email: 'james@external.com', onPlatform: false, responded: true },
-      { email: 'lisa.anderson@company.com', firstName: 'Lisa', lastName: 'Anderson', onPlatform: true, responded: true },
+      { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'available' } },
+      { email: 'david.kim@company.com', firstName: 'David', lastName: 'Kim', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'available' } },
+      { email: 'emma.wilson@company.com', firstName: 'Emma', lastName: 'Wilson', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'available' } },
+      { email: 'james@external.com', onPlatform: false, responded: true, availability: { 1: 'available', 2: 'unavailable' } },
+      { email: 'lisa.anderson@company.com', firstName: 'Lisa', lastName: 'Anderson', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'available' } },
     ]
   },
 ];
@@ -89,14 +92,14 @@ const mockInvitedMeetings = [
       { id: 3, day: 'Thu, Jan 18', time: '4:00 PM', votes: 1 },
     ],
     attendees: [
-      { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true },
-      { email: 'david.kim@company.com', firstName: 'David', lastName: 'Kim', onPlatform: true, responded: true },
-      { email: 'emma.wilson@company.com', firstName: 'Emma', lastName: 'Wilson', onPlatform: true, responded: true },
-      { email: 'james.rodriguez@client.com', onPlatform: false, responded: false },
-      { email: 'lisa.anderson@company.com', firstName: 'Lisa', lastName: 'Anderson', onPlatform: true, responded: true },
-      { email: 'mike.brown@partner.com', onPlatform: false, responded: false },
-      { email: 'sophie.taylor@company.com', firstName: 'Sophie', lastName: 'Taylor', onPlatform: true, responded: true },
-      { email: 'robert.lee@external.com', onPlatform: false, responded: false },
+      { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'available', 3: 'unavailable' } },
+      { email: 'david.kim@company.com', firstName: 'David', lastName: 'Kim', onPlatform: true, responded: true, availability: { 1: 'available', 2: null, 3: null } },
+      { email: 'emma.wilson@company.com', firstName: 'Emma', lastName: 'Wilson', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'unavailable', 3: null } },
+      { email: 'james.rodriguez@client.com', onPlatform: false, responded: false, availability: { 1: null, 2: null, 3: null } },
+      { email: 'lisa.anderson@company.com', firstName: 'Lisa', lastName: 'Anderson', onPlatform: true, responded: true, availability: { 1: 'unavailable', 2: 'available', 3: null } },
+      { email: 'mike.brown@partner.com', onPlatform: false, responded: false, availability: { 1: null, 2: null, 3: null } },
+      { email: 'sophie.taylor@company.com', firstName: 'Sophie', lastName: 'Taylor', onPlatform: true, responded: true, availability: { 1: 'unavailable', 2: null, 3: 'available' } },
+      { email: 'robert.lee@external.com', onPlatform: false, responded: false, availability: { 1: null, 2: null, 3: null } },
     ]
   },
 ];
@@ -432,54 +435,130 @@ export default function DesignOption1() {
                 />
               </Box>
 
-              {/* Proposed Times with Granular Availability */}
+              {/* Availability Grid */}
               <Box sx={{ p: 3 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-                  Proposed Times
+                  Availability Grid
                 </Typography>
-                <Stack spacing={2}>
-                  {selectedMeeting.proposedTimes.map((time) => (
-                    <Box
-                      key={time.id}
-                      sx={{
-                        p: 2.5,
-                        bgcolor: time.id === selectedMeeting.winningTime.id ? '#f0f9ff' : '#f8fafc',
-                        border: time.id === selectedMeeting.winningTime.id ? '2px solid #3b82f6' : '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Box>
-                          <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                            {time.day} @ {time.time}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {time.votes}/{selectedMeeting.totalAttendees} available
-                          </Typography>
-                        </Box>
-                        {time.id === selectedMeeting.winningTime.id && (
-                          <Chip
-                            label="Most Available"
-                            size="small"
-                            color="primary"
-                            sx={{ fontWeight: 600 }}
-                          />
-                        )}
-                      </Box>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}>
-                        {selectedMeeting.attendees.slice(0, time.votes).map((attendee, idx) => (
-                          <Chip
-                            key={idx}
-                            avatar={<Avatar sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8', fontSize: '0.7rem' }}>{getAttendeeInitials(attendee)}</Avatar>}
-                            label={getAttendeeDisplayName(attendee)}
-                            size="small"
-                            sx={{ bgcolor: 'white', border: '1px solid #e5e7eb' }}
-                          />
+                <Box sx={{ overflowX: 'auto' }}>
+                  <Table sx={{ minWidth: 650 }}>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', position: 'sticky', left: 0, bgcolor: '#f8fafc', zIndex: 1 }}>
+                          Attendee
+                        </TableCell>
+                        {selectedMeeting.proposedTimes.map((time) => (
+                          <TableCell
+                            key={time.id}
+                            align="center"
+                            sx={{
+                              fontWeight: 600,
+                              bgcolor: time.id === selectedMeeting.winningTime.id ? '#f0f9ff' : '#f8fafc',
+                              borderBottom: '2px solid #e5e7eb',
+                              minWidth: 160,
+                            }}
+                          >
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                                {time.day}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {time.time}
+                              </Typography>
+                              {time.id === selectedMeeting.winningTime.id && (
+                                <Chip
+                                  label="Best"
+                                  size="small"
+                                  color="primary"
+                                  sx={{ mt: 0.5, height: 18, fontSize: '0.65rem', fontWeight: 600 }}
+                                />
+                              )}
+                            </Box>
+                          </TableCell>
                         ))}
-                      </Box>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectedMeeting.attendees.map((attendee, idx) => (
+                        <TableRow
+                          key={idx}
+                          sx={{
+                            '&:hover': { bgcolor: '#fafbfc' },
+                            bgcolor: !attendee.responded ? '#fff9f5' : 'inherit',
+                          }}
+                        >
+                          <TableCell sx={{ position: 'sticky', left: 0, bgcolor: !attendee.responded ? '#fff9f5' : 'white', zIndex: 1, borderBottom: '1px solid #f3f4f6' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Avatar sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8', width: 32, height: 32, fontSize: '0.75rem' }}>
+                                {getAttendeeInitials(attendee)}
+                              </Avatar>
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                  {getAttendeeDisplayName(attendee)}
+                                </Typography>
+                                {!attendee.onPlatform && (
+                                  <Typography variant="caption" color="text.secondary">
+                                    Email only
+                                  </Typography>
+                                )}
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          {selectedMeeting.proposedTimes.map((time) => {
+                            const availability = attendee.availability?.[time.id];
+                            const isWinningTime = time.id === selectedMeeting.winningTime.id;
+                            return (
+                              <TableCell
+                                key={time.id}
+                                align="center"
+                                sx={{
+                                  bgcolor: isWinningTime ? '#f0f9ff' : 'inherit',
+                                  borderBottom: '1px solid #f3f4f6',
+                                }}
+                              >
+                                {availability === 'available' && (
+                                  <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', bgcolor: '#dcfce7' }}>
+                                    <CheckIcon sx={{ fontSize: 18, color: '#16a34a' }} />
+                                  </Box>
+                                )}
+                                {availability === 'unavailable' && (
+                                  <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', bgcolor: '#fee2e2' }}>
+                                    <ClearIcon sx={{ fontSize: 18, color: '#dc2626' }} />
+                                  </Box>
+                                )}
+                                {!availability && (
+                                  <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', bgcolor: '#f3f4f6' }}>
+                                    <RemoveIcon sx={{ fontSize: 18, color: '#9ca3af' }} />
+                                  </Box>
+                                )}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Box>
+                <Box sx={{ mt: 2, display: 'flex', gap: 3, justifyContent: 'center' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#dcfce7' }}>
+                      <CheckIcon sx={{ fontSize: 14, color: '#16a34a' }} />
                     </Box>
-                  ))}
-                </Stack>
+                    <Typography variant="caption" color="text.secondary">Available</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#fee2e2' }}>
+                      <ClearIcon sx={{ fontSize: 14, color: '#dc2626' }} />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">Unavailable</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#f3f4f6' }}>
+                      <RemoveIcon sx={{ fontSize: 14, color: '#9ca3af' }} />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">No Response</Typography>
+                  </Box>
+                </Box>
               </Box>
 
               <Divider />
