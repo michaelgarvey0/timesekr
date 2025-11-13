@@ -113,9 +113,10 @@ export default function DesignOption3() {
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
 
   // Invitee response state
-  const [inviteeResponses, setInviteeResponses] = useState<{ [meetingId: number]: { [timeId: number]: 'available' | 'unavailable' | null } }>({});
+  const [inviteeResponses, setInviteeResponses] = useState<{ [meetingId: number]: { [timeId: number]: boolean } }>({});
   const [cannotMakeAny, setCannotMakeAny] = useState<{ [meetingId: number]: boolean }>({});
   const [submittedMeetings, setSubmittedMeetings] = useState<{ [meetingId: number]: boolean }>({});
+  const [editMode, setEditMode] = useState<{ [meetingId: number]: boolean }>({});
 
   // Helper functions for attendee display (used in card avatars)
   const getAttendeeInitials = (attendee: any) => {
@@ -125,12 +126,12 @@ export default function DesignOption3() {
     return attendee.email ? attendee.email[0].toUpperCase() : '?';
   };
 
-  const handleInviteeResponse = (meetingId: number, timeId: number, value: 'available' | 'unavailable' | null) => {
+  const handleInviteeResponse = (meetingId: number, timeId: number, checked: boolean) => {
     setInviteeResponses(prev => ({
       ...prev,
       [meetingId]: {
         ...(prev[meetingId] || {}),
-        [timeId]: value
+        [timeId]: checked
       }
     }));
     if (cannotMakeAny[meetingId]) {
@@ -151,6 +152,7 @@ export default function DesignOption3() {
       cannotMakeAny: cannotMakeAny[meeting.id]
     });
     setSubmittedMeetings(prev => ({ ...prev, [meeting.id]: true }));
+    setEditMode(prev => ({ ...prev, [meeting.id]: false }));
   };
 
   return (
@@ -403,11 +405,12 @@ export default function DesignOption3() {
                             Please select which times work for you:
                           </Typography>
 
-                          {/* Proposed Times with Radio Buttons - Horizontal Layout */}
+                          {/* Proposed Times with Checkboxes - Horizontal Layout */}
                           <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
                             {meeting.proposedTimes.map((time) => {
                               const isWinningTime = time.id === meeting.winningTime.id;
                               const isSubmitted = submittedMeetings[meeting.id];
+                              const isEditing = editMode[meeting.id] || !isSubmitted;
                               return (
                                 <Box
                                   key={time.id}
@@ -417,9 +420,12 @@ export default function DesignOption3() {
                                     bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
                                     border: isWinningTime ? '2px solid #3b82f6' : '1px solid #e5e7eb',
                                     borderRadius: '8px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
                                   }}
                                 >
-                                  <Box sx={{ mb: 1.5 }}>
+                                  <Box sx={{ mb: 1.5, textAlign: 'center' }}>
                                     <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
                                       {time.day}
                                     </Typography>
@@ -439,42 +445,14 @@ export default function DesignOption3() {
                                     )}
                                   </Box>
 
-                                  <Stack spacing={0.5}>
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                          checked={inviteeResponses[meeting.id]?.[time.id] === 'available'}
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              handleInviteeResponse(meeting.id, time.id, 'available');
-                                            } else {
-                                              handleInviteeResponse(meeting.id, time.id, null);
-                                            }
-                                          }}
-                                          disabled={cannotMakeAny[meeting.id]}
-                                          size="small"
-                                        />
-                                      }
-                                      label={<Typography variant="caption">Available</Typography>}
-                                    />
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                          checked={inviteeResponses[meeting.id]?.[time.id] === 'unavailable'}
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              handleInviteeResponse(meeting.id, time.id, 'unavailable');
-                                            } else {
-                                              handleInviteeResponse(meeting.id, time.id, null);
-                                            }
-                                          }}
-                                          disabled={cannotMakeAny[meeting.id]}
-                                          size="small"
-                                        />
-                                      }
-                                      label={<Typography variant="caption">Not Available</Typography>}
-                                    />
-                                  </Stack>
+                                  <Checkbox
+                                    checked={inviteeResponses[meeting.id]?.[time.id] || false}
+                                    onChange={(e) => handleInviteeResponse(meeting.id, time.id, e.target.checked)}
+                                    disabled={cannotMakeAny[meeting.id] || !isEditing}
+                                    sx={{
+                                      '& .MuiSvgIcon-root': { fontSize: 32 }
+                                    }}
+                                  />
                                 </Box>
                               );
                             })}
@@ -488,6 +466,7 @@ export default function DesignOption3() {
                                   <Checkbox
                                     checked={cannotMakeAny[meeting.id] || false}
                                     onChange={(e) => handleCannotMakeAny(meeting.id, e.target.checked)}
+                                    disabled={submittedMeetings[meeting.id] && !editMode[meeting.id]}
                                   />
                                 }
                                 label={
@@ -499,19 +478,34 @@ export default function DesignOption3() {
                             </FormGroup>
                           </Box>
 
-                          {/* Submit Button */}
-                          <Button
-                            variant="contained"
-                            fullWidth
-                            startIcon={<CheckIcon />}
-                            sx={{ textTransform: 'none', minHeight: '42px' }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSubmitResponse(meeting);
-                            }}
-                          >
-                            {submittedMeetings[meeting.id] ? 'Update Response' : 'Submit Response'}
-                          </Button>
+                          {/* Submit/Edit Buttons */}
+                          {submittedMeetings[meeting.id] && !editMode[meeting.id] ? (
+                            <Button
+                              variant="outlined"
+                              fullWidth
+                              startIcon={<EditIcon />}
+                              sx={{ textTransform: 'none', minHeight: '42px' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditMode(prev => ({ ...prev, [meeting.id]: true }));
+                              }}
+                            >
+                              Edit Response
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="contained"
+                              fullWidth
+                              startIcon={<CheckIcon />}
+                              sx={{ textTransform: 'none', minHeight: '42px' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSubmitResponse(meeting);
+                              }}
+                            >
+                              {submittedMeetings[meeting.id] ? 'Update Response' : 'Submit Response'}
+                            </Button>
+                          )}
                         </>
                       )}
                     </CardContent>
