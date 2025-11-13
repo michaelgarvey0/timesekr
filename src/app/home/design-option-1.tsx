@@ -176,15 +176,9 @@ export default function DesignOption1() {
                           {meeting.winningTime.day} @ {meeting.winningTime.time}
                         </Typography>
                       </Box>
-                      <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem' } }}>
+                      <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
                         {meeting.attendees.map((attendee, idx) => (
-                          <Avatar
-                            key={idx}
-                            sx={{
-                              bgcolor: 'primary.main',
-                              opacity: attendee.responded ? 1 : 0.4,
-                            }}
-                          >
+                          <Avatar key={idx}>
                             {attendee.avatar}
                           </Avatar>
                         ))}
