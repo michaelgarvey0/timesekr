@@ -209,8 +209,9 @@ export default function DesignOption3() {
                     sx={{
                       cursor: 'pointer',
                       transition: 'all 0.2s',
+                      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
                       '&:hover': {
-                        boxShadow: 3,
+                        boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.15)',
                         transform: 'translateY(-2px)',
                       }
                     }}
@@ -434,7 +435,7 @@ export default function DesignOption3() {
               overflow: 'auto',
               bgcolor: 'background.paper',
               borderRadius: '12px',
-              boxShadow: 24,
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             }}
           >
             {/* Modal Header */}
