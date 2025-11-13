@@ -342,42 +342,43 @@ export default function DesignOption1() {
                           Please select which times work for you:
                         </Typography>
 
-                        {/* Proposed Times with Radio Buttons */}
-                        <Stack spacing={2} sx={{ mb: 2 }}>
+                        {/* Proposed Times with Radio Buttons - Horizontal Layout */}
+                        <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
                           {meeting.proposedTimes.map((time) => {
                             const isWinningTime = time.id === meeting.winningTime.id;
                             return (
                               <Box
                                 key={time.id}
                                 sx={{
+                                  flex: 1,
                                   p: 2,
                                   bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
                                   border: isWinningTime ? '2px solid #3b82f6' : '1px solid #e5e7eb',
                                   borderRadius: '8px',
                                 }}
                               >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
-                                  <Box>
-                                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
-                                      {time.day} @ {time.time}
-                                    </Typography>
-                                    <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'}>
-                                      {time.votes}/{meeting.totalAttendees} people available
-                                    </Typography>
-                                  </Box>
+                                <Box sx={{ mb: 1.5 }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                                    {time.day}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                                    {time.time}
+                                  </Typography>
+                                  <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'}>
+                                    {time.votes}/{meeting.totalAttendees} available
+                                  </Typography>
                                   {isWinningTime && (
                                     <Chip
                                       label="Most Popular"
                                       size="small"
                                       color="primary"
-                                      sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }}
+                                      sx={{ mt: 0.5, height: 20, fontSize: '0.65rem', fontWeight: 600 }}
                                     />
                                   )}
                                 </Box>
 
                                 <FormControl component="fieldset">
                                   <RadioGroup
-                                    row
                                     value={inviteeResponses[meeting.id]?.[time.id] || ''}
                                     onChange={(e) => {
                                       const value = e.target.value;
@@ -386,14 +387,14 @@ export default function DesignOption1() {
                                   >
                                     <FormControlLabel
                                       value="available"
-                                      control={<Radio disabled={cannotMakeAny[meeting.id]} />}
-                                      label="Available"
-                                      sx={{ mr: 3 }}
+                                      control={<Radio disabled={cannotMakeAny[meeting.id]} size="small" />}
+                                      label={<Typography variant="caption">Available</Typography>}
+                                      sx={{ mb: 0.5 }}
                                     />
                                     <FormControlLabel
                                       value="unavailable"
-                                      control={<Radio disabled={cannotMakeAny[meeting.id]} />}
-                                      label="Not Available"
+                                      control={<Radio disabled={cannotMakeAny[meeting.id]} size="small" />}
+                                      label={<Typography variant="caption">Not Available</Typography>}
                                     />
                                   </RadioGroup>
                                 </FormControl>
