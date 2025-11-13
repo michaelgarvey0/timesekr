@@ -20,7 +20,7 @@ import { useState } from 'react';
 
 const SIDEBAR_WIDTH = 240;
 
-// Mock data for meetings
+// Mock data for meetings organized by user
 const mockOrganizingMeetings = [
   {
     id: 1,
@@ -72,9 +72,39 @@ const mockOrganizingMeetings = [
   },
 ];
 
+// Mock data for meetings user is invited to
+const mockInvitedMeetings = [
+  {
+    id: 3,
+    title: 'Design Review',
+    organizer: 'Sarah Chen',
+    totalAttendees: 8,
+    responded: 5,
+    pending: 3,
+    status: 'Action Required',
+    statusColor: 'warning',
+    winningTime: { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', votes: 3 },
+    proposedTimes: [
+      { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', votes: 3 },
+      { id: 2, day: 'Thu, Jan 18', time: '11:00 AM', votes: 2 },
+      { id: 3, day: 'Thu, Jan 18', time: '4:00 PM', votes: 1 },
+    ],
+    attendees: [
+      { name: 'Sarah Chen', avatar: 'SC', responded: true },
+      { name: 'David Kim', avatar: 'DK', responded: true },
+      { name: 'Emma Wilson', avatar: 'EW', responded: true },
+      { name: 'James Rodriguez', avatar: 'JR', responded: false },
+      { name: 'Lisa Anderson', avatar: 'LA', responded: true },
+      { name: 'Michael Brown', avatar: 'MB', responded: false },
+      { name: 'Sophie Taylor', avatar: 'ST', responded: true },
+      { name: 'Robert Lee', avatar: 'RL', responded: false },
+    ]
+  },
+];
+
 export default function DesignOption3() {
   const [selectedSection, setSelectedSection] = useState('meetings');
-  const [meetingsTab, setMeetingsTab] = useState(0); // 0 = organizing, 1 = invited
+  const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
 
   return (
@@ -169,136 +199,100 @@ export default function DesignOption3() {
           {selectedSection === 'meetings' && (
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-                Meetings
+                {viewMode === 'organizer' ? 'Meetings You\'re Organizing' : 'Meetings You\'re Invited To'}
               </Typography>
 
-              {/* Meetings Tabs */}
-              <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-                <Tabs value={meetingsTab} onChange={(e, v) => setMeetingsTab(v)}>
-                  <Tab
-                    icon={<GroupsIcon />}
-                    iconPosition="start"
-                    label="Organizing"
-                    sx={{ textTransform: 'none', minHeight: 56 }}
-                  />
-                  <Tab
-                    icon={<EventIcon />}
-                    iconPosition="start"
-                    label="Invited To"
-                    sx={{ textTransform: 'none', minHeight: 56 }}
-                  />
-                </Tabs>
-              </Box>
-
-              {/* Tab: Organizing */}
-              {meetingsTab === 0 && (
-                <Stack spacing={2}>
-                  {mockOrganizingMeetings.map((meeting) => (
-                    <Card
-                      key={meeting.id}
-                      sx={{
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          boxShadow: 3,
-                          transform: 'translateY(-2px)',
-                        }
-                      }}
-                      onClick={() => setSelectedMeeting(meeting)}
-                    >
-                      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-                              {meeting.title}
-                            </Typography>
-                            <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
+              <Stack spacing={2}>
+                {(viewMode === 'organizer' ? mockOrganizingMeetings : mockInvitedMeetings).map((meeting) => (
+                  <Card
+                    key={meeting.id}
+                    sx={{
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        boxShadow: 3,
+                        transform: 'translateY(-2px)',
+                      }
+                    }}
+                    onClick={() => setSelectedMeeting(meeting)}
+                  >
+                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                            {meeting.title}
+                          </Typography>
+                          <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
+                            {viewMode === 'invitee' && 'organizer' in meeting && (
                               <Typography variant="body2" color="text.secondary">
-                                <GroupsIcon sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
-                                {meeting.totalAttendees} attendees
+                                Organized by {meeting.organizer}
                               </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                {meeting.responded}/{meeting.totalAttendees} responded
-                              </Typography>
-                            </Stack>
-                          </Box>
-                          <Chip
-                            label={meeting.status}
-                            color={meeting.statusColor as any}
-                            sx={{ fontWeight: 600 }}
-                          />
-                        </Box>
-
-                        {/* Progress Bar */}
-                        <Box sx={{ mb: 1.5 }}>
-                          <LinearProgress
-                            variant="determinate"
-                            value={(meeting.responded / meeting.totalAttendees) * 100}
-                            sx={{
-                              height: 6,
-                              borderRadius: 1,
-                              bgcolor: '#e5e7eb',
-                              '& .MuiLinearProgress-bar': {
-                                bgcolor: meeting.status === 'Ready' ? '#22c55e' : '#f59e0b',
-                              }
-                            }}
-                          />
-                        </Box>
-
-                        {/* Winning Time */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                          <Box sx={{ p: 1.25, bgcolor: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd', flex: 1, mr: 2 }}>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                              <ThumbUpIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} />
-                              Winning Time ({meeting.winningTime.votes} votes)
+                            )}
+                            <Typography variant="body2" color="text.secondary">
+                              <GroupsIcon sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
+                              {meeting.totalAttendees} attendees
                             </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {meeting.winningTime.day} @ {meeting.winningTime.time}
+                            <Typography variant="body2" color="text.secondary">
+                              {meeting.responded}/{meeting.totalAttendees} responded
                             </Typography>
-                          </Box>
-                          <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
-                            {meeting.attendees.map((attendee, idx) => (
-                              <Avatar key={idx}>
-                                {attendee.avatar}
-                              </Avatar>
-                            ))}
-                          </AvatarGroup>
+                          </Stack>
                         </Box>
+                        <Chip
+                          label={meeting.status}
+                          color={meeting.statusColor as any}
+                          sx={{ fontWeight: 600 }}
+                        />
+                      </Box>
 
-                        {meeting.pending > 0 && (
-                          <Chip
-                            icon={<HourglassEmptyIcon />}
-                            label={`${meeting.pending} pending`}
-                            size="small"
-                            color="warning"
-                            variant="outlined"
-                          />
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Stack>
-              )}
+                      {/* Progress Bar */}
+                      <Box sx={{ mb: 1.5 }}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={(meeting.responded / meeting.totalAttendees) * 100}
+                          sx={{
+                            height: 6,
+                            borderRadius: 1,
+                            bgcolor: '#e5e7eb',
+                            '& .MuiLinearProgress-bar': {
+                              bgcolor: meeting.status === 'Ready' ? '#22c55e' : '#f59e0b',
+                            }
+                          }}
+                        />
+                      </Box>
 
-              {/* Tab: Invited To */}
-              {meetingsTab === 1 && (
-                <Stack spacing={2}>
-                  <Card sx={{ border: '2px solid #fbbf24', bgcolor: '#fffbeb' }}>
-                    <CardContent>
-                      <Chip label="Action Required" color="warning" size="small" sx={{ mb: 2 }} />
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        Design Review
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                        Organized by Sarah Chen • 3 time options • Due tomorrow
-                      </Typography>
-                      <Button variant="contained" size="small">
-                        Respond Now
-                      </Button>
+                      {/* Winning Time */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                        <Box sx={{ p: 1.25, bgcolor: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd', flex: 1, mr: 2 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                            <ThumbUpIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} />
+                            Winning Time ({meeting.winningTime.votes} votes)
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {meeting.winningTime.day} @ {meeting.winningTime.time}
+                          </Typography>
+                        </Box>
+                        <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
+                          {meeting.attendees.map((attendee, idx) => (
+                            <Avatar key={idx}>
+                              {attendee.avatar}
+                            </Avatar>
+                          ))}
+                        </AvatarGroup>
+                      </Box>
+
+                      {meeting.pending > 0 && (
+                        <Chip
+                          icon={<HourglassEmptyIcon />}
+                          label={`${meeting.pending} pending`}
+                          size="small"
+                          color="warning"
+                          variant="outlined"
+                        />
+                      )}
                     </CardContent>
                   </Card>
-                </Stack>
-              )}
+                ))}
+              </Stack>
             </Box>
           )}
 
@@ -377,6 +371,18 @@ export default function DesignOption3() {
             </Box>
           )}
         </Box>
+      </Box>
+
+      {/* View Mode Toggle */}
+      <Box sx={{ position: 'fixed', bottom: 80, right: 20, zIndex: 999 }}>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => setViewMode(viewMode === 'organizer' ? 'invitee' : 'organizer')}
+          sx={{ textTransform: 'none' }}
+        >
+          {viewMode === 'organizer' ? 'Switch to Invitee View' : 'Switch to Organizer View'}
+        </Button>
       </Box>
 
       {/* Meeting Details Modal */}

@@ -17,9 +17,9 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 // DESIGN OPTION 1: Clean Horizontal Tabs
-// All four sections accessible via top-level tabs
+// All sections accessible via top-level tabs
 
-// Mock data for meetings
+// Mock data for meetings organized by user
 const mockOrganizingMeetings = [
   {
     id: 1,
@@ -71,8 +71,39 @@ const mockOrganizingMeetings = [
   },
 ];
 
+// Mock data for meetings user is invited to
+const mockInvitedMeetings = [
+  {
+    id: 3,
+    title: 'Design Review',
+    organizer: 'Sarah Chen',
+    totalAttendees: 8,
+    responded: 5,
+    pending: 3,
+    status: 'Action Required',
+    statusColor: 'warning',
+    winningTime: { day: 'Wed, Jan 17', time: '3:00 PM', votes: 3 },
+    proposedTimes: [
+      { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', votes: 3 },
+      { id: 2, day: 'Thu, Jan 18', time: '11:00 AM', votes: 2 },
+      { id: 3, day: 'Thu, Jan 18', time: '4:00 PM', votes: 1 },
+    ],
+    attendees: [
+      { name: 'Sarah Chen', avatar: 'SC', responded: true },
+      { name: 'David Kim', avatar: 'DK', responded: true },
+      { name: 'Emma Wilson', avatar: 'EW', responded: true },
+      { name: 'James Rodriguez', avatar: 'JR', responded: false },
+      { name: 'Lisa Anderson', avatar: 'LA', responded: true },
+      { name: 'Michael Brown', avatar: 'MB', responded: false },
+      { name: 'Sophie Taylor', avatar: 'ST', responded: true },
+      { name: 'Robert Lee', avatar: 'RL', responded: false },
+    ]
+  },
+];
+
 export default function DesignOption1() {
   const [currentTab, setCurrentTab] = useState(0);
+  const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
 
   return (
@@ -93,8 +124,7 @@ export default function DesignOption1() {
       <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'white' }}>
         <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)}>
-            <Tab icon={<GroupsIcon />} iconPosition="start" label="Organizing" sx={{ textTransform: 'none', minHeight: 64 }} />
-            <Tab icon={<EventIcon />} iconPosition="start" label="Invited To" sx={{ textTransform: 'none', minHeight: 64 }} />
+            <Tab icon={<EventIcon />} iconPosition="start" label="Meetings" sx={{ textTransform: 'none', minHeight: 64 }} />
             <Tab icon={<ContactsIcon />} iconPosition="start" label="People" sx={{ textTransform: 'none', minHeight: 64 }} />
             <Tab icon={<AccessTimeIcon />} iconPosition="start" label="My Time" sx={{ textTransform: 'none', minHeight: 64 }} />
           </Tabs>
@@ -106,14 +136,14 @@ export default function DesignOption1() {
 
       {/* Content Area */}
       <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, py: 4 }}>
-        {/* TAB 1: Organizing */}
+        {/* TAB 1: Meetings */}
         {currentTab === 0 && (
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-              Meetings You're Organizing
+              {viewMode === 'organizer' ? 'Meetings You\'re Organizing' : 'Meetings You\'re Invited To'}
             </Typography>
             <Stack spacing={2}>
-              {mockOrganizingMeetings.map((meeting) => (
+              {(viewMode === 'organizer' ? mockOrganizingMeetings : mockInvitedMeetings).map((meeting) => (
                 <Card
                   key={meeting.id}
                   sx={{
@@ -133,6 +163,11 @@ export default function DesignOption1() {
                           {meeting.title}
                         </Typography>
                         <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
+                          {viewMode === 'invitee' && 'organizer' in meeting && (
+                            <Typography variant="body2" color="text.secondary">
+                              Organized by {meeting.organizer}
+                            </Typography>
+                          )}
                           <Typography variant="body2" color="text.secondary">
                             <GroupsIcon sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
                             {meeting.totalAttendees} attendees
@@ -201,30 +236,8 @@ export default function DesignOption1() {
           </Box>
         )}
 
-        {/* TAB 2: Invited To */}
+        {/* TAB 2: People */}
         {currentTab === 1 && (
-          <Box>
-            <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-              Meetings You're Invited To
-            </Typography>
-            <Stack spacing={2}>
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 600 }}>Design Review</Typography>
-                      <Typography variant="body2" color="text.secondary">Organized by Sarah Chen</Typography>
-                    </Box>
-                    <Button variant="contained" size="small">Respond</Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Stack>
-          </Box>
-        )}
-
-        {/* TAB 3: People */}
-        {currentTab === 2 && (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
@@ -249,8 +262,8 @@ export default function DesignOption1() {
           </Box>
         )}
 
-        {/* TAB 4: My Time */}
-        {currentTab === 3 && (
+        {/* TAB 3: My Time */}
+        {currentTab === 2 && (
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
               My Availability
@@ -268,6 +281,18 @@ export default function DesignOption1() {
             </Card>
           </Box>
         )}
+      </Box>
+
+      {/* View Mode Toggle */}
+      <Box sx={{ position: 'fixed', bottom: 80, right: 20, zIndex: 999 }}>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => setViewMode(viewMode === 'organizer' ? 'invitee' : 'organizer')}
+          sx={{ textTransform: 'none' }}
+        >
+          {viewMode === 'organizer' ? 'Switch to Invitee View' : 'Switch to Organizer View'}
+        </Button>
       </Box>
 
       {/* Meeting Details Modal */}
