@@ -157,12 +157,23 @@ export default function DesignOption1() {
                   onClick={() => setSelectedMeeting(meeting)}
                 >
                   <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                    {/* Status Chip at Top Left */}
+                    <Box sx={{ mb: 1 }}>
+                      <Chip
+                        label={meeting.status}
+                        color={meeting.statusColor as any}
+                        size="small"
+                        sx={{ fontWeight: 600 }}
+                      />
+                    </Box>
+
+                    {/* Title and Avatars */}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                           {meeting.title}
                         </Typography>
-                        <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
+                        <Stack direction="row" spacing={2}>
                           {viewMode === 'invitee' && 'organizer' in meeting && (
                             <Typography variant="body2" color="text.secondary">
                               Organized by {meeting.organizer}
@@ -174,11 +185,13 @@ export default function DesignOption1() {
                           </Typography>
                         </Stack>
                       </Box>
-                      <Chip
-                        label={meeting.status}
-                        color={meeting.statusColor as any}
-                        sx={{ fontWeight: 600 }}
-                      />
+                      <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
+                        {meeting.attendees.map((attendee, idx) => (
+                          <Avatar key={idx}>
+                            {attendee.avatar}
+                          </Avatar>
+                        ))}
+                      </AvatarGroup>
                     </Box>
 
                     {/* Proposed Times */}
@@ -207,31 +220,8 @@ export default function DesignOption1() {
                       </Stack>
                     </Box>
 
-                    {/* Attendees */}
+                    {/* Progress Bar */}
                     <Box sx={{ mb: 1.5 }}>
-                      <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
-                        {meeting.attendees.map((attendee, idx) => (
-                          <Avatar key={idx}>
-                            {attendee.avatar}
-                          </Avatar>
-                        ))}
-                      </AvatarGroup>
-                    </Box>
-
-                    {/* View Details Button */}
-                    <Box sx={{ mb: 1.5 }}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        sx={{ textTransform: 'none' }}
-                      >
-                        View Details
-                      </Button>
-                    </Box>
-
-                    {/* Progress Bar at Bottom */}
-                    <Box>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                         <Typography variant="caption" color="text.secondary">
                           Response Progress
@@ -253,6 +243,26 @@ export default function DesignOption1() {
                         }}
                       />
                     </Box>
+
+                    {/* Action Buttons at Bottom */}
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        sx={{ textTransform: 'none' }}
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        fullWidth
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Send Invite
+                      </Button>
+                    </Stack>
                   </CardContent>
                 </Card>
               ))}
