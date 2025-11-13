@@ -164,7 +164,7 @@ export default function DesignOption3() {
 
       {/* Main Content */}
       <Box sx={{ flexGrow: 1, bgcolor: '#fafbfc' }}>
-        <Box sx={{ maxWidth: 1200, mx: 'auto', px: 4, py: 4 }}>
+        <Box sx={{ maxWidth: 800, mx: 'auto', px: 3, py: 4 }}>
           {/* Section: Meetings */}
           {selectedSection === 'meetings' && (
             <Box>
@@ -206,8 +206,8 @@ export default function DesignOption3() {
                       }}
                       onClick={() => setSelectedMeeting(meeting)}
                     >
-                      <CardContent>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1.5 }}>
                           <Box sx={{ flex: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                               {meeting.title}
@@ -230,7 +230,7 @@ export default function DesignOption3() {
                         </Box>
 
                         {/* Progress Bar */}
-                        <Box sx={{ mb: 2 }}>
+                        <Box sx={{ mb: 1.5 }}>
                           <LinearProgress
                             variant="determinate"
                             value={(meeting.responded / meeting.totalAttendees) * 100}
@@ -246,8 +246,8 @@ export default function DesignOption3() {
                         </Box>
 
                         {/* Winning Time */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                          <Box sx={{ p: 1.5, bgcolor: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd', flex: 1, mr: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                          <Box sx={{ p: 1.25, bgcolor: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd', flex: 1, mr: 2 }}>
                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                               <ThumbUpIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} />
                               Winning Time ({meeting.winningTime.votes} votes)
