@@ -553,6 +553,9 @@ export default function DesignOption3() {
                         <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', position: 'sticky', left: 0, bgcolor: '#f8fafc', zIndex: 1 }}>
                           Attendee
                         </TableCell>
+                        <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', minWidth: 120 }} align="center">
+                          Status
+                        </TableCell>
                         {selectedMeeting.proposedTimes.map((time) => (
                           <TableCell
                             key={time.id}
@@ -593,27 +596,17 @@ export default function DesignOption3() {
                           key={idx}
                           sx={{
                             '&:hover': { bgcolor: '#fafbfc' },
-                            bgcolor: !attendee.responded ? '#fff9f5' : 'inherit',
                           }}
                         >
-                          <TableCell sx={{ position: 'sticky', left: 0, bgcolor: !attendee.responded ? '#fff9f5' : 'white', zIndex: 1, borderBottom: '1px solid #f3f4f6' }}>
+                          <TableCell sx={{ position: 'sticky', left: 0, bgcolor: 'white', zIndex: 1, borderBottom: '1px solid #f3f4f6' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                               <Avatar sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8', width: 32, height: 32, fontSize: '0.75rem' }}>
                                 {getAttendeeInitials(attendee)}
                               </Avatar>
                               <Box sx={{ flex: 1 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
-                                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                    {getAttendeeDisplayName(attendee)}
-                                  </Typography>
-                                  <Chip
-                                    icon={attendee.responded ? <CheckCircleIcon /> : <HourglassEmptyIcon />}
-                                    label={attendee.responded ? 'Responded' : 'Pending'}
-                                    size="small"
-                                    color={attendee.responded ? 'success' : 'warning'}
-                                    sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }}
-                                  />
-                                </Box>
+                                <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.25 }}>
+                                  {getAttendeeDisplayName(attendee)}
+                                </Typography>
                                 {!attendee.onPlatform && (
                                   <Typography variant="caption" color="text.secondary">
                                     Email only
@@ -621,6 +614,25 @@ export default function DesignOption3() {
                                 )}
                               </Box>
                             </Box>
+                          </TableCell>
+                          <TableCell align="center" sx={{ borderBottom: '1px solid #f3f4f6' }}>
+                            <Chip
+                              icon={attendee.responded ? <CheckCircleIcon /> : <HourglassEmptyIcon />}
+                              label={attendee.responded ? 'Responded' : 'Pending'}
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                height: 24,
+                                fontSize: '0.75rem',
+                                fontWeight: 500,
+                                borderColor: attendee.responded ? '#86efac' : '#fcd34d',
+                                color: attendee.responded ? '#16a34a' : '#d97706',
+                                bgcolor: attendee.responded ? '#f0fdf4' : '#fffbeb',
+                                '& .MuiChip-icon': {
+                                  color: attendee.responded ? '#16a34a' : '#d97706',
+                                }
+                              }}
+                            />
                           </TableCell>
                           {selectedMeeting.proposedTimes.map((time) => {
                             const availability = attendee.availability?.[time.id];
