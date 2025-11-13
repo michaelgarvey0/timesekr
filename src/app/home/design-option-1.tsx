@@ -105,6 +105,7 @@ export default function DesignOption1() {
   const [currentTab, setCurrentTab] = useState(0);
   const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
+  const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
@@ -198,26 +199,39 @@ export default function DesignOption1() {
                     {/* Proposed Times */}
                     <Box sx={{ mb: 2.5 }}>
                       <Stack direction="row" spacing={1.5}>
-                        {meeting.proposedTimes.map((time) => (
-                          <Box
-                            key={time.id}
-                            sx={{
-                              flex: 1,
-                              py: 1.5,
-                              px: 1.5,
-                              bgcolor: '#f8fafc',
-                              borderRadius: '6px',
-                              textAlign: 'center',
-                            }}
-                          >
-                            <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.25 }}>
-                              {time.day} @ {time.time}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                              {time.votes}/{meeting.totalAttendees} available
-                            </Typography>
-                          </Box>
-                        ))}
+                        {meeting.proposedTimes.map((time) => {
+                          const isWinningTime = time.id === meeting.winningTime.id;
+                          return (
+                            <Box
+                              key={time.id}
+                              sx={{
+                                flex: 1,
+                                py: 1.5,
+                                px: 1.5,
+                                bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
+                                border: isWinningTime ? '2px solid #3b82f6' : '1px solid transparent',
+                                borderRadius: '6px',
+                                textAlign: 'center',
+                                position: 'relative',
+                              }}
+                            >
+                              <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                                {time.day} @ {time.time}
+                              </Typography>
+                              <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'} sx={{ display: 'block', fontWeight: isWinningTime ? 600 : 400 }}>
+                                {time.votes}/{meeting.totalAttendees} available
+                              </Typography>
+                              {isWinningTime && (
+                                <Chip
+                                  label="Best"
+                                  size="small"
+                                  color="primary"
+                                  sx={{ position: 'absolute', top: -8, right: -8, height: 20, fontSize: '0.7rem', fontWeight: 600 }}
+                                />
+                              )}
+                            </Box>
+                          );
+                        })}
                       </Stack>
                     </Box>
 
@@ -251,6 +265,10 @@ export default function DesignOption1() {
                         variant="outlined"
                         fullWidth
                         sx={{ textTransform: 'none', minHeight: '42px' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedMeeting(meeting);
+                        }}
                       >
                         View Details
                       </Button>
@@ -258,6 +276,10 @@ export default function DesignOption1() {
                         variant="contained"
                         fullWidth
                         sx={{ textTransform: 'none', minHeight: '42px' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmInviteMeeting(meeting);
+                        }}
                       >
                         Send Invite
                       </Button>
@@ -521,6 +543,86 @@ export default function DesignOption1() {
                 </Stack>
               </Stack>
             </Box>
+          </Box>
+        </Modal>
+      )}
+
+      {/* Confirmation Modal for Send Invite */}
+      {confirmInviteMeeting && (
+        <Modal
+          open={true}
+          onClose={() => setConfirmInviteMeeting(null)}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: { xs: '90%', sm: 500 },
+              bgcolor: 'background.paper',
+              borderRadius: '12px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              p: 4,
+            }}
+          >
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <CheckCircleIcon sx={{ fontSize: 56, color: 'primary.main', mb: 2 }} />
+              <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+                Send Meeting Invitation?
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                You're about to send invitations for:
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                {confirmInviteMeeting.title}
+              </Typography>
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: '#f0f9ff',
+                  border: '2px solid #3b82f6',
+                  borderRadius: '12px',
+                  mb: 2,
+                }}
+              >
+                <Typography variant="caption" color="primary" sx={{ display: 'block', mb: 1, fontWeight: 600 }}>
+                  Selected Time
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e40af', mb: 0.5 }}>
+                  {confirmInviteMeeting.winningTime.day} @ {confirmInviteMeeting.winningTime.time}
+                </Typography>
+                <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>
+                  {confirmInviteMeeting.winningTime.votes}/{confirmInviteMeeting.totalAttendees} attendees available
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary">
+                Calendar invitations will be sent to all {confirmInviteMeeting.totalAttendees} attendees.
+              </Typography>
+            </Box>
+            <Stack spacing={1.5}>
+              <Button
+                variant="contained"
+                fullWidth
+                size="large"
+                sx={{ textTransform: 'none', minHeight: '48px' }}
+                onClick={() => {
+                  // Handle send invite logic here
+                  setConfirmInviteMeeting(null);
+                }}
+              >
+                Confirm & Send Invitations
+              </Button>
+              <Button
+                variant="outlined"
+                fullWidth
+                size="large"
+                sx={{ textTransform: 'none', minHeight: '48px' }}
+                onClick={() => setConfirmInviteMeeting(null)}
+              >
+                Cancel
+              </Button>
+            </Stack>
           </Box>
         </Modal>
       )}
