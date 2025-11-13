@@ -243,24 +243,23 @@ export default function DesignOption3() {
 
                       {/* Proposed Times */}
                       <Box sx={{ mb: 1.5 }}>
-                        <Stack spacing={0.75}>
+                        <Stack direction="row" spacing={1}>
                           {meeting.proposedTimes.map((time) => (
                             <Box
                               key={time.id}
                               sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                py: 0.75,
+                                flex: 1,
+                                py: 1,
                                 px: 1.25,
                                 bgcolor: '#f8fafc',
                                 borderRadius: '6px',
+                                textAlign: 'center',
                               }}
                             >
-                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.25 }}>
                                 {time.day} @ {time.time}
                               </Typography>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                                 {time.votes}/{meeting.totalAttendees} available
                               </Typography>
                             </Box>
@@ -287,7 +286,7 @@ export default function DesignOption3() {
                           fullWidth
                           sx={{ textTransform: 'none' }}
                         >
-                          View Details & Edit
+                          View Details
                         </Button>
                       </Box>
 
