@@ -98,7 +98,7 @@ export default function DesignOption1() {
           <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)}>
             <Tab icon={<GroupsIcon />} iconPosition="start" label="Organizing" sx={{ textTransform: 'none', minHeight: 64 }} />
             <Tab icon={<EventIcon />} iconPosition="start" label="Invited To" sx={{ textTransform: 'none', minHeight: 64 }} />
-            <Tab icon={<ContactsIcon />} iconPosition="start" label="Contacts" sx={{ textTransform: 'none', minHeight: 64 }} />
+            <Tab icon={<ContactsIcon />} iconPosition="start" label="People" sx={{ textTransform: 'none', minHeight: 64 }} />
             <Tab icon={<AccessTimeIcon />} iconPosition="start" label="My Time" sx={{ textTransform: 'none', minHeight: 64 }} />
           </Tabs>
         </Box>
@@ -229,14 +229,14 @@ export default function DesignOption1() {
           </Box>
         )}
 
-        {/* TAB 3: Contacts */}
+        {/* TAB 3: People */}
         {currentTab === 2 && (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                Contacts & Connections
+                People
               </Typography>
-              <Button variant="contained">Add Contact</Button>
+              <Button variant="contained">Add Person</Button>
             </Box>
             <Stack spacing={2}>
               <Card>

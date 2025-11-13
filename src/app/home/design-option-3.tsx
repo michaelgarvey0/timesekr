@@ -125,12 +125,12 @@ export default function DesignOption3() {
 
           <ListItem disablePadding sx={{ mb: 1 }}>
             <ListItemButton
-              selected={selectedSection === 'contacts'}
-              onClick={() => setSelectedSection('contacts')}
+              selected={selectedSection === 'people'}
+              onClick={() => setSelectedSection('people')}
               sx={{ borderRadius: '8px' }}
             >
               <ListItemIcon><ContactsIcon /></ListItemIcon>
-              <ListItemText primary="Contacts" />
+              <ListItemText primary="People" />
             </ListItemButton>
           </ListItem>
 
@@ -308,14 +308,14 @@ export default function DesignOption3() {
             </Box>
           )}
 
-          {/* Section: Contacts */}
-          {selectedSection === 'contacts' && (
+          {/* Section: People */}
+          {selectedSection === 'people' && (
             <Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
                 <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                  Contacts & Connections
+                  People
                 </Typography>
-                <Button variant="contained">Add Contact</Button>
+                <Button variant="contained">Add Person</Button>
               </Box>
               <Stack spacing={2}>
                 <Card>
