@@ -29,7 +29,7 @@ const mockOrganizingMeetings = [
     pending: 4,
     status: 'Pending',
     statusColor: 'warning',
-    winningTime: { day: 'Thu, Jan 18', time: '2:00 PM', votes: 4 },
+    winningTime: { id: 1, day: 'Thu, Jan 18', time: '2:00 PM', votes: 4 },
     proposedTimes: [
       { id: 1, day: 'Thu, Jan 18', time: '2:00 PM', votes: 4 },
       { id: 2, day: 'Fri, Jan 19', time: '10:00 AM', votes: 2 },
@@ -56,7 +56,7 @@ const mockOrganizingMeetings = [
     pending: 0,
     status: 'Ready',
     statusColor: 'success',
-    winningTime: { day: 'Mon, Jan 15', time: '10:00 AM', votes: 5 },
+    winningTime: { id: 1, day: 'Mon, Jan 15', time: '10:00 AM', votes: 5 },
     proposedTimes: [
       { id: 1, day: 'Mon, Jan 15', time: '10:00 AM', votes: 5 },
       { id: 2, day: 'Mon, Jan 15', time: '2:00 PM', votes: 3 },
@@ -82,7 +82,7 @@ const mockInvitedMeetings = [
     pending: 3,
     status: 'Action Required',
     statusColor: 'warning',
-    winningTime: { day: 'Wed, Jan 17', time: '3:00 PM', votes: 3 },
+    winningTime: { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', votes: 3 },
     proposedTimes: [
       { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', votes: 3 },
       { id: 2, day: 'Thu, Jan 18', time: '11:00 AM', votes: 2 },
