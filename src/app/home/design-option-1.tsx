@@ -465,9 +465,26 @@ export default function DesignOption1() {
 
             {/* Attendees */}
             <Box sx={{ p: 3 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-                Attendees ({selectedMeeting.totalAttendees})
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                  Attendees ({selectedMeeting.totalAttendees})
+                </Typography>
+                {selectedMeeting.responded < selectedMeeting.totalAttendees && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<EmailIcon />}
+                    sx={{ textTransform: 'none' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Handle nudge all logic here
+                      alert(`Nudging ${selectedMeeting.totalAttendees - selectedMeeting.responded} non-responders`);
+                    }}
+                  >
+                    Nudge All Pending ({selectedMeeting.totalAttendees - selectedMeeting.responded})
+                  </Button>
+                )}
+              </Box>
               <List sx={{ p: 0 }}>
                 {selectedMeeting.attendees.map((attendee, idx) => (
                   <ListItem
@@ -488,13 +505,29 @@ export default function DesignOption1() {
                         </Typography>
                       }
                     />
-                    <Chip
-                      icon={attendee.responded ? <CheckCircleIcon /> : <HourglassEmptyIcon />}
-                      label={attendee.responded ? 'Responded' : 'Pending'}
-                      size="small"
-                      color={attendee.responded ? 'success' : 'warning'}
-                      sx={{ minWidth: 100 }}
-                    />
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Chip
+                        icon={attendee.responded ? <CheckCircleIcon /> : <HourglassEmptyIcon />}
+                        label={attendee.responded ? 'Responded' : 'Pending'}
+                        size="small"
+                        color={attendee.responded ? 'success' : 'warning'}
+                        sx={{ minWidth: 100 }}
+                      />
+                      {!attendee.responded && (
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          sx={{ ml: 1 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Handle individual nudge logic here
+                            alert(`Nudging ${attendee.name}`);
+                          }}
+                        >
+                          <EmailIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Stack>
                   </ListItem>
                 ))}
               </List>
