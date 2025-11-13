@@ -456,6 +456,26 @@ export default function DesignOption1() {
                     </Button>
                   )}
                 </Box>
+                <Box sx={{ mb: 2, display: 'flex', gap: 3, justifyContent: 'center' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#dcfce7' }}>
+                      <CheckIcon sx={{ fontSize: 14, color: '#16a34a' }} />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">Available</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#fee2e2' }}>
+                      <ClearIcon sx={{ fontSize: 14, color: '#dc2626' }} />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">Unavailable</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#f3f4f6' }}>
+                      <RemoveIcon sx={{ fontSize: 14, color: '#9ca3af' }} />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">No Response</Typography>
+                  </Box>
+                </Box>
                 <Box sx={{ overflowX: 'auto' }}>
                   <Table sx={{ minWidth: 650 }}>
                     <TableHead>
@@ -484,15 +504,15 @@ export default function DesignOption1() {
                               <Typography variant="caption" color="text.secondary">
                                 {time.time}
                               </Typography>
-                              {time.id === selectedMeeting.winningTime.id && (
-                                <Chip
-                                  label="Best"
-                                  size="small"
-                                  color="primary"
-                                  sx={{ mt: 0.5, height: 18, fontSize: '0.65rem', fontWeight: 600 }}
-                                />
-                              )}
                             </Box>
+                            {time.id === selectedMeeting.winningTime.id && (
+                              <Chip
+                                label="Best"
+                                size="small"
+                                color="primary"
+                                sx={{ mt: 1, height: 20, fontSize: '0.65rem', fontWeight: 600 }}
+                              />
+                            )}
                           </TableCell>
                         ))}
                         <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', minWidth: 100 }} align="center">
@@ -565,6 +585,7 @@ export default function DesignOption1() {
                               <Button
                                 size="small"
                                 variant="outlined"
+                                startIcon={<EmailIcon />}
                                 sx={{ textTransform: 'none', minWidth: 80 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -579,26 +600,6 @@ export default function DesignOption1() {
                       ))}
                     </TableBody>
                   </Table>
-                </Box>
-                <Box sx={{ mt: 2, display: 'flex', gap: 3, justifyContent: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#dcfce7' }}>
-                      <CheckIcon sx={{ fontSize: 14, color: '#16a34a' }} />
-                    </Box>
-                    <Typography variant="caption" color="text.secondary">Available</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#fee2e2' }}>
-                      <ClearIcon sx={{ fontSize: 14, color: '#dc2626' }} />
-                    </Box>
-                    <Typography variant="caption" color="text.secondary">Unavailable</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#f3f4f6' }}>
-                      <RemoveIcon sx={{ fontSize: 14, color: '#9ca3af' }} />
-                    </Box>
-                    <Typography variant="caption" color="text.secondary">No Response</Typography>
-                  </Box>
                 </Box>
               </Box>
             </Box>
