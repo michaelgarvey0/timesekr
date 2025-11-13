@@ -140,7 +140,7 @@ export default function DesignOption1() {
         {currentTab === 0 && (
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-              {viewMode === 'organizer' ? 'Meetings You\'re Organizing' : 'Meetings You\'re Invited To'}
+              Meetings
             </Typography>
             <Stack spacing={2}>
               {(viewMode === 'organizer' ? mockOrganizingMeetings : mockInvitedMeetings).map((meeting) => (

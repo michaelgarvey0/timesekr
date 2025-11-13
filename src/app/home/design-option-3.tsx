@@ -199,7 +199,7 @@ export default function DesignOption3() {
           {selectedSection === 'meetings' && (
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-                {viewMode === 'organizer' ? 'Meetings You\'re Organizing' : 'Meetings You\'re Invited To'}
+                Meetings
               </Typography>
 
               <Stack spacing={2}>
