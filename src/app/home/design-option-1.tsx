@@ -27,7 +27,7 @@ const mockOrganizingMeetings = [
     totalAttendees: 10,
     responded: 6,
     pending: 4,
-    status: 'In Progress',
+    status: 'Pending',
     statusColor: 'warning',
     winningTime: { day: 'Thu, Jan 18', time: '2:00 PM', votes: 4 },
     proposedTimes: [
@@ -172,9 +172,6 @@ export default function DesignOption1() {
                             <GroupsIcon sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
                             {meeting.totalAttendees} attendees
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {meeting.responded}/{meeting.totalAttendees} responded
-                          </Typography>
                         </Stack>
                       </Box>
                       <Chip
@@ -184,8 +181,66 @@ export default function DesignOption1() {
                       />
                     </Box>
 
-                    {/* Progress Bar */}
+                    {/* Proposed Times */}
                     <Box sx={{ mb: 1.5 }}>
+                      <Stack spacing={0.75}>
+                        {meeting.proposedTimes.map((time) => (
+                          <Box
+                            key={time.id}
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              py: 0.75,
+                              px: 1.25,
+                              bgcolor: '#f8fafc',
+                              borderRadius: '6px',
+                            }}
+                          >
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {time.day} @ {time.time}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {time.votes}/{meeting.totalAttendees} available
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Box>
+
+                    {/* Attendees */}
+                    <Box sx={{ mb: 1.5 }}>
+                      <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
+                        {meeting.attendees.map((attendee, idx) => (
+                          <Avatar key={idx}>
+                            {attendee.avatar}
+                          </Avatar>
+                        ))}
+                      </AvatarGroup>
+                    </Box>
+
+                    {/* View Details Button */}
+                    <Box sx={{ mb: 1.5 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        sx={{ textTransform: 'none' }}
+                      >
+                        View Details & Edit
+                      </Button>
+                    </Box>
+
+                    {/* Progress Bar at Bottom */}
+                    <Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Response Progress
+                        </Typography>
+                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                          {meeting.responded}/{meeting.totalAttendees}
+                        </Typography>
+                      </Box>
                       <LinearProgress
                         variant="determinate"
                         value={(meeting.responded / meeting.totalAttendees) * 100}
@@ -199,36 +254,6 @@ export default function DesignOption1() {
                         }}
                       />
                     </Box>
-
-                    {/* Winning Time */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                      <Box sx={{ p: 1.25, bgcolor: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd', flex: 1, mr: 2 }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                          <ThumbUpIcon sx={{ fontSize: 12, verticalAlign: 'middle', mr: 0.5 }} />
-                          Winning Time ({meeting.winningTime.votes} votes)
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {meeting.winningTime.day} @ {meeting.winningTime.time}
-                        </Typography>
-                      </Box>
-                      <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
-                        {meeting.attendees.map((attendee, idx) => (
-                          <Avatar key={idx}>
-                            {attendee.avatar}
-                          </Avatar>
-                        ))}
-                      </AvatarGroup>
-                    </Box>
-
-                    {meeting.pending > 0 && (
-                      <Chip
-                        icon={<HourglassEmptyIcon />}
-                        label={`${meeting.pending} pending`}
-                        size="small"
-                        color="warning"
-                        variant="outlined"
-                      />
-                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -456,7 +481,7 @@ export default function DesignOption1() {
                     startIcon={<CheckCircleIcon />}
                     sx={{ textTransform: 'none' }}
                   >
-                    Confirm & Send Invitations
+                    Send Invitations
                   </Button>
                 )}
                 <Stack direction="row" spacing={1}>
@@ -466,7 +491,7 @@ export default function DesignOption1() {
                     startIcon={<EditIcon />}
                     sx={{ textTransform: 'none' }}
                   >
-                    Edit Meeting
+                    Edit
                   </Button>
                   <Button
                     variant="outlined"
@@ -475,6 +500,15 @@ export default function DesignOption1() {
                     sx={{ textTransform: 'none' }}
                   >
                     Send Reminder
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    color="error"
+                    startIcon={<CloseIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Close Meeting
                   </Button>
                 </Stack>
               </Stack>
