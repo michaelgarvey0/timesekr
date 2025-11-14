@@ -6,11 +6,13 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
 import DesignOption1 from './design-option-1';
 import DesignOption3 from './design-option-3';
+import MobileSimulator from './MobileSimulator';
 
 export default function HomePage() {
   const [viewState, setViewState] = useState<'option1' | 'option3'>('option1');
   const [cardView, setCardView] = useState<'detailed' | 'compact'>('detailed');
   const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
+  const [deviceView, setDeviceView] = useState<'desktop' | 'mobile'>('desktop');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
@@ -55,6 +57,31 @@ export default function HomePage() {
           </Box>
 
           <Stack spacing={3}>
+            {/* Device View */}
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1.5, color: 'text.secondary' }}>
+                DEVICE
+              </Typography>
+              <ButtonGroup variant="outlined" fullWidth>
+                <Button
+                  onClick={() => setDeviceView('desktop')}
+                  variant={deviceView === 'desktop' ? 'contained' : 'outlined'}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Desktop
+                </Button>
+                <Button
+                  onClick={() => setDeviceView('mobile')}
+                  variant={deviceView === 'mobile' ? 'contained' : 'outlined'}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Mobile
+                </Button>
+              </ButtonGroup>
+            </Box>
+
+            <Divider />
+
             {/* View Mode */}
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 1.5, color: 'text.secondary' }}>
@@ -143,8 +170,17 @@ export default function HomePage() {
       </Modal>
 
       {/* Content */}
-      {viewState === 'option1' && <DesignOption1 cardView={cardView} viewMode={viewMode} />}
-      {viewState === 'option3' && <DesignOption3 cardView={cardView} viewMode={viewMode} />}
+      {deviceView === 'mobile' ? (
+        <MobileSimulator>
+          {viewState === 'option1' && <DesignOption1 cardView={cardView} viewMode={viewMode} isMobile={true} />}
+          {viewState === 'option3' && <DesignOption3 cardView={cardView} viewMode={viewMode} isMobile={true} />}
+        </MobileSimulator>
+      ) : (
+        <>
+          {viewState === 'option1' && <DesignOption1 cardView={cardView} viewMode={viewMode} isMobile={false} />}
+          {viewState === 'option3' && <DesignOption3 cardView={cardView} viewMode={viewMode} isMobile={false} />}
+        </>
+      )}
     </Box>
   );
 }

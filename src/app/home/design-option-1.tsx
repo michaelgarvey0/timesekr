@@ -106,7 +106,7 @@ const mockInvitedMeetings = [
   },
 ];
 
-export default function DesignOption1({ cardView = 'detailed', viewMode = 'organizer' }: { cardView?: 'detailed' | 'compact'; viewMode?: 'organizer' | 'invitee' }) {
+export default function DesignOption1({ cardView = 'detailed', viewMode = 'organizer', isMobile = false }: { cardView?: 'detailed' | 'compact'; viewMode?: 'organizer' | 'invitee'; isMobile?: boolean }) {
   const [currentTab, setCurrentTab] = useState(0);
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
@@ -247,41 +247,73 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc', pb: isMobile ? 8 : 0 }}>
       {/* Top Nav */}
       <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
-        <Box sx={{ maxWidth: 900, mx: 'auto', width: '100%', px: 3 }}>
-          <Toolbar sx={{ px: 0 }}>
+        <Box sx={{ maxWidth: isMobile ? '100%' : 900, mx: 'auto', width: '100%', px: isMobile ? 2 : 3 }}>
+          <Toolbar sx={{ px: 0, minHeight: isMobile ? 56 : 64 }}>
             <Box sx={{ flexGrow: 1 }}>
-              <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
+              <Image src="/images/logomark.svg" alt="timesēkr" width={isMobile ? 100 : 120} height={isMobile ? 27 : 32} priority />
             </Box>
-            <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>M</Avatar>
+            <Avatar sx={{ bgcolor: 'primary.main', width: isMobile ? 32 : 40, height: isMobile ? 32 : 40, fontSize: isMobile ? '0.875rem' : '1rem' }}>M</Avatar>
           </Toolbar>
         </Box>
       </AppBar>
 
-      {/* Main Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'white' }}>
-        <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)}>
-            <Tab icon={<EventIcon />} iconPosition="start" label="Meetings" sx={{ textTransform: 'none', minHeight: 64 }} />
-            <Tab icon={<ContactsIcon />} iconPosition="start" label="People" sx={{ textTransform: 'none', minHeight: 64 }} />
-            <Tab icon={<AccessTimeIcon />} iconPosition="start" label="My Time" sx={{ textTransform: 'none', minHeight: 64 }} />
-          </Tabs>
-          {viewMode === 'organizer' && (
-            <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none' }}>
-              New Meeting
-            </Button>
-          )}
+      {/* Main Tabs - Desktop */}
+      {!isMobile && (
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'white' }}>
+          <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)}>
+              <Tab icon={<EventIcon />} iconPosition="start" label="Meetings" sx={{ textTransform: 'none', minHeight: 64 }} />
+              <Tab icon={<ContactsIcon />} iconPosition="start" label="People" sx={{ textTransform: 'none', minHeight: 64 }} />
+              <Tab icon={<AccessTimeIcon />} iconPosition="start" label="My Time" sx={{ textTransform: 'none', minHeight: 64 }} />
+            </Tabs>
+            {viewMode === 'organizer' && (
+              <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none' }}>
+                New Meeting
+              </Button>
+            )}
+          </Box>
         </Box>
-      </Box>
+      )}
+
+      {/* Mobile Bottom Tab Bar */}
+      {isMobile && (
+        <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, bgcolor: 'white', borderTop: '1px solid #e5e7eb' }} elevation={0}>
+          <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} variant="fullWidth">
+            <Tab icon={<EventIcon />} label="Meetings" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
+            <Tab icon={<ContactsIcon />} label="People" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
+            <Tab icon={<AccessTimeIcon />} label="My Time" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
+          </Tabs>
+        </AppBar>
+      )}
+
+      {/* Floating Action Button - Mobile */}
+      {isMobile && viewMode === 'organizer' && (
+        <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
+          <Button
+            variant="contained"
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              minWidth: 'unset',
+              p: 0,
+              boxShadow: 3,
+            }}
+          >
+            <EventIcon />
+          </Button>
+        </Box>
+      )}
 
       {/* Content Area */}
-      <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, py: 4 }}>
+      <Box sx={{ maxWidth: isMobile ? '100%' : 900, mx: 'auto', px: isMobile ? 2 : 3, py: isMobile ? 2 : 4 }}>
         {/* TAB 1: Meetings */}
         {currentTab === 0 && (
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
+            <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ fontWeight: 600, mb: isMobile ? 2 : 3 }}>
               Meetings
             </Typography>
             <Stack spacing={2}>
