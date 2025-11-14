@@ -856,9 +856,9 @@ export default function CreateMeetingPage() {
                           } else {
                             const lastItem = newValue[newValue.length - 1];
                             if (lastItem && typeof lastItem !== 'string') {
-                              handleAddRequiredAttendee(lastItem);
+                              handleAddRequired(lastItem);
                             } else if (typeof lastItem === 'string') {
-                              handleAddRequiredAttendee(lastItem);
+                              handleAddRequired(lastItem);
                             }
                           }
                         }}
@@ -923,9 +923,9 @@ export default function CreateMeetingPage() {
                           } else {
                             const lastItem = newValue[newValue.length - 1];
                             if (lastItem && typeof lastItem !== 'string') {
-                              handleAddOptionalAttendee(lastItem);
+                              handleAddOptional(lastItem);
                             } else if (typeof lastItem === 'string') {
-                              handleAddOptionalAttendee(lastItem);
+                              handleAddOptional(lastItem);
                             }
                           }
                         }}
