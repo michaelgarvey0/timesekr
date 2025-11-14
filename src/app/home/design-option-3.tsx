@@ -248,7 +248,7 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: isMobile ? '100%' : '100vh', pb: isMobile ? 8 : 0, position: 'relative' }}>
+    <Box sx={{ display: 'flex', height: isMobile ? '100%' : 'auto', minHeight: isMobile ? undefined : '100vh', maxHeight: isMobile ? '100%' : undefined, pb: isMobile ? 8 : 0, position: 'relative' }}>
       {/* Left Sidebar - Desktop Only */}
       {!isMobile && (
         <Drawer
