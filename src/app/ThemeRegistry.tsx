@@ -5,6 +5,11 @@ import CssBaseline from '@mui/material/CssBaseline';
 
 const theme = createTheme({
   typography: {
+    // Lexend font (previous - keep for easy revert)
+    // fontFamily: '"Lexend", Arial, sans-serif',
+    // fontWeightRegular: 300, // Light
+    // fontWeightBold: 600,    // Semibold
+    // IBM Plex Sans font (current)
     fontFamily: '"IBM Plex Sans", Arial, sans-serif',
   },
   palette: {

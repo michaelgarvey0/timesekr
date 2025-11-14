@@ -59,7 +59,7 @@ export default function CalendarsOnboardingPage() {
   };
 
   const handleSkip = () => {
-    router.push('/home');
+    router.push('/onboarding/invite');
   };
 
   return (

@@ -141,7 +141,7 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
               <Table sx={{ minWidth: 650 }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', position: 'sticky', left: 0, bgcolor: '#f8fafc', zIndex: 1 }}>
+                    <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', position: 'sticky', left: 0, zIndex: 1 }}>
                       Attendee
                     </TableCell>
                     {meeting.proposedTimes.map((time: any) => (
