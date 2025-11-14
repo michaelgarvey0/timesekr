@@ -114,8 +114,8 @@ const mockInvitedMeetings = [
 export default function DesignOption1({ cardView = 'detailed', viewMode = 'organizer', isMobile = false }: { cardView?: 'detailed' | 'compact'; viewMode?: 'organizer' | 'invitee'; isMobile?: boolean }) {
   const router = useRouter();
   const [currentTab, setCurrentTab] = useState(0);
-  const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
-  const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
+  const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
+  const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<any>(null);
 
   // Invitee response state
   const [inviteeResponses, setInviteeResponses] = useState<{ [meetingId: number]: { [timeId: number]: boolean } }>({});
