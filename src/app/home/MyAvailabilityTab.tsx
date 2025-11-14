@@ -94,7 +94,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                     }
                   }}
                 >
-                  hello
+                  Busy
                 </Button>
                 <Button
                   variant={selectedBlockType === 'tentative' ? 'contained' : 'outlined'}
@@ -159,7 +159,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
           {/* Days Header */}
           <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', borderBottom: '1px solid #e5e7eb' }}>
             <Box sx={{ p: 1 }} />
-            {['Mon\n15', 'Tue\n16', 'Wed\n17', 'Thu\n18', 'Fri\n19', 'Sat\n20', 'Sun\n21'].map((day, i) => (
+            {['Sun\n15', 'Mon\n16', 'Tue\n17', 'Wed\n18', 'Thu\n19', 'Fri\n20', 'Sat\n21'].map((day, i) => (
               <Box key={i} sx={{ p: 1, textAlign: 'center', borderLeft: '1px solid #e5e7eb' }}>
                 <Typography variant="caption" sx={{ fontWeight: 600, whiteSpace: 'pre-line' }}>{day}</Typography>
               </Box>
