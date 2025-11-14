@@ -1044,7 +1044,7 @@ export default function CreateMeetingPage() {
                         />
                       </Box>
 
-                      {allAttendeesV4.length === 0 ? (
+                      {allAttendees.length === 0 ? (
                         <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#f8fafc', borderRadius: '8px' }}>
                           <Typography color="text.secondary">Add attendees to see suggested times</Typography>
                         </Box>
@@ -2545,7 +2545,7 @@ export default function CreateMeetingPage() {
 
             {/* Right: Available Times */}
             <Box>
-              {allAttendeesV4.length === 0 ? (
+              {allAttendees.length === 0 ? (
                 <Card sx={{ border: '2px dashed #e5e7eb', p: 6, textAlign: 'center' }}>
                   <GroupsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                   <Typography variant="h6" color="text.secondary">
