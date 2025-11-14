@@ -34,11 +34,11 @@ const mockOrganizingMeetings = [
     pending: 4,
     status: 'Pending',
     statusColor: 'warning',
-    winningTime: { id: 1, day: 'Thu, Jan 18', time: '2:00 PM', votes: 4 },
+    winningTime: { id: 1, day: 'Thu, Jan 18', time: '2:00 PM', endTime: '3:00 PM', votes: 4 },
     proposedTimes: [
-      { id: 1, day: 'Thu, Jan 18', time: '2:00 PM', votes: 4 },
-      { id: 2, day: 'Fri, Jan 19', time: '10:00 AM', votes: 2 },
-      { id: 3, day: 'Fri, Jan 19', time: '3:00 PM', votes: 1 },
+      { id: 1, day: 'Thu, Jan 18', time: '2:00 PM', endTime: '3:00 PM', votes: 4 },
+      { id: 2, day: 'Fri, Jan 19', time: '10:00 AM', endTime: '11:00 AM', votes: 2 },
+      { id: 3, day: 'Fri, Jan 19', time: '3:00 PM', endTime: '4:00 PM', votes: 1 },
     ],
     attendees: [
       { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'unavailable', 3: null } },
@@ -61,10 +61,10 @@ const mockOrganizingMeetings = [
     pending: 0,
     status: 'Ready',
     statusColor: 'success',
-    winningTime: { id: 1, day: 'Mon, Jan 15', time: '10:00 AM', votes: 5 },
+    winningTime: { id: 1, day: 'Mon, Jan 15', time: '10:00 AM', endTime: '11:00 AM', votes: 5 },
     proposedTimes: [
-      { id: 1, day: 'Mon, Jan 15', time: '10:00 AM', votes: 5 },
-      { id: 2, day: 'Mon, Jan 15', time: '2:00 PM', votes: 3 },
+      { id: 1, day: 'Mon, Jan 15', time: '10:00 AM', endTime: '11:00 AM', votes: 5 },
+      { id: 2, day: 'Mon, Jan 15', time: '2:00 PM', endTime: '3:00 PM', votes: 3 },
     ],
     attendees: [
       { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'available' } },
@@ -87,11 +87,11 @@ const mockInvitedMeetings = [
     pending: 3,
     status: 'Action Required',
     statusColor: 'warning',
-    winningTime: { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', votes: 3 },
+    winningTime: { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', endTime: '4:00 PM', votes: 3 },
     proposedTimes: [
-      { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', votes: 3 },
-      { id: 2, day: 'Thu, Jan 18', time: '11:00 AM', votes: 2 },
-      { id: 3, day: 'Thu, Jan 18', time: '4:00 PM', votes: 1 },
+      { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', endTime: '4:00 PM', votes: 3 },
+      { id: 2, day: 'Thu, Jan 18', time: '11:00 AM', endTime: '12:00 PM', votes: 2 },
+      { id: 3, day: 'Thu, Jan 18', time: '4:00 PM', endTime: '5:00 PM', votes: 1 },
     ],
     attendees: [
       { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'available', 3: 'unavailable' } },
@@ -198,7 +198,7 @@ export default function DesignOption1({ cardView = 'detailed' }: { cardView?: 'd
                 {meeting.winningTime.day}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {meeting.winningTime.time}
+                {meeting.winningTime.time} - {meeting.winningTime.endTime}
               </Typography>
             </Box>
 
@@ -362,7 +362,10 @@ export default function DesignOption1({ cardView = 'detailed' }: { cardView?: 'd
                                   }}
                                 >
                                   <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? '#1e40af' : 'inherit' }}>
-                                    {time.day} @ {time.time}
+                                    {time.day}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                                    {time.time} - {time.endTime}
                                   </Typography>
                                   <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'} sx={{ display: 'block', fontWeight: isWinningTime ? 600 : 400 }}>
                                     {time.votes}/{meeting.totalAttendees} available
@@ -561,7 +564,10 @@ export default function DesignOption1({ cardView = 'detailed' }: { cardView?: 'd
                   Selected Time
                 </Typography>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e40af', mb: 0.5 }}>
-                  {confirmInviteMeeting.winningTime.day} @ {confirmInviteMeeting.winningTime.time}
+                  {confirmInviteMeeting.winningTime.day}
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e40af', mb: 0.5 }}>
+                  {confirmInviteMeeting.winningTime.time} - {confirmInviteMeeting.winningTime.endTime}
                 </Typography>
                 <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>
                   {confirmInviteMeeting.winningTime.votes}/{confirmInviteMeeting.totalAttendees} attendees available
