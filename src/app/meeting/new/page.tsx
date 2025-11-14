@@ -770,7 +770,7 @@ export default function CreateMeetingPage() {
                   />
                   <Box>
                     <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>Duration</Typography>
-                    <Stack direction="row" spacing={1} sx={{ mb: customDurationMode ? 1.5 : 0 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
                       {[30, 60, 90].map((mins) => (
                         <Button
                           key={mins}
@@ -797,25 +797,29 @@ export default function CreateMeetingPage() {
                       >
                         Custom
                       </Button>
+                      {customDurationMode && (
+                        <>
+                          <TextField
+                            size="small"
+                            type="number"
+                            placeholder="180"
+                            value={customDurationInput}
+                            onChange={(e) => {
+                              setCustomDurationInput(e.target.value);
+                              const value = parseInt(e.target.value);
+                              if (!isNaN(value) && value > 0) {
+                                setDuration(value);
+                              }
+                            }}
+                            inputProps={{ min: 1 }}
+                            sx={{ width: 100 }}
+                          />
+                          <Typography variant="body2" color="text.secondary">
+                            minutes
+                          </Typography>
+                        </>
+                      )}
                     </Stack>
-                    {customDurationMode && (
-                      <TextField
-                        fullWidth
-                        size="small"
-                        type="number"
-                        label="Duration (minutes)"
-                        placeholder="e.g., 180 for 3 hours"
-                        value={customDurationInput}
-                        onChange={(e) => {
-                          setCustomDurationInput(e.target.value);
-                          const value = parseInt(e.target.value);
-                          if (!isNaN(value) && value > 0) {
-                            setDuration(value);
-                          }
-                        }}
-                        inputProps={{ min: 1 }}
-                      />
-                    )}
                   </Box>
 
                   <Divider sx={{ my: 2 }} />
@@ -2831,38 +2835,6 @@ export default function CreateMeetingPage() {
               <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
             </Box>
 
-            {/* Version Toggle */}
-            <ButtonGroup size="small" sx={{ mr: 2 }}>
-              <Button
-                variant={version === 1 ? 'contained' : 'outlined'}
-                onClick={() => setVersion(1)}
-                sx={{ textTransform: 'none' }}
-              >
-                Wizard
-              </Button>
-              <Button
-                variant={version === 2 ? 'contained' : 'outlined'}
-                onClick={() => setVersion(2)}
-                sx={{ textTransform: 'none' }}
-              >
-                Split
-              </Button>
-              <Button
-                variant={version === 3 ? 'contained' : 'outlined'}
-                onClick={() => setVersion(3)}
-                sx={{ textTransform: 'none' }}
-              >
-                Smart
-              </Button>
-              <Button
-                variant={version === 4 ? 'contained' : 'outlined'}
-                onClick={() => setVersion(4)}
-                sx={{ textTransform: 'none' }}
-              >
-                Combined
-              </Button>
-            </ButtonGroup>
-
             <Badge badgeContent={0} color="error" sx={{ mr: 2 }}>
               <NotificationsIcon sx={{ color: 'text.secondary' }} />
             </Badge>
@@ -2883,16 +2855,11 @@ export default function CreateMeetingPage() {
         </AppBar>
         )}
 
-        {/* Version Content */}
+        {/* Content */}
         {showEmailPreview ? (
           renderEmailPreview()
         ) : (
-          <>
-            {version === 1 && renderVersion1()}
-            {version === 2 && renderVersion2()}
-            {version === 3 && renderVersion3()}
-            {version === 4 && renderVersion4()}
-          </>
+          renderVersion1()
         )}
       </Box>
     </LocalizationProvider>
