@@ -329,8 +329,7 @@ export default function CreateMeetingPage() {
   };
 
   // Check if user needs upgrade
-  const needsUpgrade = !isPremium && allParticipants.length >= 5 && freeMeetingsUsed >= 3;
-  const needsUpgradeV4 = !isPremium && allParticipantsV4.length >= 5 && freeMeetingsUsed >= 3;
+  const needsUpgrade = !isPremium && activeParticipants.length >= 5 && freeMeetingsUsed >= 3;
 
   // Render participant status for a time slot
   const renderParticipantStatus = (participants: ParticipantStatus[]) => {
@@ -549,7 +548,7 @@ export default function CreateMeetingPage() {
                     Duration: {duration} minutes
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Attendees: {allParticipants.length} people
+                    Attendees: {activeParticipants.length} people
                   </Typography>
                   {description && (
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -2174,8 +2173,8 @@ export default function CreateMeetingPage() {
 
   // Version 4: Combined Smart + Split with monetization and quorum rules
   const renderVersion4 = () => {
-    const showUpgradeWarning = !isPremium && allParticipantsV4.length >= 5;
-    const canSend = !needsUpgradeV4 && selectedSlots.length > 0;
+    const showUpgradeWarning = !isPremium && activeParticipants.length >= 5;
+    const canSend = !needsUpgrade && selectedSlots.length > 0;
 
     return (
       <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc' }}>
@@ -2196,7 +2195,7 @@ export default function CreateMeetingPage() {
           {/* Upgrade Warning */}
           {showUpgradeWarning && (
             <Alert
-              severity={needsUpgradeV4 ? "error" : "warning"}
+              severity={needsUpgrade ? "error" : "warning"}
               sx={{ mb: 3 }}
               action={
                 <Button
@@ -2209,7 +2208,7 @@ export default function CreateMeetingPage() {
                 </Button>
               }
             >
-              {needsUpgradeV4 ? (
+              {needsUpgrade ? (
                 <Typography variant="body2">
                   <strong>Upgrade required:</strong> You've used your 3 free meetings with 5+ people. Upgrade to continue scheduling large meetings.
                 </Typography>
