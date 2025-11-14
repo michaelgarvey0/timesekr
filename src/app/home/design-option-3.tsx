@@ -107,7 +107,7 @@ const mockInvitedMeetings = [
   },
 ];
 
-export default function DesignOption3({ cardView = 'detailed', viewMode = 'organizer' }: { cardView?: 'detailed' | 'compact'; viewMode?: 'organizer' | 'invitee' }) {
+export default function DesignOption3({ cardView = 'detailed', viewMode = 'organizer', isMobile = false }: { cardView?: 'detailed' | 'compact'; viewMode?: 'organizer' | 'invitee'; isMobile?: boolean }) {
   const [selectedSection, setSelectedSection] = useState('meetings');
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
@@ -248,99 +248,162 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Left Sidebar */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: SIDEBAR_WIDTH,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
+    <Box sx={{ display: 'flex', minHeight: '100vh', pb: isMobile ? 8 : 0 }}>
+      {/* Left Sidebar - Desktop Only */}
+      {!isMobile && (
+        <Drawer
+          variant="permanent"
+          sx={{
             width: SIDEBAR_WIDTH,
-            boxSizing: 'border-box',
-            borderRight: '1px solid #e5e7eb',
-          },
-        }}
-      >
-        {/* Logo */}
-        <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
-          <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
-        </Box>
-
-        {/* New Meeting Button */}
-        {viewMode === 'organizer' && (
-          <Box sx={{ px: 2, py: 2 }}>
-            <Button
-              variant="contained"
-              fullWidth
-              startIcon={<EventIcon />}
-              sx={{ textTransform: 'none', py: 1.5 }}
-            >
-              New Meeting
-            </Button>
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              width: SIDEBAR_WIDTH,
+              boxSizing: 'border-box',
+              borderRight: '1px solid #e5e7eb',
+            },
+          }}
+        >
+          {/* Logo */}
+          <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
+            <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
           </Box>
-        )}
 
-        {/* Navigation */}
-        <List sx={{ px: 2, flex: 1 }}>
-          <ListItem disablePadding sx={{ mb: 1 }}>
+          {/* New Meeting Button */}
+          {viewMode === 'organizer' && (
+            <Box sx={{ px: 2, py: 2 }}>
+              <Button
+                variant="contained"
+                fullWidth
+                startIcon={<EventIcon />}
+                sx={{ textTransform: 'none', py: 1.5 }}
+              >
+                New Meeting
+              </Button>
+            </Box>
+          )}
+
+          {/* Navigation */}
+          <List sx={{ px: 2, flex: 1 }}>
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                selected={selectedSection === 'meetings'}
+                onClick={() => setSelectedSection('meetings')}
+                sx={{ borderRadius: '8px' }}
+              >
+                <ListItemIcon><EventIcon /></ListItemIcon>
+                <ListItemText primary="Meetings" />
+                <Chip label="3" size="small" color="error" />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                selected={selectedSection === 'people'}
+                onClick={() => setSelectedSection('people')}
+                sx={{ borderRadius: '8px' }}
+              >
+                <ListItemIcon><ContactsIcon /></ListItemIcon>
+                <ListItemText primary="People" />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                selected={selectedSection === 'availability'}
+                onClick={() => setSelectedSection('availability')}
+                sx={{ borderRadius: '8px' }}
+              >
+                <ListItemIcon><AccessTimeIcon /></ListItemIcon>
+                <ListItemText primary="My Time" />
+              </ListItemButton>
+            </ListItem>
+          </List>
+
+          {/* User Profile at Bottom */}
+          <Box sx={{ p: 2, borderTop: '1px solid #e5e7eb' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Avatar sx={{ bgcolor: 'primary.main' }}>M</Avatar>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                  Michael Garvey
+                </Typography>
+                <Typography variant="caption" color="text.secondary" noWrap>
+                  michael@example.com
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Drawer>
+      )}
+
+      {/* Mobile Top Header */}
+      {isMobile && (
+        <Box sx={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1100, bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5 }}>
+            <Image src="/images/logomark.svg" alt="timesēkr" width={100} height={27} priority />
+            <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32, fontSize: '0.875rem' }}>M</Avatar>
+          </Box>
+        </Box>
+      )}
+
+      {/* Mobile Bottom Tab Bar */}
+      {isMobile && (
+        <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100, bgcolor: 'white', borderTop: '1px solid #e5e7eb' }}>
+          <List sx={{ display: 'flex', p: 0 }}>
             <ListItemButton
               selected={selectedSection === 'meetings'}
               onClick={() => setSelectedSection('meetings')}
-              sx={{ borderRadius: '8px' }}
+              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
             >
-              <ListItemIcon><EventIcon /></ListItemIcon>
-              <ListItemText primary="Meetings" />
-              <Chip label="3" size="small" color="error" />
+              <EventIcon sx={{ fontSize: 24, mb: 0.5 }} />
+              <Typography variant="caption">Meetings</Typography>
             </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding sx={{ mb: 1 }}>
             <ListItemButton
               selected={selectedSection === 'people'}
               onClick={() => setSelectedSection('people')}
-              sx={{ borderRadius: '8px' }}
+              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
             >
-              <ListItemIcon><ContactsIcon /></ListItemIcon>
-              <ListItemText primary="People" />
+              <ContactsIcon sx={{ fontSize: 24, mb: 0.5 }} />
+              <Typography variant="caption">People</Typography>
             </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding sx={{ mb: 1 }}>
             <ListItemButton
               selected={selectedSection === 'availability'}
               onClick={() => setSelectedSection('availability')}
-              sx={{ borderRadius: '8px' }}
+              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
             >
-              <ListItemIcon><AccessTimeIcon /></ListItemIcon>
-              <ListItemText primary="My Time" />
+              <AccessTimeIcon sx={{ fontSize: 24, mb: 0.5 }} />
+              <Typography variant="caption">My Time</Typography>
             </ListItemButton>
-          </ListItem>
-        </List>
-
-        {/* User Profile at Bottom */}
-        <Box sx={{ p: 2, borderTop: '1px solid #e5e7eb' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Avatar sx={{ bgcolor: 'primary.main' }}>M</Avatar>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                Michael Garvey
-              </Typography>
-              <Typography variant="caption" color="text.secondary" noWrap>
-                michael@example.com
-              </Typography>
-            </Box>
-          </Box>
+          </List>
         </Box>
-      </Drawer>
+      )}
+
+      {/* Floating Action Button - Mobile */}
+      {isMobile && viewMode === 'organizer' && (
+        <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
+          <Button
+            variant="contained"
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              minWidth: 'unset',
+              p: 0,
+              boxShadow: 3,
+            }}
+          >
+            <EventIcon />
+          </Button>
+        </Box>
+      )}
 
       {/* Main Content */}
-      <Box sx={{ flexGrow: 1, bgcolor: '#fafbfc' }}>
-        <Box sx={{ maxWidth: 800, mx: 'auto', px: 3, py: 4 }}>
+      <Box sx={{ flexGrow: 1, bgcolor: '#fafbfc', pt: isMobile ? 7 : 0 }}>
+        <Box sx={{ maxWidth: isMobile ? '100%' : 800, mx: 'auto', px: isMobile ? 2 : 3, py: isMobile ? 2 : 4 }}>
           {/* Section: Meetings */}
           {selectedSection === 'meetings' && (
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
+              <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 700, mb: isMobile ? 2 : 3 }}>
                 Meetings
               </Typography>
 
