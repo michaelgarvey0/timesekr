@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Tabs, Tab, AppBar, Toolbar, IconButton, Avatar, Card, CardContent, Chip, Stack, LinearProgress, AvatarGroup, Modal, Divider, List, ListItem, ListItemText, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel, TextField } from '@mui/material';
+import { Box, Typography, Button, Tabs, Tab, AppBar, Toolbar, IconButton, Avatar, Card, CardContent, Chip, Stack, LinearProgress, AvatarGroup, Modal, Divider, List, ListItem, ListItemText, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel, TextField, TableContainer, Paper, Menu, MenuItem, TableSortLabel } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -22,6 +22,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Image from 'next/image';
 import { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import MeetingDetailsModal from './MeetingDetailsModal';
 import InviteeResponseForm from './InviteeResponseForm';
@@ -81,6 +82,12 @@ const mockOrganizingMeetings = [
   },
 ];
 
+// Mock calendar events for current user (used for conflict detection)
+const mockUserCalendarEvents = [
+  { day: 'Wed, Jan 17', startTime: '2:00 PM', endTime: '3:30 PM', title: 'Client Call' }, // Conflicts with time slot 1
+  { day: 'Mon, Jan 15', startTime: '10:00 AM', endTime: '11:00 AM', title: 'Team Sync' },
+];
+
 // Mock data for meetings user is invited to
 const mockInvitedMeetings = [
   {
@@ -94,9 +101,9 @@ const mockInvitedMeetings = [
     statusColor: 'warning',
     winningTime: { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', endTime: '4:00 PM', votes: 3 },
     proposedTimes: [
-      { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', endTime: '4:00 PM', votes: 3 },
-      { id: 2, day: 'Thu, Jan 18', time: '11:00 AM', endTime: '12:00 PM', votes: 2 },
-      { id: 3, day: 'Thu, Jan 18', time: '4:00 PM', endTime: '5:00 PM', votes: 1 },
+      { id: 1, day: 'Wed, Jan 17', time: '3:00 PM', endTime: '4:00 PM', votes: 3 }, // Has conflict
+      { id: 2, day: 'Thu, Jan 18', time: '11:00 AM', endTime: '12:00 PM', votes: 2 }, // No conflict
+      { id: 3, day: 'Thu, Jan 18', time: '4:00 PM', endTime: '5:00 PM', votes: 1 }, // No conflict
     ],
     attendees: [
       { email: 'sarah.chen@company.com', firstName: 'Sarah', lastName: 'Chen', onPlatform: true, responded: true, availability: { 1: 'available', 2: 'available', 3: 'unavailable' } },
@@ -128,6 +135,112 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ day: number; hour: number } | null>(null);
   const [selectedBlockType, setSelectedBlockType] = useState<'busy' | 'tentative' | 'available'>('busy');
+
+  // People table state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [sortColumn, setSortColumn] = useState<'name' | 'email' | 'role' | 'status'>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedPerson, setSelectedPerson] = useState<any>(null);
+
+  // Calendar filter state
+  const [calendarFilters, setCalendarFilters] = useState({
+    google: true,
+    microsoft: true
+  });
+
+  const peopleData = [
+    { id: 1, name: 'Michael Garvey', email: 'michael@timesekr.com', role: 'Administrator', status: 'Active' },
+    { id: 2, name: 'Sarah Chen', email: 'sarah@company.com', role: 'Member', status: 'Active' },
+    { id: 3, name: 'John Smith', email: 'john@company.com', role: 'Member', status: 'Active' },
+    { id: 4, name: 'Alice Johnson', email: 'alice@company.com', role: 'Member', status: 'Pending' },
+    { id: 5, name: 'Bob Williams', email: 'bob@external.com', role: 'Member', status: 'Pending' },
+  ];
+
+  const filteredAndSortedPeople = peopleData
+    .filter(person => {
+      const matchesSearch = person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           person.email.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || person.status.toLowerCase() === statusFilter.toLowerCase();
+      const matchesRole = roleFilter === 'all' || person.role.toLowerCase() === roleFilter.toLowerCase();
+      return matchesSearch && matchesStatus && matchesRole;
+    })
+    .sort((a, b) => {
+      const aVal = a[sortColumn].toLowerCase();
+      const bVal = b[sortColumn].toLowerCase();
+      if (sortDirection === 'asc') {
+        return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      } else {
+        return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+      }
+    });
+
+  const handleSort = (column: 'name' | 'email' | 'role' | 'status') => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, person: any) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedPerson(person);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedPerson(null);
+  };
+
+  // Conflict detection helper
+  const detectConflicts = (meeting: any) => {
+    const conflicts: { [timeId: number]: boolean } = {};
+    const conflictDetails: { [timeId: number]: string } = {};
+
+    meeting.proposedTimes.forEach((time: any) => {
+      const conflictingEvent = mockUserCalendarEvents.find(event =>
+        event.day === time.day &&
+        // Check if times overlap
+        (event.startTime <= time.time && event.endTime > time.time)
+      );
+
+      if (conflictingEvent) {
+        conflicts[time.id] = true;
+        conflictDetails[time.id] = `Conflicts with "${conflictingEvent.title}"`;
+      } else {
+        conflicts[time.id] = false;
+      }
+    });
+
+    return { conflicts, conflictDetails };
+  };
+
+  // Auto-select non-conflicting times on initial load
+  React.useEffect(() => {
+    if (viewMode === 'invitee') {
+      mockInvitedMeetings.forEach(meeting => {
+        if (!submittedMeetings[meeting.id] && !inviteeResponses[meeting.id]) {
+          const { conflicts } = detectConflicts(meeting);
+          const autoSelected: { [timeId: number]: boolean } = {};
+          meeting.proposedTimes.forEach((time: any) => {
+            if (!conflicts[time.id]) {
+              autoSelected[time.id] = true;
+            }
+          });
+          if (Object.keys(autoSelected).length > 0) {
+            setInviteeResponses(prev => ({
+              ...prev,
+              [meeting.id]: autoSelected
+            }));
+          }
+        }
+      });
+    }
+  }, [viewMode]);
 
   // Helper functions for attendee display (used in card avatars)
   const getAttendeeInitials = (attendee: any) => {
@@ -465,17 +578,24 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
                         </Stack>
                       </>
                     ) : (
-                      <InviteeResponseForm
-                        meeting={meeting}
-                        inviteeResponses={inviteeResponses[meeting.id] || {}}
-                        cannotMakeAny={cannotMakeAny[meeting.id] || false}
-                        isSubmitted={submittedMeetings[meeting.id] || false}
-                        isEditing={editMode[meeting.id] || !submittedMeetings[meeting.id]}
-                        onResponseChange={(timeId, checked) => handleInviteeResponse(meeting.id, timeId, checked)}
-                        onCannotMakeAnyChange={(checked) => handleCannotMakeAny(meeting.id, checked)}
-                        onEdit={() => setEditMode(prev => ({ ...prev, [meeting.id]: true }))}
-                        onSubmit={() => handleSubmitResponse(meeting)}
-                      />
+                      (() => {
+                        const { conflicts, conflictDetails } = detectConflicts(meeting);
+                        return (
+                          <InviteeResponseForm
+                            meeting={meeting}
+                            inviteeResponses={inviteeResponses[meeting.id] || {}}
+                            cannotMakeAny={cannotMakeAny[meeting.id] || false}
+                            isSubmitted={submittedMeetings[meeting.id] || false}
+                            isEditing={editMode[meeting.id] || !submittedMeetings[meeting.id]}
+                            onResponseChange={(timeId, checked) => handleInviteeResponse(meeting.id, timeId, checked)}
+                            onCannotMakeAnyChange={(checked) => handleCannotMakeAny(meeting.id, checked)}
+                            onEdit={() => setEditMode(prev => ({ ...prev, [meeting.id]: true }))}
+                            onSubmit={() => handleSubmitResponse(meeting)}
+                            conflicts={conflicts}
+                            conflictDetails={conflictDetails}
+                          />
+                        );
+                      })()
                     )}
                   </CardContent>
                 </Card>
@@ -494,119 +614,154 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
               <Button variant="contained" size={isMobile ? 'small' : 'medium'}>Invite People</Button>
             </Box>
 
-            {/* Search */}
-            <TextField
-              fullWidth
-              placeholder="Search people..."
-              size="small"
-              sx={{ mb: 3 }}
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
-              }}
-            />
-
-            <Stack spacing={2}>
-              {/* Administrator */}
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>M</Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600 }}>Michael Garvey</Typography>
-                        <Chip label="Administrator" size="small" sx={{ height: 20, fontSize: '0.7rem', bgcolor: '#f3f4f6', color: 'text.secondary' }} />
-                      </Box>
-                      <Typography variant="body2" color="text.secondary">michael@timesekr.com</Typography>
-                    </Box>
-                    <Chip label="Active" size="small" color="success" />
-                  </Box>
-                </CardContent>
-              </Card>
-
-              {/* Accepted Users */}
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: '#3b82f6', width: 40, height: 40 }}>S</Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>Sarah Chen</Typography>
-                      <Typography variant="body2" color="text.secondary">sarah@company.com</Typography>
-                    </Box>
-                    <Chip label="Active" size="small" color="success" />
-                    <IconButton size="small">
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: '#8b5cf6', width: 40, height: 40 }}>J</Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>John Smith</Typography>
-                      <Typography variant="body2" color="text.secondary">john@company.com</Typography>
-                    </Box>
-                    <Chip label="Active" size="small" color="success" />
-                    <IconButton size="small">
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-              </Card>
-
-              {/* Pending Users */}
-              <Card sx={{ bgcolor: '#fef3c7', borderLeft: '4px solid #f59e0b' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: '#f59e0b', width: 40, height: 40 }}>A</Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>Alice Johnson</Typography>
-                      <Typography variant="body2" color="text.secondary">alice@company.com</Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                        Invited 3 days ago
-                      </Typography>
-                    </Box>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ textTransform: 'none', minWidth: 80 }}
-                    >
-                      Nudge
-                    </Button>
-                    <IconButton size="small">
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-              </Card>
-
-              <Card sx={{ bgcolor: '#fef3c7', borderLeft: '4px solid #f59e0b' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: '#f59e0b', width: 40, height: 40 }}>B</Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body1" sx={{ fontWeight: 600 }}>Bob Williams</Typography>
-                      <Typography variant="body2" color="text.secondary">bob@external.com</Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                        Invited 1 week ago
-                      </Typography>
-                    </Box>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ textTransform: 'none', minWidth: 80 }}
-                    >
-                      Nudge
-                    </Button>
-                    <IconButton size="small">
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-              </Card>
+            {/* Search and Filters */}
+            <Stack direction={isMobile ? 'column' : 'row'} spacing={2} sx={{ mb: 3 }}>
+              <TextField
+                fullWidth
+                placeholder="Search by name or email..."
+                size="small"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
+                }}
+              />
+              <Box sx={{ display: 'flex', gap: 2, minWidth: isMobile ? '100%' : 'auto' }}>
+                <TextField
+                  select
+                  size="small"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  sx={{ minWidth: 120 }}
+                  label="Status"
+                >
+                  <MenuItem value="all">All Status</MenuItem>
+                  <MenuItem value="active">Active</MenuItem>
+                  <MenuItem value="pending">Pending</MenuItem>
+                </TextField>
+                <TextField
+                  select
+                  size="small"
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  sx={{ minWidth: 140 }}
+                  label="Role"
+                >
+                  <MenuItem value="all">All Roles</MenuItem>
+                  <MenuItem value="administrator">Administrator</MenuItem>
+                  <MenuItem value="member">Member</MenuItem>
+                </TextField>
+              </Box>
             </Stack>
+
+            {/* Table */}
+            <TableContainer component={Paper} sx={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1)' }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#f9fafb' }}>
+                    <TableCell>
+                      <TableSortLabel
+                        active={sortColumn === 'name'}
+                        direction={sortColumn === 'name' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('name')}
+                      >
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Name</Typography>
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell>
+                      <TableSortLabel
+                        active={sortColumn === 'email'}
+                        direction={sortColumn === 'email' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('email')}
+                      >
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Email</Typography>
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell>
+                      <TableSortLabel
+                        active={sortColumn === 'role'}
+                        direction={sortColumn === 'role' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('role')}
+                      >
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Role</Typography>
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell>
+                      <TableSortLabel
+                        active={sortColumn === 'status'}
+                        direction={sortColumn === 'status' ? sortDirection : 'asc'}
+                        onClick={() => handleSort('status')}
+                      >
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>Status</Typography>
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>Actions</Typography>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredAndSortedPeople.map((person) => (
+                    <TableRow key={person.id} hover>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Avatar sx={{ bgcolor: person.role === 'Administrator' ? 'primary.main' : '#64748b', width: 36, height: 36 }}>
+                            {person.name.charAt(0)}
+                          </Avatar>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{person.name}</Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">{person.email}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={person.role}
+                          size="small"
+                          sx={{
+                            height: 24,
+                            fontSize: '0.75rem',
+                            bgcolor: person.role === 'Administrator' ? '#e0e7ff' : '#f3f4f6',
+                            color: person.role === 'Administrator' ? '#4f46e5' : '#64748b',
+                            fontWeight: 500
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={person.status}
+                          size="small"
+                          color={person.status === 'Active' ? 'success' : 'warning'}
+                          sx={{ height: 24, fontSize: '0.75rem', fontWeight: 500 }}
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, person)}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* Actions Menu */}
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
+              <MenuItem onClick={handleMenuClose}>Edit Role</MenuItem>
+              <MenuItem onClick={handleMenuClose}>Send Message</MenuItem>
+              {selectedPerson?.status === 'Pending' && (
+                <MenuItem onClick={handleMenuClose}>Resend Invite</MenuItem>
+              )}
+              <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>Remove</MenuItem>
+            </Menu>
           </Box>
         )}
 
@@ -622,13 +777,38 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
               </Button>
             </Box>
 
-            {/* Connected Calendars Summary */}
+            {/* Connected Calendars Summary with Filters */}
             <Card sx={{ mb: 3 }}>
               <CardContent>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Connected Calendars</Typography>
-                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-                  <Chip label="Google - work@company.com" size="small" onDelete={() => {}} />
-                  <Chip label="Microsoft - personal@outlook.com" size="small" onDelete={() => {}} />
+                <Stack spacing={1}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={calendarFilters.google}
+                        onChange={(e) => setCalendarFilters({ ...calendarFilters, google: e.target.checked })}
+                        size="small"
+                      />
+                    }
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body2">Google - work@company.com</Typography>
+                        <Chip label="Primary" size="small" sx={{ height: 20, fontSize: '0.65rem' }} />
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={calendarFilters.microsoft}
+                        onChange={(e) => setCalendarFilters({ ...calendarFilters, microsoft: e.target.checked })}
+                        size="small"
+                      />
+                    }
+                    label={
+                      <Typography variant="body2">Microsoft - personal@outlook.com</Typography>
+                    }
+                  />
                 </Stack>
               </CardContent>
             </Card>
@@ -725,77 +905,84 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
                 <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', maxHeight: 600, overflow: 'auto' }}>
                   {/* Hours column */}
                   <Box>
-                    {Array.from({ length: 24 }, (_, hour) => (
-                      <Box key={hour} sx={{ height: 60, display: 'flex', alignItems: 'start', justifyContent: 'center', pt: 0.5, borderBottom: '1px solid #f3f4f6' }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
-                        </Typography>
-                      </Box>
-                    ))}
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const hour = i + 7; // Start at 7 AM
+                      return (
+                        <Box key={hour} sx={{ height: 60, display: 'flex', alignItems: 'start', justifyContent: 'center', pt: 0.5, borderBottom: '1px solid #f3f4f6' }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {hour === 12 ? '12 PM' : hour < 12 ? `${hour} AM` : `${hour - 12} PM`}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
                   </Box>
 
                   {/* Day columns */}
                   {[0, 1, 2, 3, 4, 5, 6].map((day) => (
                     <Box key={day} sx={{ borderLeft: '1px solid #e5e7eb', position: 'relative' }}>
                       {/* Hour slots */}
-                      {Array.from({ length: 24 }, (_, hour) => (
-                        <Box
-                          key={hour}
-                          sx={{
-                            height: 60,
-                            borderBottom: '1px solid #f3f4f6',
-                            cursor: 'crosshair',
-                            '&:hover': {
-                              bgcolor: '#f9fafb'
-                            }
-                          }}
-                          onMouseDown={() => {
-                            setIsDragging(true);
-                            setDragStart({ day, hour });
-                          }}
-                          onMouseUp={() => {
-                            if (isDragging && dragStart) {
-                              // Create block
-                              const newBlock = {
-                                id: Date.now(),
-                                day,
-                                startHour: Math.min(dragStart.hour, hour),
-                                endHour: Math.max(dragStart.hour, hour) + 1,
-                                type: selectedBlockType
-                              };
-                              setAvailabilityBlocks([...availabilityBlocks, newBlock]);
-                            }
-                            setIsDragging(false);
-                            setDragStart(null);
-                          }}
-                          onMouseEnter={(e) => {
-                            if (isDragging) {
-                              e.currentTarget.style.backgroundColor =
-                                selectedBlockType === 'busy' ? 'rgba(239, 68, 68, 0.1)' :
-                                selectedBlockType === 'tentative' ? 'rgba(245, 158, 11, 0.1)' :
-                                'rgba(34, 197, 94, 0.1)';
-                            }
-                          }}
-                        />
-                      ))}
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const hour = i + 7; // Start at 7 AM
+                        return (
+                          <Box
+                            key={hour}
+                            sx={{
+                              height: 60,
+                              borderBottom: '1px solid #f3f4f6',
+                              cursor: 'crosshair',
+                              '&:hover': {
+                                bgcolor: '#f9fafb'
+                              }
+                            }}
+                            onMouseDown={() => {
+                              setIsDragging(true);
+                              setDragStart({ day, hour });
+                            }}
+                            onMouseUp={() => {
+                              if (isDragging && dragStart) {
+                                // Create block
+                                const newBlock = {
+                                  id: Date.now(),
+                                  day,
+                                  startHour: Math.min(dragStart.hour, hour),
+                                  endHour: Math.max(dragStart.hour, hour) + 1,
+                                  type: selectedBlockType
+                                };
+                                setAvailabilityBlocks([...availabilityBlocks, newBlock]);
+                              }
+                              setIsDragging(false);
+                              setDragStart(null);
+                            }}
+                            onMouseEnter={(e) => {
+                              if (isDragging) {
+                                e.currentTarget.style.backgroundColor =
+                                  selectedBlockType === 'busy' ? 'rgba(239, 68, 68, 0.1)' :
+                                  selectedBlockType === 'tentative' ? 'rgba(245, 158, 11, 0.1)' :
+                                  'rgba(34, 197, 94, 0.1)';
+                              }
+                            }}
+                          />
+                        );
+                      })}
 
                       {/* Mock calendar events */}
-                      {day === 1 && (
+                      {/* Monday - day 0 - Google Calendar */}
+                      {day === 0 && calendarFilters.google && (
                         <>
                           <Box sx={{
                             position: 'absolute',
-                            top: 9 * 60, // 9 AM
+                            top: (9-7) * 60, // 9 AM
                             left: 4,
                             right: 4,
                             height: 60,
-                            bgcolor: '#bfdbfe',
-                            border: '1px solid #60a5fa',
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
                             borderRadius: '4px',
                             p: 0.5,
                             overflow: 'hidden'
                           }}>
                             <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
-                              Team Sync
+                              Stand-up
                             </Typography>
                             <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
                               9:00 - 10:00
@@ -803,21 +990,383 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
                           </Box>
                           <Box sx={{
                             position: 'absolute',
-                            top: 14 * 60, // 2 PM
+                            top: (10.5-7) * 60, // 10:30 AM
                             left: 4,
                             right: 4,
                             height: 90,
-                            bgcolor: '#fecaca',
-                            border: '1px solid #f87171',
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
                             borderRadius: '4px',
                             p: 0.5,
                             overflow: 'hidden'
                           }}>
                             <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
-                              Client Meeting
+                              Product Review
                             </Typography>
                             <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
-                              2:00 - 3:30
+                              10:30 - 12:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (14-7) * 60, // 2 PM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              1:1 with Sarah
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              2:00 - 3:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (15.5-7) * 60, // 3:30 PM
+                            left: 4,
+                            right: 4,
+                            height: 90,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Client Call
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              3:30 - 5:00
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+                      {/* Tuesday - day 1 - Microsoft Calendar */}
+                      {day === 1 && calendarFilters.microsoft && (
+                        <>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (8-7) * 60, // 8 AM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Engineering Sync
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              8:00 - 9:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (10-7) * 60, // 10 AM
+                            left: 4,
+                            right: 4,
+                            height: 120,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Q2 Planning
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              10:00 - 12:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (13-7) * 60, // 1 PM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Lunch w/ Team
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              1:00 - 2:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (15-7) * 60, // 3 PM
+                            left: 4,
+                            right: 4,
+                            height: 90,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Design Review
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              3:00 - 4:30
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+                      {/* Wednesday - day 2 - Google Calendar */}
+                      {day === 2 && calendarFilters.google && (
+                        <>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: 9 * 60, // 9 AM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Stand-up
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              9:00 - 10:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (11-7) * 60, // 11 AM
+                            left: 4,
+                            right: 4,
+                            height: 90,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Board Meeting
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              11:00 - 12:30
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: 14 * 60, // 2 PM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Interview - Dev
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              2:00 - 3:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (16-7) * 60, // 4 PM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Vendor Demo
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              4:00 - 5:00
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+                      {/* Thursday - day 3 - Microsoft Calendar */}
+                      {day === 3 && calendarFilters.microsoft && (
+                        <>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: 9 * 60, // 9 AM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Team Standup
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              9:00 - 10:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (10-7) * 60, // 10 AM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Sales Call
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              10:00 - 11:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (13-7) * 60, // 1 PM
+                            left: 4,
+                            right: 4,
+                            height: 120,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              All Hands
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              1:00 - 3:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (15-7) * 60, // 3 PM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              1:1 with John
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              3:00 - 4:00
+                            </Typography>
+                          </Box>
+                        </>
+                      )}
+                      {/* Friday - day 4 - Google Calendar */}
+                      {day === 4 && calendarFilters.google && (
+                        <>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: 9 * 60, // 9 AM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Stand-up
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              9:00 - 10:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (10-7) * 60, // 10 AM
+                            left: 4,
+                            right: 4,
+                            height: 90,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Sprint Planning
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              10:00 - 11:30
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (13-7) * 60, // 1 PM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Tech Review
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              1:00 - 2:00
+                            </Typography>
+                          </Box>
+                          <Box sx={{
+                            position: 'absolute',
+                            top: (15-7) * 60, // 3 PM
+                            left: 4,
+                            right: 4,
+                            height: 60,
+                            bgcolor: '#dbeafe',
+                            border: '1px solid #3b82f6',
+                            borderRadius: '4px',
+                            p: 0.5,
+                            overflow: 'hidden'
+                          }}>
+                            <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                              Happy Hour
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                              3:00 - 4:00
                             </Typography>
                           </Box>
                         </>
@@ -831,7 +1380,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
                             key={block.id}
                             sx={{
                               position: 'absolute',
-                              top: block.startHour * 60,
+                              top: (block.startHour - 7) * 60,
                               left: 4,
                               right: 4,
                               height: (block.endHour - block.startHour) * 60 - 2,

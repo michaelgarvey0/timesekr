@@ -10,8 +10,8 @@ import { useDeviceView } from '../contexts/DeviceViewContext';
 
 export default function HomePage() {
   const [viewState, setViewState] = useState<'option1' | 'option3'>('option1');
-  const [cardView, setCardView] = useState<'detailed' | 'compact'>('detailed');
   const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
+  const [cardView, setCardView] = useState<'detailed' | 'compact'>(viewMode === 'invitee' ? 'detailed' : 'detailed');
   const { deviceView, setDeviceView } = useDeviceView();
   const [settingsOpen, setSettingsOpen] = useState(false);
 

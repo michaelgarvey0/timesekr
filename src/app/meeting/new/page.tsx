@@ -74,7 +74,10 @@ export default function CreateMeetingPage() {
   const [description, setDescription] = useState('');
   const [duration, setDuration] = useState(60);
   const [customDurationMode, setCustomDurationMode] = useState(false);
-  const [customDurationInput, setCustomDurationInput] = useState('');
+  const [customDurationHours, setCustomDurationHours] = useState('');
+  const [customDurationMinutes, setCustomDurationMinutes] = useState('');
+  const [meetingType, setMeetingType] = useState<'in-person' | 'teams' | 'meet' | 'zoom'>('meet');
+  const [meetingAddress, setMeetingAddress] = useState('');
   const [attendees, setAttendees] = useState<Attendee[]>([]); // Keep for backwards compatibility
   const [requiredAttendees, setRequiredAttendees] = useState<Attendee[]>([]);
   const [optionalAttendees, setOptionalAttendees] = useState<Attendee[]>([]);
@@ -758,7 +761,8 @@ export default function CreateMeetingPage() {
                           onClick={() => {
                             setDuration(mins);
                             setCustomDurationMode(false);
-                            setCustomDurationInput('');
+                            setCustomDurationHours('');
+                            setCustomDurationMinutes('');
                           }}
                           sx={{ textTransform: 'none' }}
                         >
@@ -769,9 +773,6 @@ export default function CreateMeetingPage() {
                         variant={customDurationMode ? 'contained' : 'outlined'}
                         onClick={() => {
                           setCustomDurationMode(true);
-                          if (customDurationInput) {
-                            setDuration(parseInt(customDurationInput));
-                          }
                         }}
                         sx={{ textTransform: 'none' }}
                       >
@@ -782,24 +783,86 @@ export default function CreateMeetingPage() {
                           <TextField
                             size="small"
                             type="number"
-                            placeholder="180"
-                            value={customDurationInput}
+                            placeholder="0"
+                            label="Hours"
+                            value={customDurationHours}
                             onChange={(e) => {
-                              setCustomDurationInput(e.target.value);
-                              const value = parseInt(e.target.value);
-                              if (!isNaN(value) && value > 0) {
-                                setDuration(value);
+                              setCustomDurationHours(e.target.value);
+                              const hours = parseInt(e.target.value) || 0;
+                              const minutes = parseInt(customDurationMinutes) || 0;
+                              const totalMinutes = hours * 60 + minutes;
+                              if (totalMinutes > 0) {
+                                setDuration(totalMinutes);
                               }
                             }}
-                            inputProps={{ min: 1 }}
-                            sx={{ width: 100 }}
+                            inputProps={{ min: 0 }}
+                            sx={{ width: 80 }}
                           />
-                          <Typography variant="body2" color="text.secondary">
-                            minutes
-                          </Typography>
+                          <TextField
+                            size="small"
+                            type="number"
+                            placeholder="0"
+                            label="Min"
+                            value={customDurationMinutes}
+                            onChange={(e) => {
+                              setCustomDurationMinutes(e.target.value);
+                              const hours = parseInt(customDurationHours) || 0;
+                              const minutes = parseInt(e.target.value) || 0;
+                              const totalMinutes = hours * 60 + minutes;
+                              if (totalMinutes > 0) {
+                                setDuration(totalMinutes);
+                              }
+                            }}
+                            inputProps={{ min: 0, max: 59 }}
+                            sx={{ width: 80 }}
+                          />
                         </>
                       )}
                     </Stack>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>Meeting Type</Typography>
+                    <ButtonGroup fullWidth>
+                      <Button
+                        variant={meetingType === 'in-person' ? 'contained' : 'outlined'}
+                        onClick={() => setMeetingType('in-person')}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        In Person
+                      </Button>
+                      <Button
+                        variant={meetingType === 'teams' ? 'contained' : 'outlined'}
+                        onClick={() => setMeetingType('teams')}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Teams
+                      </Button>
+                      <Button
+                        variant={meetingType === 'meet' ? 'contained' : 'outlined'}
+                        onClick={() => setMeetingType('meet')}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Google Meet
+                      </Button>
+                      <Button
+                        variant={meetingType === 'zoom' ? 'contained' : 'outlined'}
+                        onClick={() => setMeetingType('zoom')}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Zoom
+                      </Button>
+                    </ButtonGroup>
+                    {meetingType === 'in-person' && (
+                      <TextField
+                        fullWidth
+                        label="Address"
+                        value={meetingAddress}
+                        onChange={(e) => setMeetingAddress(e.target.value)}
+                        placeholder="Enter meeting location"
+                        sx={{ mt: 2 }}
+                      />
+                    )}
                   </Box>
 
                   <Divider sx={{ my: 2 }} />

@@ -3,6 +3,7 @@
 import { Box, Typography, Button, Chip, Stack, Checkbox, FormGroup, FormControlLabel } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
+import WarningIcon from '@mui/icons-material/Warning';
 
 interface InviteeResponseFormProps {
   meeting: any;
@@ -14,6 +15,8 @@ interface InviteeResponseFormProps {
   onCannotMakeAnyChange: (checked: boolean) => void;
   onEdit: () => void;
   onSubmit: () => void;
+  conflicts?: { [timeId: number]: boolean };
+  conflictDetails?: { [timeId: number]: string };
 }
 
 export default function InviteeResponseForm({
@@ -25,7 +28,9 @@ export default function InviteeResponseForm({
   onResponseChange,
   onCannotMakeAnyChange,
   onEdit,
-  onSubmit
+  onSubmit,
+  conflicts = {},
+  conflictDetails = {}
 }: InviteeResponseFormProps) {
   return (
     <>
@@ -39,14 +44,15 @@ export default function InviteeResponseForm({
         {meeting.proposedTimes.map((time: any) => {
           const isWinningTime = time.id === meeting.winningTime.id;
           const isSelected = inviteeResponses[time.id] || false;
+          const hasConflict = conflicts[time.id] || false;
           return (
             <Box
               key={time.id}
               sx={{
                 flex: 1,
                 p: 2,
-                bgcolor: isSelected ? '#f0f9ff' : '#f8fafc',
-                border: isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                bgcolor: hasConflict ? '#fef2f2' : (isSelected ? '#f0f9ff' : '#f8fafc'),
+                border: hasConflict ? '2px solid #fca5a5' : (isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb'),
                 borderRadius: '8px',
                 position: 'relative',
                 minHeight: 120,
@@ -54,18 +60,17 @@ export default function InviteeResponseForm({
                 flexDirection: 'column',
               }}
             >
-              {/* Top row: Most Popular chip and Checkbox aligned */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 'auto' }}>
-                {isWinningTime ? (
+              {/* Top row: Chips and Checkbox aligned */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 'auto', gap: 0.5 }}>
+                {isWinningTime && (
                   <Chip
                     label="Most Popular"
                     size="small"
                     color="primary"
                     sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }}
                   />
-                ) : (
-                  <Box />
                 )}
+                {!isWinningTime && <Box />}
                 <Checkbox
                   checked={isSelected}
                   onChange={(e) => onResponseChange(time.id, e.target.checked)}
@@ -85,9 +90,18 @@ export default function InviteeResponseForm({
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
                   {time.time}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                   {time.votes}/{meeting.totalAttendees} available
                 </Typography>
+                {hasConflict ? (
+                  <Typography variant="caption" sx={{ color: '#dc2626', fontWeight: 500, display: 'block' }}>
+                    {conflictDetails[time.id] || 'Conflicts with your calendar'}
+                  </Typography>
+                ) : (
+                  <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 500, display: 'block' }}>
+                    No conflicts
+                  </Typography>
+                )}
               </Box>
             </Box>
           );
