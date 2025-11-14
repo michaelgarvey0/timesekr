@@ -10,6 +10,7 @@ import DesignOption3 from './design-option-3';
 export default function HomePage() {
   const [viewState, setViewState] = useState<'option1' | 'option3'>('option1');
   const [cardView, setCardView] = useState<'detailed' | 'compact'>('detailed');
+  const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
@@ -54,6 +55,31 @@ export default function HomePage() {
           </Box>
 
           <Stack spacing={3}>
+            {/* View Mode */}
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1.5, color: 'text.secondary' }}>
+                VIEW AS
+              </Typography>
+              <ButtonGroup variant="outlined" fullWidth>
+                <Button
+                  onClick={() => setViewMode('organizer')}
+                  variant={viewMode === 'organizer' ? 'contained' : 'outlined'}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Organizer
+                </Button>
+                <Button
+                  onClick={() => setViewMode('invitee')}
+                  variant={viewMode === 'invitee' ? 'contained' : 'outlined'}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Invitee
+                </Button>
+              </ButtonGroup>
+            </Box>
+
+            <Divider />
+
             {/* Design Layout */}
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 600, mb: 1.5, color: 'text.secondary' }}>
@@ -117,8 +143,8 @@ export default function HomePage() {
       </Modal>
 
       {/* Content */}
-      {viewState === 'option1' && <DesignOption1 cardView={cardView} />}
-      {viewState === 'option3' && <DesignOption3 cardView={cardView} />}
+      {viewState === 'option1' && <DesignOption1 cardView={cardView} viewMode={viewMode} />}
+      {viewState === 'option3' && <DesignOption3 cardView={cardView} viewMode={viewMode} />}
     </Box>
   );
 }

@@ -106,9 +106,8 @@ const mockInvitedMeetings = [
   },
 ];
 
-export default function DesignOption1({ cardView = 'detailed' }: { cardView?: 'detailed' | 'compact' }) {
+export default function DesignOption1({ cardView = 'detailed', viewMode = 'organizer' }: { cardView?: 'detailed' | 'compact'; viewMode?: 'organizer' | 'invitee' }) {
   const [currentTab, setCurrentTab] = useState(0);
-  const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
 
@@ -269,9 +268,11 @@ export default function DesignOption1({ cardView = 'detailed' }: { cardView?: 'd
             <Tab icon={<ContactsIcon />} iconPosition="start" label="People" sx={{ textTransform: 'none', minHeight: 64 }} />
             <Tab icon={<AccessTimeIcon />} iconPosition="start" label="My Time" sx={{ textTransform: 'none', minHeight: 64 }} />
           </Tabs>
-          <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none' }}>
-            New Meeting
-          </Button>
+          {viewMode === 'organizer' && (
+            <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none' }}>
+              New Meeting
+            </Button>
+          )}
         </Box>
       </Box>
 
@@ -499,18 +500,6 @@ export default function DesignOption1({ cardView = 'detailed' }: { cardView?: 'd
             </Card>
           </Box>
         )}
-      </Box>
-
-      {/* View Mode Toggle */}
-      <Box sx={{ position: 'fixed', bottom: 80, right: 20, zIndex: 999 }}>
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => setViewMode(viewMode === 'organizer' ? 'invitee' : 'organizer')}
-          sx={{ textTransform: 'none' }}
-        >
-          {viewMode === 'organizer' ? 'Switch to Invitee View' : 'Switch to Organizer View'}
-        </Button>
       </Box>
 
       {/* Meeting Details Modal */}

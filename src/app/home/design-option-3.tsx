@@ -107,9 +107,8 @@ const mockInvitedMeetings = [
   },
 ];
 
-export default function DesignOption3({ cardView = 'detailed' }: { cardView?: 'detailed' | 'compact' }) {
+export default function DesignOption3({ cardView = 'detailed', viewMode = 'organizer' }: { cardView?: 'detailed' | 'compact'; viewMode?: 'organizer' | 'invitee' }) {
   const [selectedSection, setSelectedSection] = useState('meetings');
-  const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
 
@@ -269,16 +268,18 @@ export default function DesignOption3({ cardView = 'detailed' }: { cardView?: 'd
         </Box>
 
         {/* New Meeting Button */}
-        <Box sx={{ px: 2, py: 2 }}>
-          <Button
-            variant="contained"
-            fullWidth
-            startIcon={<EventIcon />}
-            sx={{ textTransform: 'none', py: 1.5 }}
-          >
-            New Meeting
-          </Button>
-        </Box>
+        {viewMode === 'organizer' && (
+          <Box sx={{ px: 2, py: 2 }}>
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<EventIcon />}
+              sx={{ textTransform: 'none', py: 1.5 }}
+            >
+              New Meeting
+            </Button>
+          </Box>
+        )}
 
         {/* Navigation */}
         <List sx={{ px: 2, flex: 1 }}>
@@ -589,18 +590,6 @@ export default function DesignOption3({ cardView = 'detailed' }: { cardView?: 'd
             </Box>
           )}
         </Box>
-      </Box>
-
-      {/* View Mode Toggle */}
-      <Box sx={{ position: 'fixed', bottom: 80, right: 20, zIndex: 999 }}>
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => setViewMode(viewMode === 'organizer' ? 'invitee' : 'organizer')}
-          sx={{ textTransform: 'none' }}
-        >
-          {viewMode === 'organizer' ? 'Switch to Invitee View' : 'Switch to Organizer View'}
-        </Button>
       </Box>
 
       {/* Meeting Details Modal */}
