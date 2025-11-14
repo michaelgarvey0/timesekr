@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import ThemeRegistry from './ThemeRegistry';
+import { DeviceViewProvider } from './contexts/DeviceViewContext';
+import DeviceViewWrapper from './components/DeviceViewWrapper';
 import '@fontsource/ibm-plex-sans/300.css';
 import '@fontsource/ibm-plex-sans/400.css';
 import '@fontsource/ibm-plex-sans/500.css';
@@ -20,7 +22,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeRegistry>
-          {children}
+          <DeviceViewProvider>
+            <DeviceViewWrapper>
+              {children}
+            </DeviceViewWrapper>
+          </DeviceViewProvider>
         </ThemeRegistry>
       </body>
     </html>
