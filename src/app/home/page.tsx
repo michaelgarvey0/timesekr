@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import React from 'react';
 import { Box, Button, ButtonGroup, Stack, Modal, Typography, Divider, IconButton } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
@@ -11,9 +12,14 @@ import { useDeviceView } from '../contexts/DeviceViewContext';
 export default function HomePage() {
   const [viewState, setViewState] = useState<'option1' | 'option3'>('option1');
   const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
-  const [cardView, setCardView] = useState<'detailed' | 'compact'>(viewMode === 'invitee' ? 'detailed' : 'detailed');
+  const [cardView, setCardView] = useState<'detailed' | 'compact'>('compact');
   const { deviceView, setDeviceView } = useDeviceView();
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const handleViewModeChange = (newViewMode: 'organizer' | 'invitee') => {
+    setViewMode(newViewMode);
+    setCardView(newViewMode === 'invitee' ? 'detailed' : 'compact');
+  };
 
   return (
     <Box>
@@ -89,14 +95,14 @@ export default function HomePage() {
               </Typography>
               <ButtonGroup variant="outlined" fullWidth>
                 <Button
-                  onClick={() => setViewMode('organizer')}
+                  onClick={() => handleViewModeChange('organizer')}
                   variant={viewMode === 'organizer' ? 'contained' : 'outlined'}
                   sx={{ textTransform: 'none' }}
                 >
                   Organizer
                 </Button>
                 <Button
-                  onClick={() => setViewMode('invitee')}
+                  onClick={() => handleViewModeChange('invitee')}
                   variant={viewMode === 'invitee' ? 'contained' : 'outlined'}
                   sx={{ textTransform: 'none' }}
                 >
