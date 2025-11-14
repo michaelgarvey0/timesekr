@@ -231,8 +231,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                 })}
 
                 {/* Mock calendar events - all days with events */}
-                {/* Monday - day 0 - Google Calendar */}
-                {day === 0 && calendarFilters.google && (
+                {/* Monday - day 1 - Google Calendar */}
+                {day === 1 && calendarFilters.google && (
                   <>
                     {[
                       { top: (9-7), height: 60, title: 'Stand-up', time: '9:00 - 10:00' },
@@ -263,8 +263,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Tuesday - day 1 - Microsoft Calendar */}
-                {day === 1 && calendarFilters.microsoft && (
+                {/* Tuesday - day 2 - Microsoft Calendar */}
+                {day === 2 && calendarFilters.microsoft && (
                   <>
                     {[
                       { top: (8-7), height: 60, title: 'Engineering Sync', time: '8:00 - 9:00' },
@@ -295,8 +295,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Wednesday - day 2 - Google Calendar */}
-                {day === 2 && calendarFilters.google && (
+                {/* Wednesday - day 3 - Google Calendar */}
+                {day === 3 && calendarFilters.google && (
                   <>
                     {[
                       { top: (9-7), height: 60, title: 'Stand-up', time: '9:00 - 10:00' },
@@ -327,8 +327,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Thursday - day 3 - Microsoft Calendar */}
-                {day === 3 && calendarFilters.microsoft && (
+                {/* Thursday - day 4 - Microsoft Calendar */}
+                {day === 4 && calendarFilters.microsoft && (
                   <>
                     {[
                       { top: (9-7), height: 60, title: 'Team Standup', time: '9:00 - 10:00' },
@@ -359,8 +359,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Friday - day 4 - Google Calendar */}
-                {day === 4 && calendarFilters.google && (
+                {/* Friday - day 5 - Google Calendar */}
+                {day === 5 && calendarFilters.google && (
                   <>
                     {[
                       { top: (9-7), height: 60, title: 'Stand-up', time: '9:00 - 10:00' },
