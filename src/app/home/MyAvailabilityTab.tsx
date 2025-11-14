@@ -20,7 +20,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ fontWeight: 600 }}>
-          My Availability
+          My Time
         </Typography>
       </Box>
 
