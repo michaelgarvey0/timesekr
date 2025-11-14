@@ -17,6 +17,8 @@ import ClearIcon from '@mui/icons-material/Clear';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -121,6 +123,12 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
   const [cannotMakeAny, setCannotMakeAny] = useState<{ [meetingId: number]: boolean }>({});
   const [submittedMeetings, setSubmittedMeetings] = useState<{ [meetingId: number]: boolean }>({});
   const [editMode, setEditMode] = useState<{ [meetingId: number]: boolean }>({});
+
+  // My Time / Availability State
+  const [selectedBlockType, setSelectedBlockType] = useState('available');
+  const [availabilityBlocks, setAvailabilityBlocks] = useState<Array<{ id: number; day: number; startHour: number; endHour: number; type: string }>>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ day: number; hour: number } | null>(null);
 
   // Helper functions for attendee display (used in card avatars)
   const getAttendeeInitials = (attendee: any) => {
@@ -670,21 +678,260 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
           {/* Section: My Time / Availability */}
           {selectedSection === 'availability' && (
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 4 }}>
-                My Availability
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  My Availability
+                </Typography>
+                <Button variant="outlined" startIcon={<CalendarTodayIcon />}>
+                  Connect More
+                </Button>
+              </Box>
+
+              {/* Connected Calendars Summary */}
+              <Card sx={{ mb: 3 }}>
+                <CardContent>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Connected Calendars</Typography>
+                  <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+                    <Chip label="Google - work@company.com" size="small" onDelete={() => {}} />
+                    <Chip label="Microsoft - personal@outlook.com" size="small" onDelete={() => {}} />
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              {/* Availability Block Type Selector */}
+              <Card sx={{ mb: 3 }}>
+                <CardContent>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Set Availability</Typography>
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      variant={selectedBlockType === 'busy' ? 'contained' : 'outlined'}
+                      size="small"
+                      onClick={() => setSelectedBlockType('busy')}
+                      sx={{
+                        textTransform: 'none',
+                        bgcolor: selectedBlockType === 'busy' ? '#ef4444' : 'transparent',
+                        borderColor: '#ef4444',
+                        color: selectedBlockType === 'busy' ? 'white' : '#ef4444',
+                        '&:hover': {
+                          bgcolor: selectedBlockType === 'busy' ? '#dc2626' : 'rgba(239, 68, 68, 0.1)',
+                          borderColor: '#ef4444',
+                        }
+                      }}
+                    >
+                      Busy
+                    </Button>
+                    <Button
+                      variant={selectedBlockType === 'tentative' ? 'contained' : 'outlined'}
+                      size="small"
+                      onClick={() => setSelectedBlockType('tentative')}
+                      sx={{
+                        textTransform: 'none',
+                        bgcolor: selectedBlockType === 'tentative' ? '#f59e0b' : 'transparent',
+                        borderColor: '#f59e0b',
+                        color: selectedBlockType === 'tentative' ? 'white' : '#f59e0b',
+                        '&:hover': {
+                          bgcolor: selectedBlockType === 'tentative' ? '#d97706' : 'rgba(245, 158, 11, 0.1)',
+                          borderColor: '#f59e0b',
+                        }
+                      }}
+                    >
+                      Tentative
+                    </Button>
+                    <Button
+                      variant={selectedBlockType === 'available' ? 'contained' : 'outlined'}
+                      size="small"
+                      onClick={() => setSelectedBlockType('available')}
+                      sx={{
+                        textTransform: 'none',
+                        bgcolor: selectedBlockType === 'available' ? '#22c55e' : 'transparent',
+                        borderColor: '#22c55e',
+                        color: selectedBlockType === 'available' ? 'white' : '#22c55e',
+                        '&:hover': {
+                          bgcolor: selectedBlockType === 'available' ? '#16a34a' : 'rgba(34, 197, 94, 0.1)',
+                          borderColor: '#22c55e',
+                        }
+                      }}
+                    >
+                      Available
+                    </Button>
+                  </Stack>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                    Click and drag on the calendar to set your {selectedBlockType} times
+                  </Typography>
+                </CardContent>
+              </Card>
+
+              {/* Week Calendar View */}
               <Card>
-                <CardContent sx={{ p: 4, textAlign: 'center' }}>
-                  <CalendarTodayIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                    No Calendar Connected
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Connect your calendar to automatically manage your availability and sync meetings
-                  </Typography>
-                  <Button variant="contained" startIcon={<CalendarTodayIcon />} sx={{ textTransform: 'none' }}>
-                    Connect Google Calendar
-                  </Button>
+                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                  {/* Calendar Header */}
+                  <Box sx={{ p: 2, borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      Week of Jan 15, 2025
+                    </Typography>
+                    <Stack direction="row" spacing={1}>
+                      <Button size="small" variant="outlined" sx={{ textTransform: 'none' }}>Today</Button>
+                      <IconButton size="small"><ArrowBackIcon /></IconButton>
+                      <IconButton size="small"><ArrowForwardIcon /></IconButton>
+                    </Stack>
+                  </Box>
+
+                  {/* Days Header */}
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', borderBottom: '1px solid #e5e7eb' }}>
+                    <Box sx={{ p: 1 }} />
+                    {['Mon\n15', 'Tue\n16', 'Wed\n17', 'Thu\n18', 'Fri\n19', 'Sat\n20', 'Sun\n21'].map((day, i) => (
+                      <Box key={i} sx={{ p: 1, textAlign: 'center', borderLeft: '1px solid #e5e7eb' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 600, whiteSpace: 'pre-line' }}>{day}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+
+                  {/* Time Grid */}
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', maxHeight: 600, overflow: 'auto' }}>
+                    {/* Hours column */}
+                    <Box>
+                      {Array.from({ length: 24 }, (_, hour) => (
+                        <Box key={hour} sx={{ height: 60, display: 'flex', alignItems: 'start', justifyContent: 'center', pt: 0.5, borderBottom: '1px solid #f3f4f6' }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+
+                    {/* Day columns */}
+                    {[0, 1, 2, 3, 4, 5, 6].map((day) => (
+                      <Box key={day} sx={{ borderLeft: '1px solid #e5e7eb', position: 'relative' }}>
+                        {/* Hour slots */}
+                        {Array.from({ length: 24 }, (_, hour) => (
+                          <Box
+                            key={hour}
+                            sx={{
+                              height: 60,
+                              borderBottom: '1px solid #f3f4f6',
+                              cursor: 'crosshair',
+                              '&:hover': {
+                                bgcolor: '#f9fafb'
+                              }
+                            }}
+                            onMouseDown={() => {
+                              setIsDragging(true);
+                              setDragStart({ day, hour });
+                            }}
+                            onMouseUp={() => {
+                              if (isDragging && dragStart) {
+                                // Create block
+                                const newBlock = {
+                                  id: Date.now(),
+                                  day,
+                                  startHour: Math.min(dragStart.hour, hour),
+                                  endHour: Math.max(dragStart.hour, hour) + 1,
+                                  type: selectedBlockType
+                                };
+                                setAvailabilityBlocks([...availabilityBlocks, newBlock]);
+                              }
+                              setIsDragging(false);
+                              setDragStart(null);
+                            }}
+                            onMouseEnter={(e) => {
+                              if (isDragging) {
+                                e.currentTarget.style.backgroundColor =
+                                  selectedBlockType === 'busy' ? 'rgba(239, 68, 68, 0.1)' :
+                                  selectedBlockType === 'tentative' ? 'rgba(245, 158, 11, 0.1)' :
+                                  'rgba(34, 197, 94, 0.1)';
+                              }
+                            }}
+                          />
+                        ))}
+
+                        {/* Mock calendar events */}
+                        {day === 1 && (
+                          <>
+                            <Box sx={{
+                              position: 'absolute',
+                              top: 9 * 60, // 9 AM
+                              left: 4,
+                              right: 4,
+                              height: 60,
+                              bgcolor: '#bfdbfe',
+                              border: '1px solid #60a5fa',
+                              borderRadius: '4px',
+                              p: 0.5,
+                              overflow: 'hidden'
+                            }}>
+                              <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                                Team Sync
+                              </Typography>
+                              <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                                9:00 - 10:00
+                              </Typography>
+                            </Box>
+                            <Box sx={{
+                              position: 'absolute',
+                              top: 14 * 60, // 2 PM
+                              left: 4,
+                              right: 4,
+                              height: 90,
+                              bgcolor: '#fecaca',
+                              border: '1px solid #f87171',
+                              borderRadius: '4px',
+                              p: 0.5,
+                              overflow: 'hidden'
+                            }}>
+                              <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+                                Client Meeting
+                              </Typography>
+                              <Typography variant="caption" sx={{ display: 'block', fontSize: '0.65rem' }}>
+                                2:00 - 3:30
+                              </Typography>
+                            </Box>
+                          </>
+                        )}
+
+                        {/* Availability blocks */}
+                        {availabilityBlocks
+                          .filter(block => block.day === day)
+                          .map(block => (
+                            <Box
+                              key={block.id}
+                              sx={{
+                                position: 'absolute',
+                                top: block.startHour * 60,
+                                left: 4,
+                                right: 4,
+                                height: (block.endHour - block.startHour) * 60 - 2,
+                                bgcolor:
+                                  block.type === 'busy' ? 'rgba(239, 68, 68, 0.3)' :
+                                  block.type === 'tentative' ? 'rgba(245, 158, 11, 0.3)' :
+                                  'rgba(34, 197, 94, 0.3)',
+                                border: `2px dashed ${
+                                  block.type === 'busy' ? '#ef4444' :
+                                  block.type === 'tentative' ? '#f59e0b' :
+                                  '#22c55e'
+                                }`,
+                                borderRadius: '4px',
+                                p: 0.5,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between'
+                              }}
+                              onClick={() => {
+                                // Remove block on click
+                                setAvailabilityBlocks(availabilityBlocks.filter(b => b.id !== block.id));
+                              }}
+                            >
+                              <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.7rem', textTransform: 'capitalize' }}>
+                                {block.type}
+                              </Typography>
+                              <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>
+                                Click to remove
+                              </Typography>
+                            </Box>
+                          ))}
+                      </Box>
+                    ))}
+                  </Box>
                 </CardContent>
               </Card>
             </Box>
