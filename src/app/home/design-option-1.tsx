@@ -247,7 +247,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc', pb: isMobile ? 8 : 0 }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc', pb: isMobile ? 8 : 0, position: 'relative' }}>
       {/* Top Nav */}
       <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
         <Box sx={{ maxWidth: isMobile ? '100%' : 900, mx: 'auto', width: '100%', px: isMobile ? 2 : 3 }}>
@@ -280,7 +280,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
 
       {/* Mobile Bottom Tab Bar */}
       {isMobile && (
-        <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, bgcolor: 'white', borderTop: '1px solid #e5e7eb' }} elevation={0}>
+        <AppBar position="absolute" sx={{ top: 'auto', bottom: 0, bgcolor: 'white', borderTop: '1px solid #e5e7eb' }} elevation={0}>
           <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} variant="fullWidth">
             <Tab icon={<EventIcon />} label="Meetings" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
             <Tab icon={<ContactsIcon />} label="People" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
@@ -291,7 +291,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
 
       {/* Floating Action Button - Mobile */}
       {isMobile && viewMode === 'organizer' && (
-        <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
+        <Box sx={{ position: 'absolute', bottom: 80, right: 16, zIndex: 1000 }}>
           <Button
             variant="contained"
             sx={{
