@@ -247,9 +247,15 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
   };
 
   return (
-    <Box sx={{ height: isMobile ? '100%' : 'auto', minHeight: isMobile ? undefined : '100vh', maxHeight: isMobile ? '100%' : undefined, bgcolor: '#fafbfc', pb: isMobile ? 8 : 0, position: 'relative' }}>
+    <Box sx={{
+      height: isMobile ? '100%' : 'auto',
+      minHeight: isMobile ? undefined : '100vh',
+      bgcolor: '#fafbfc',
+      display: isMobile ? 'flex' : 'block',
+      flexDirection: isMobile ? 'column' : undefined,
+    }}>
       {/* Top Nav */}
-      <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
+      <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
         <Box sx={{ maxWidth: isMobile ? '100%' : 900, mx: 'auto', width: '100%', px: isMobile ? 2 : 3 }}>
           <Toolbar sx={{ px: 0, minHeight: isMobile ? 56 : 64 }}>
             <Box sx={{ flexGrow: 1 }}>
@@ -278,38 +284,16 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
         </Box>
       )}
 
-      {/* Mobile Bottom Tab Bar */}
-      {isMobile && (
-        <AppBar position="absolute" sx={{ top: 'auto', bottom: 0, bgcolor: 'white', borderTop: '1px solid #e5e7eb' }} elevation={0}>
-          <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} variant="fullWidth">
-            <Tab icon={<EventIcon />} label="Meetings" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
-            <Tab icon={<ContactsIcon />} label="People" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
-            <Tab icon={<AccessTimeIcon />} label="My Time" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
-          </Tabs>
-        </AppBar>
-      )}
-
-      {/* Floating Action Button - Mobile */}
-      {isMobile && viewMode === 'organizer' && (
-        <Box sx={{ position: 'absolute', bottom: 80, right: 16, zIndex: 1000 }}>
-          <Button
-            variant="contained"
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
-              minWidth: 'unset',
-              p: 0,
-              boxShadow: 3,
-            }}
-          >
-            <EventIcon />
-          </Button>
-        </Box>
-      )}
-
       {/* Content Area */}
-      <Box sx={{ maxWidth: isMobile ? '100%' : 900, mx: 'auto', px: isMobile ? 2 : 3, py: isMobile ? 2 : 4 }}>
+      <Box sx={{
+        maxWidth: isMobile ? '100%' : 900,
+        mx: 'auto',
+        px: isMobile ? 2 : 3,
+        py: isMobile ? 2 : 4,
+        flex: isMobile ? 1 : undefined,
+        overflow: isMobile ? 'auto' : undefined,
+        position: 'relative',
+      }}>
         {/* TAB 1: Meetings */}
         {currentTab === 0 && (
           <Box>
@@ -533,6 +517,36 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
           </Box>
         )}
       </Box>
+
+      {/* Mobile Bottom Tab Bar */}
+      {isMobile && (
+        <AppBar position="static" sx={{ bgcolor: 'white', borderTop: '1px solid #e5e7eb', flexShrink: 0 }} elevation={0}>
+          <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} variant="fullWidth">
+            <Tab icon={<EventIcon />} label="Meetings" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
+            <Tab icon={<ContactsIcon />} label="People" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
+            <Tab icon={<AccessTimeIcon />} label="My Time" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
+          </Tabs>
+        </AppBar>
+      )}
+
+      {/* Floating Action Button - Mobile */}
+      {isMobile && viewMode === 'organizer' && (
+        <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
+          <Button
+            variant="contained"
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              minWidth: 'unset',
+              p: 0,
+              boxShadow: 3,
+            }}
+          >
+            <EventIcon />
+          </Button>
+        </Box>
+      )}
 
       {/* Meeting Details Modal */}
       {selectedMeeting && viewMode === 'organizer' && (

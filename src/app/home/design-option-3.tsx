@@ -248,7 +248,12 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
   };
 
   return (
-    <Box sx={{ display: 'flex', height: isMobile ? '100%' : 'auto', minHeight: isMobile ? undefined : '100vh', maxHeight: isMobile ? '100%' : undefined, pb: isMobile ? 8 : 0, position: 'relative' }}>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
+      height: isMobile ? '100%' : 'auto',
+      minHeight: isMobile ? undefined : '100vh',
+    }}>
       {/* Left Sidebar - Desktop Only */}
       {!isMobile && (
         <Drawer
@@ -338,7 +343,7 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
 
       {/* Mobile Top Header */}
       {isMobile && (
-        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1100, bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
+        <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5 }}>
             <Image src="/images/logomark.svg" alt="timesēkr" width={100} height={27} priority />
             <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32, fontSize: '0.875rem' }}>M</Avatar>
@@ -346,59 +351,13 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
         </Box>
       )}
 
-      {/* Mobile Bottom Tab Bar */}
-      {isMobile && (
-        <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1100, bgcolor: 'white', borderTop: '1px solid #e5e7eb' }}>
-          <List sx={{ display: 'flex', p: 0 }}>
-            <ListItemButton
-              selected={selectedSection === 'meetings'}
-              onClick={() => setSelectedSection('meetings')}
-              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
-            >
-              <EventIcon sx={{ fontSize: 24, mb: 0.5 }} />
-              <Typography variant="caption">Meetings</Typography>
-            </ListItemButton>
-            <ListItemButton
-              selected={selectedSection === 'people'}
-              onClick={() => setSelectedSection('people')}
-              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
-            >
-              <ContactsIcon sx={{ fontSize: 24, mb: 0.5 }} />
-              <Typography variant="caption">People</Typography>
-            </ListItemButton>
-            <ListItemButton
-              selected={selectedSection === 'availability'}
-              onClick={() => setSelectedSection('availability')}
-              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
-            >
-              <AccessTimeIcon sx={{ fontSize: 24, mb: 0.5 }} />
-              <Typography variant="caption">My Time</Typography>
-            </ListItemButton>
-          </List>
-        </Box>
-      )}
-
-      {/* Floating Action Button - Mobile */}
-      {isMobile && viewMode === 'organizer' && (
-        <Box sx={{ position: 'absolute', bottom: 80, right: 16, zIndex: 1000 }}>
-          <Button
-            variant="contained"
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
-              minWidth: 'unset',
-              p: 0,
-              boxShadow: 3,
-            }}
-          >
-            <EventIcon />
-          </Button>
-        </Box>
-      )}
-
       {/* Main Content */}
-      <Box sx={{ flexGrow: 1, bgcolor: '#fafbfc', pt: isMobile ? 7 : 0 }}>
+      <Box sx={{
+        flex: 1,
+        bgcolor: '#fafbfc',
+        overflow: isMobile ? 'auto' : undefined,
+        position: 'relative',
+      }}>
         <Box sx={{ maxWidth: isMobile ? '100%' : 800, mx: 'auto', px: isMobile ? 2 : 3, py: isMobile ? 2 : 4 }}>
           {/* Section: Meetings */}
           {selectedSection === 'meetings' && (
@@ -654,6 +613,57 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
           )}
         </Box>
       </Box>
+
+      {/* Mobile Bottom Tab Bar */}
+      {isMobile && (
+        <Box sx={{ bgcolor: 'white', borderTop: '1px solid #e5e7eb', flexShrink: 0 }}>
+          <List sx={{ display: 'flex', p: 0 }}>
+            <ListItemButton
+              selected={selectedSection === 'meetings'}
+              onClick={() => setSelectedSection('meetings')}
+              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
+            >
+              <EventIcon sx={{ fontSize: 24, mb: 0.5 }} />
+              <Typography variant="caption">Meetings</Typography>
+            </ListItemButton>
+            <ListItemButton
+              selected={selectedSection === 'people'}
+              onClick={() => setSelectedSection('people')}
+              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
+            >
+              <ContactsIcon sx={{ fontSize: 24, mb: 0.5 }} />
+              <Typography variant="caption">People</Typography>
+            </ListItemButton>
+            <ListItemButton
+              selected={selectedSection === 'availability'}
+              onClick={() => setSelectedSection('availability')}
+              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
+            >
+              <AccessTimeIcon sx={{ fontSize: 24, mb: 0.5 }} />
+              <Typography variant="caption">My Time</Typography>
+            </ListItemButton>
+          </List>
+        </Box>
+      )}
+
+      {/* Floating Action Button - Mobile */}
+      {isMobile && viewMode === 'organizer' && (
+        <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
+          <Button
+            variant="contained"
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              minWidth: 'unset',
+              p: 0,
+              boxShadow: 3,
+            }}
+          >
+            <EventIcon />
+          </Button>
+        </Box>
+      )}
 
       {/* Meeting Details Modal */}
       {selectedMeeting && viewMode === 'organizer' && (
