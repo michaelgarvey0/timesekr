@@ -7,15 +7,18 @@ type DeviceView = 'desktop' | 'mobile';
 interface DeviceViewContextType {
   deviceView: DeviceView;
   setDeviceView: (view: DeviceView) => void;
+  isMounted: boolean;
 }
 
 const DeviceViewContext = createContext<DeviceViewContextType | undefined>(undefined);
 
 export function DeviceViewProvider({ children }: { children: ReactNode }) {
   const [deviceView, setDeviceView] = useState<DeviceView>('desktop');
+  const [isMounted, setIsMounted] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
+    setIsMounted(true);
     const saved = localStorage.getItem('deviceView') as DeviceView;
     if (saved) {
       setDeviceView(saved);
@@ -25,11 +28,13 @@ export function DeviceViewProvider({ children }: { children: ReactNode }) {
   // Save to localStorage when changed
   const handleSetDeviceView = (view: DeviceView) => {
     setDeviceView(view);
-    localStorage.setItem('deviceView', view);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('deviceView', view);
+    }
   };
 
   return (
-    <DeviceViewContext.Provider value={{ deviceView, setDeviceView: handleSetDeviceView }}>
+    <DeviceViewContext.Provider value={{ deviceView, setDeviceView: handleSetDeviceView, isMounted }}>
       {children}
     </DeviceViewContext.Provider>
   );
