@@ -247,7 +247,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#fafbfc', pb: isMobile ? 8 : 0, position: 'relative' }}>
+    <Box sx={{ minHeight: isMobile ? '100%' : '100vh', bgcolor: '#fafbfc', pb: isMobile ? 8 : 0, position: 'relative' }}>
       {/* Top Nav */}
       <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
         <Box sx={{ maxWidth: isMobile ? '100%' : 900, mx: 'auto', width: '100%', px: isMobile ? 2 : 3 }}>
