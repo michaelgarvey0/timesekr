@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, TextField, Button, IconButton, Stack, Chip, Autocomplete, Avatar, AppBar, Toolbar, Menu, MenuItem, Badge, Stepper, Step, StepLabel, Card, CardContent, ButtonGroup, Switch, FormControlLabel, Collapse, Divider, Alert, Select, FormControl, InputLabel, Tooltip } from '@mui/material';
+import { Box, Typography, TextField, Button, IconButton, Stack, Chip, Autocomplete, Avatar, AppBar, Toolbar, Stepper, Step, StepLabel, Card, CardContent, Switch, FormControlLabel, Collapse, Divider, Alert, Select, FormControl, InputLabel, Tooltip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
@@ -8,10 +8,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import GroupsIcon from '@mui/icons-material/Groups';
-import SettingsIcon from '@mui/icons-material/Settings';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SendIcon from '@mui/icons-material/Send';
@@ -71,8 +68,6 @@ const mockPlatformUsers: Attendee[] = [
 
 export default function CreateMeetingPage() {
   const router = useRouter();
-  const [version, setVersion] = useState(4); // Toggle between versions (default to Combined)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   // Common state
   const [title, setTitle] = useState('');
@@ -122,14 +117,8 @@ export default function CreateMeetingPage() {
   };
 
   // All participants including me if attending
-  const allParticipants = isAttending ? [meAttendee, ...attendees] : attendees;
-
-  // For version 4: combine required and optional
-  const allAttendeesV4 = [...requiredAttendees, ...optionalAttendees];
-  const allParticipantsV4 = isAttending ? [meAttendee, ...allAttendeesV4] : allAttendeesV4;
-
-  // Use appropriate participant list based on version
-  const activeParticipants = version === 4 ? allParticipantsV4 : allParticipants;
+  const allAttendees = [...requiredAttendees, ...optionalAttendees];
+  const activeParticipants = isAttending ? [meAttendee, ...allAttendees] : allAttendees;
 
   // Mock suggested times with detailed participant availability
   const suggestedTimes: TimeSlot[] = activeParticipants.length > 0 ? [
@@ -196,14 +185,6 @@ export default function CreateMeetingPage() {
   const everyoneAvailable = suggestedTimes.filter(t => t.available === t.total);
   const mostAvailable = suggestedTimes.filter(t => t.available >= t.total * 0.8 && t.available < t.total);
   const someConflicts = suggestedTimes.filter(t => t.available < t.total * 0.8);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
 
   // Get attendee status with MUI icons
   const getAttendeeIcon = (attendee: Attendee) => {
@@ -2826,34 +2807,20 @@ export default function CreateMeetingPage() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ minHeight: '100vh', bgcolor: showEmailPreview ? '#f5f5f5' : '#fafbfc' }}>
-        {/* Header matching dashboard */}
+        {/* Header */}
         {!showEmailPreview && (
-        <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid', borderColor: 'grey.200' }}>
-          <Toolbar sx={{ py: 1 }}>
-            <IconButton onClick={() => router.push('/home')} sx={{ mr: 2 }}>
-              <ArrowBackIcon />
-            </IconButton>
-            <Box sx={{ flexGrow: 1 }}>
-              <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
-            </Box>
-
-            <Badge badgeContent={0} color="error" sx={{ mr: 2 }}>
-              <NotificationsIcon sx={{ color: 'text.secondary' }} />
-            </Badge>
-            <IconButton onClick={handleMenuOpen} sx={{ bgcolor: 'grey.100', '&:hover': { bgcolor: 'grey.200' } }}>
-              <AccountCircleIcon sx={{ color: 'primary.main' }} />
-            </IconButton>
-            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-              <MenuItem onClick={handleMenuClose}>
-                <SettingsIcon sx={{ mr: 1.5, fontSize: 20 }} />
-                Settings
-              </MenuItem>
-              <MenuItem onClick={handleMenuClose}>
-                <LogoutIcon sx={{ mr: 1.5, fontSize: 20 }} />
-                Logout
-              </MenuItem>
-            </Menu>
-          </Toolbar>
+        <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
+          <Box sx={{ maxWidth: 900, mx: 'auto', width: '100%', px: 3 }}>
+            <Toolbar sx={{ px: 0, minHeight: 64 }}>
+              <IconButton onClick={() => router.push('/home')} sx={{ mr: 2 }}>
+                <ArrowBackIcon />
+              </IconButton>
+              <Box sx={{ flexGrow: 1 }}>
+                <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
+              </Box>
+              <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>M</Avatar>
+            </Toolbar>
+          </Box>
         </AppBar>
         )}
 
