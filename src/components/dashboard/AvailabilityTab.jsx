@@ -3,12 +3,33 @@ import { useState } from 'react'
 function AvailabilityTab({ showBanner }) {
   const [connectedCalendars, setConnectedCalendars] = useState([])
   const [activeTab, setActiveTab] = useState('calendar') // 'calendar' or 'connections'
+  const [manualBlocks, setManualBlocks] = useState([]) // Store manual availability blocks
+  const [showBlockModal, setShowBlockModal] = useState(null) // {timeIdx, dayIdx}
 
   const handleConnectCalendar = (provider) => {
     // TODO: OAuth flow
     console.log('Connecting to', provider)
     // Mock: add to connected calendars
     setConnectedCalendars([...connectedCalendars, { provider, email: 'user@example.com' }])
+  }
+
+  const handleSlotClick = (timeIdx, dayIdx) => {
+    // Check if there's already a manual block here
+    const existingBlock = manualBlocks.find(b => b.timeIdx === timeIdx && b.dayIdx === dayIdx)
+    if (existingBlock) {
+      // Remove it
+      setManualBlocks(manualBlocks.filter(b => !(b.timeIdx === timeIdx && b.dayIdx === dayIdx)))
+    } else {
+      // Show modal to select type
+      setShowBlockModal({ timeIdx, dayIdx })
+    }
+  }
+
+  const addManualBlock = (type) => {
+    if (showBlockModal) {
+      setManualBlocks([...manualBlocks, { ...showBlockModal, type }])
+      setShowBlockModal(null)
+    }
   }
 
   return (
@@ -84,7 +105,7 @@ function AvailabilityTab({ showBanner }) {
           ) : (
             /* Calendar view */
             <div>
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Week of Oct 21 - Oct 27, 2024</h3>
                 <div className="flex gap-2">
                   <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">
@@ -97,6 +118,12 @@ function AvailabilityTab({ showBanner }) {
                     Next →
                   </button>
                 </div>
+              </div>
+
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-900">
+                  <span className="font-semibold">Tip:</span> Click any time slot to add manual availability. Click again to remove.
+                </p>
               </div>
 
               {/* Weekly calendar grid */}
@@ -121,29 +148,39 @@ function AvailabilityTab({ showBanner }) {
                         {time}
                       </div>
                       {[0, 1, 2, 3, 4, 5, 6].map((dayIdx) => {
-                        // Mock some events - differentiate between synced calendar events and manual availability
+                        // Mock some synced calendar events
                         const hasSyncedEvent = (timeIdx === 2 && dayIdx === 1) ||
                                                (timeIdx === 4 && dayIdx === 3)
-                        const hasManualAvailability = (timeIdx === 6 && dayIdx === 2) ||
-                                                      (timeIdx === 3 && dayIdx === 4)
+
+                        // Check for manual availability block
+                        const manualBlock = manualBlocks.find(b => b.timeIdx === timeIdx && b.dayIdx === dayIdx)
 
                         return (
                           <div
                             key={dayIdx}
-                            className={`relative min-h-[60px] p-2 border-r border-gray-200 last:border-r-0 hover:bg-teal-50 transition ${
-                              hasSyncedEvent || hasManualAvailability ? 'bg-gradient-to-br from-teal-100 to-teal-50' : ''
+                            onClick={() => !hasSyncedEvent && handleSlotClick(timeIdx, dayIdx)}
+                            className={`relative min-h-[60px] p-2 border-r border-gray-200 last:border-r-0 transition ${
+                              hasSyncedEvent ? 'bg-gradient-to-br from-teal-100 to-teal-50' : 'hover:bg-teal-50 cursor-pointer'
                             }`}
                           >
                             {hasSyncedEvent && (
-                              <div className="absolute inset-2 bg-teal-500 rounded p-2 text-white text-xs shadow-sm">
+                              <div className="absolute inset-2 bg-teal-500 rounded p-2 text-white text-xs shadow-sm pointer-events-none">
                                 <div className="font-semibold">Team Meeting</div>
                                 <div className="text-teal-100">{time} - {parseInt(time) + 1} {time.includes('AM') ? 'AM' : 'PM'}</div>
                               </div>
                             )}
-                            {hasManualAvailability && (
-                              <div className="absolute inset-2 bg-teal-200/50 border-2 border-dashed border-teal-400 rounded p-2 text-teal-800 text-xs">
-                                <div className="font-semibold">Available (Manual)</div>
-                                <div className="text-teal-600">{time} - {parseInt(time) + 1} {time.includes('AM') ? 'AM' : 'PM'}</div>
+                            {manualBlock && (
+                              <div className={`absolute inset-2 rounded p-2 text-xs border-2 border-dashed pointer-events-none ${
+                                manualBlock.type === 'available'
+                                  ? 'bg-teal-200/50 border-teal-400 text-teal-800'
+                                  : 'bg-amber-200/50 border-amber-400 text-amber-800'
+                              }`}>
+                                <div className="font-semibold">
+                                  {manualBlock.type === 'available' ? 'Available' : 'Tentative'}
+                                </div>
+                                <div className={manualBlock.type === 'available' ? 'text-teal-600' : 'text-amber-600'}>
+                                  {time} - {parseInt(time) + 1} {time.includes('AM') ? 'AM' : 'PM'}
+                                </div>
                               </div>
                             )}
                           </div>
@@ -162,7 +199,11 @@ function AvailabilityTab({ showBanner }) {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-teal-200/50 border-2 border-dashed border-teal-400 rounded"></div>
-                  <span>Manual Availability</span>
+                  <span>Manual - Available</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-amber-200/50 border-2 border-dashed border-amber-400 rounded"></div>
+                  <span>Manual - Tentative</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-white border border-gray-300 rounded"></div>
@@ -263,6 +304,48 @@ function AvailabilityTab({ showBanner }) {
             <div className="text-sm font-medium text-gray-900">Yahoo</div>
           </button>
         </div>
+        </div>
+      )}
+
+      {/* Modal for selecting block type */}
+      {showBlockModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowBlockModal(null)}>
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Manual Availability</h3>
+            <p className="text-sm text-gray-600 mb-6">Select your availability type for this time slot</p>
+            <div className="space-y-3">
+              <button
+                onClick={() => addManualBlock('available')}
+                className="w-full p-4 border-2 border-teal-400 bg-teal-50 rounded-lg hover:bg-teal-100 transition text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-teal-200/50 border-2 border-dashed border-teal-400 rounded flex-shrink-0"></div>
+                  <div>
+                    <div className="font-semibold text-teal-900">Available</div>
+                    <div className="text-xs text-teal-700">I'm definitely free during this time</div>
+                  </div>
+                </div>
+              </button>
+              <button
+                onClick={() => addManualBlock('tentative')}
+                className="w-full p-4 border-2 border-amber-400 bg-amber-50 rounded-lg hover:bg-amber-100 transition text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-amber-200/50 border-2 border-dashed border-amber-400 rounded flex-shrink-0"></div>
+                  <div>
+                    <div className="font-semibold text-amber-900">Tentative</div>
+                    <div className="text-xs text-amber-700">I might be available</div>
+                  </div>
+                </div>
+              </button>
+              <button
+                onClick={() => setShowBlockModal(null)}
+                className="w-full p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-center text-sm font-medium text-gray-700"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
