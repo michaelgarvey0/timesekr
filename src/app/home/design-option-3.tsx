@@ -250,10 +250,9 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
   return (
     <Box sx={{
       display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
       height: isMobile ? '100%' : 'auto',
       minHeight: isMobile ? undefined : '100vh',
-      position: 'relative',
-      pb: isMobile ? 8 : 0,
     }}>
       {/* Left Sidebar - Desktop Only */}
       {!isMobile && (
@@ -344,7 +343,7 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
 
       {/* Mobile Top Header */}
       {isMobile && (
-        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bgcolor: 'white', borderBottom: '1px solid #e5e7eb', zIndex: 1100 }}>
+        <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5 }}>
             <Image src="/images/logomark.svg" alt="timesēkr" width={100} height={27} priority />
             <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32, fontSize: '0.875rem' }}>M</Avatar>
@@ -354,9 +353,9 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
 
       {/* Main Content */}
       <Box sx={{
-        flexGrow: 1,
+        flex: 1,
         bgcolor: '#fafbfc',
-        pt: isMobile ? 7 : 0,
+        overflow: isMobile ? 'auto' : undefined,
       }}>
         <Box sx={{ maxWidth: isMobile ? '100%' : 800, mx: 'auto', px: isMobile ? 2 : 3, py: isMobile ? 2 : 4 }}>
           {/* Section: Meetings */}
@@ -616,7 +615,7 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
 
       {/* Mobile Bottom Tab Bar */}
       {isMobile && (
-        <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, bgcolor: 'white', borderTop: '1px solid #e5e7eb', zIndex: 1100 }}>
+        <Box sx={{ bgcolor: 'white', borderTop: '1px solid #e5e7eb', flexShrink: 0 }}>
           <List sx={{ display: 'flex', p: 0 }}>
             <ListItemButton
               selected={selectedSection === 'meetings'}
@@ -648,7 +647,7 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
 
       {/* Floating Action Button - Mobile */}
       {isMobile && viewMode === 'organizer' && (
-        <Box sx={{ position: 'absolute', bottom: 80, right: 16, zIndex: 1000 }}>
+        <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
           <Button
             variant="contained"
             sx={{

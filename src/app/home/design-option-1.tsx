@@ -251,38 +251,40 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
       height: isMobile ? '100%' : 'auto',
       minHeight: isMobile ? undefined : '100vh',
       bgcolor: '#fafbfc',
-      position: 'relative',
-      pb: isMobile ? 8 : 0,
+      display: isMobile ? 'flex' : 'block',
+      flexDirection: isMobile ? 'column' : undefined,
     }}>
       {/* Top Nav */}
-      <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
-        <Box sx={{ maxWidth: isMobile ? '100%' : 900, mx: 'auto', width: '100%', px: isMobile ? 2 : 3 }}>
-          <Toolbar sx={{ px: 0, minHeight: isMobile ? 56 : 64 }}>
-            <Box sx={{ flexGrow: 1 }}>
-              <Image src="/images/logomark.svg" alt="timesēkr" width={isMobile ? 100 : 120} height={isMobile ? 27 : 32} priority />
-            </Box>
-            <Avatar sx={{ bgcolor: 'primary.main', width: isMobile ? 32 : 40, height: isMobile ? 32 : 40, fontSize: isMobile ? '0.875rem' : '1rem' }}>M</Avatar>
-          </Toolbar>
-        </Box>
-      </AppBar>
-
-      {/* Main Tabs - Desktop */}
-      {!isMobile && (
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'white' }}>
-          <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)}>
-              <Tab icon={<EventIcon />} iconPosition="start" label="Meetings" sx={{ textTransform: 'none', minHeight: 64 }} />
-              <Tab icon={<ContactsIcon />} iconPosition="start" label="People" sx={{ textTransform: 'none', minHeight: 64 }} />
-              <Tab icon={<AccessTimeIcon />} iconPosition="start" label="My Time" sx={{ textTransform: 'none', minHeight: 64 }} />
-            </Tabs>
-            {viewMode === 'organizer' && (
-              <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none' }}>
-                New Meeting
-              </Button>
-            )}
+      <Box sx={{ flexShrink: 0 }}>
+        <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
+          <Box sx={{ maxWidth: isMobile ? '100%' : 900, mx: 'auto', width: '100%', px: isMobile ? 2 : 3 }}>
+            <Toolbar sx={{ px: 0, minHeight: isMobile ? 56 : 64 }}>
+              <Box sx={{ flexGrow: 1 }}>
+                <Image src="/images/logomark.svg" alt="timesēkr" width={isMobile ? 100 : 120} height={isMobile ? 27 : 32} priority />
+              </Box>
+              <Avatar sx={{ bgcolor: 'primary.main', width: isMobile ? 32 : 40, height: isMobile ? 32 : 40, fontSize: isMobile ? '0.875rem' : '1rem' }}>M</Avatar>
+            </Toolbar>
           </Box>
-        </Box>
-      )}
+        </AppBar>
+
+        {/* Main Tabs - Desktop */}
+        {!isMobile && (
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'white' }}>
+            <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)}>
+                <Tab icon={<EventIcon />} iconPosition="start" label="Meetings" sx={{ textTransform: 'none', minHeight: 64 }} />
+                <Tab icon={<ContactsIcon />} iconPosition="start" label="People" sx={{ textTransform: 'none', minHeight: 64 }} />
+                <Tab icon={<AccessTimeIcon />} iconPosition="start" label="My Time" sx={{ textTransform: 'none', minHeight: 64 }} />
+              </Tabs>
+              {viewMode === 'organizer' && (
+                <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none' }}>
+                  New Meeting
+                </Button>
+              )}
+            </Box>
+          </Box>
+        )}
+      </Box>
 
       {/* Content Area */}
       <Box sx={{
@@ -290,6 +292,8 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
         mx: 'auto',
         px: isMobile ? 2 : 3,
         py: isMobile ? 2 : 4,
+        flex: isMobile ? 1 : undefined,
+        overflow: isMobile ? 'auto' : undefined,
       }}>
         {/* TAB 1: Meetings */}
         {currentTab === 0 && (
@@ -517,18 +521,20 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
 
       {/* Mobile Bottom Tab Bar */}
       {isMobile && (
-        <AppBar position="absolute" sx={{ bottom: 0, left: 0, right: 0, bgcolor: 'white', borderTop: '1px solid #e5e7eb' }} elevation={0}>
-          <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} variant="fullWidth">
-            <Tab icon={<EventIcon />} label="Meetings" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
-            <Tab icon={<ContactsIcon />} label="People" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
-            <Tab icon={<AccessTimeIcon />} label="My Time" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
-          </Tabs>
-        </AppBar>
+        <Box sx={{ flexShrink: 0 }}>
+          <AppBar position="static" sx={{ bgcolor: 'white', borderTop: '1px solid #e5e7eb' }} elevation={0}>
+            <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} variant="fullWidth">
+              <Tab icon={<EventIcon />} label="Meetings" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
+              <Tab icon={<ContactsIcon />} label="People" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
+              <Tab icon={<AccessTimeIcon />} label="My Time" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
+            </Tabs>
+          </AppBar>
+        </Box>
       )}
 
       {/* Floating Action Button - Mobile */}
       {isMobile && viewMode === 'organizer' && (
-        <Box sx={{ position: 'absolute', bottom: 80, right: 16, zIndex: 1000 }}>
+        <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
           <Button
             variant="contained"
             sx={{
