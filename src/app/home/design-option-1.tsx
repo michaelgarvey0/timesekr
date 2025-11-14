@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Tabs, Tab, AppBar, Toolbar, IconButton, Avatar, Card, CardContent, Chip, Stack, LinearProgress, AvatarGroup, Modal, Divider, List, ListItem, ListItemText, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel } from '@mui/material';
+import { Box, Typography, Button, Tabs, Tab, AppBar, Toolbar, IconButton, Avatar, Card, CardContent, Chip, Stack, LinearProgress, AvatarGroup, Modal, Divider, List, ListItem, ListItemText, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel, TextField } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -16,6 +16,8 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import RemoveIcon from '@mui/icons-material/Remove';
+import SearchIcon from '@mui/icons-material/Search';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -478,21 +480,121 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
         {currentTab === 1 && (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ fontWeight: 600 }}>
                 People
               </Typography>
-              <Button variant="contained">Add Person</Button>
+              <Button variant="contained" size={isMobile ? 'small' : 'medium'}>Invite People</Button>
             </Box>
+
+            {/* Search */}
+            <TextField
+              fullWidth
+              placeholder="Search people..."
+              size="small"
+              sx={{ mb: 3 }}
+              InputProps={{
+                startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
+              }}
+            />
+
             <Stack spacing={2}>
+              {/* Administrator */}
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: '#3b82f6' }}>S</Avatar>
+                    <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>M</Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600 }}>Michael Garvey</Typography>
+                        <Chip label="Administrator" size="small" sx={{ height: 20, fontSize: '0.7rem', bgcolor: '#f3f4f6', color: 'text.secondary' }} />
+                      </Box>
+                      <Typography variant="body2" color="text.secondary">michael@timesekr.com</Typography>
+                    </Box>
+                    <Chip label="Active" size="small" color="success" />
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Accepted Users */}
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar sx={{ bgcolor: '#3b82f6', width: 40, height: 40 }}>S</Avatar>
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="body1" sx={{ fontWeight: 600 }}>Sarah Chen</Typography>
                       <Typography variant="body2" color="text.secondary">sarah@company.com</Typography>
                     </Box>
-                    <Chip label="Connected" size="small" color="success" />
+                    <Chip label="Active" size="small" color="success" />
+                    <IconButton size="small">
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Box>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar sx={{ bgcolor: '#8b5cf6', width: 40, height: 40 }}>J</Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>John Smith</Typography>
+                      <Typography variant="body2" color="text.secondary">john@company.com</Typography>
+                    </Box>
+                    <Chip label="Active" size="small" color="success" />
+                    <IconButton size="small">
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Box>
+                </CardContent>
+              </Card>
+
+              {/* Pending Users */}
+              <Card sx={{ bgcolor: '#fef3c7', borderLeft: '4px solid #f59e0b' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar sx={{ bgcolor: '#f59e0b', width: 40, height: 40 }}>A</Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>Alice Johnson</Typography>
+                      <Typography variant="body2" color="text.secondary">alice@company.com</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                        Invited 3 days ago
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      sx={{ textTransform: 'none', minWidth: 80 }}
+                    >
+                      Nudge
+                    </Button>
+                    <IconButton size="small">
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Box>
+                </CardContent>
+              </Card>
+
+              <Card sx={{ bgcolor: '#fef3c7', borderLeft: '4px solid #f59e0b' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Avatar sx={{ bgcolor: '#f59e0b', width: 40, height: 40 }}>B</Avatar>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>Bob Williams</Typography>
+                      <Typography variant="body2" color="text.secondary">bob@external.com</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                        Invited 1 week ago
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      sx={{ textTransform: 'none', minWidth: 80 }}
+                    >
+                      Nudge
+                    </Button>
+                    <IconButton size="small">
+                      <MoreVertIcon />
+                    </IconButton>
                   </Box>
                 </CardContent>
               </Card>
