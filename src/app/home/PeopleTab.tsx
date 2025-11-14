@@ -169,7 +169,7 @@ export default function PeopleTab({ isMobile = false }: { isMobile?: boolean }) 
           onClick={() => setInviteModalOpen(true)}
           sx={{ textTransform: 'none' }}
         >
-          invite people
+          Invite People
         </Button>
       </Box>
 
