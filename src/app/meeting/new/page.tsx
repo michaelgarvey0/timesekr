@@ -843,17 +843,6 @@ export default function CreateMeetingPage() {
                     </Stack>
                   </Box>
 
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={isAttending}
-                        onChange={(e) => setIsAttending(e.target.checked)}
-                        color="primary"
-                      />
-                    }
-                    label="I am attending this meeting"
-                  />
-
                   <Button
                     variant="contained"
                     size="large"
@@ -1010,6 +999,19 @@ export default function CreateMeetingPage() {
                         }}
                       />
                     </Box>
+
+                    <Divider sx={{ my: 3 }} />
+
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={isAttending}
+                          onChange={(e) => setIsAttending(e.target.checked)}
+                          color="primary"
+                        />
+                      }
+                      label="I am attending this meeting"
+                    />
                   </CardContent>
                 </Card>
 
