@@ -332,7 +332,7 @@ export default function PeopleTab({ isMobile = false }: { isMobile?: boolean }) 
         <DialogTitle>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              invite people
+              Invite People
             </Typography>
             <IconButton size="small" onClick={handleCloseInviteModal}>
               <CloseIcon />
