@@ -18,6 +18,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import RemoveIcon from '@mui/icons-material/Remove';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import MeetingDetailsModal from './MeetingDetailsModal';
 import InviteeResponseForm from './InviteeResponseForm';
 
@@ -107,6 +108,7 @@ const mockInvitedMeetings = [
 ];
 
 export default function DesignOption1({ cardView = 'detailed', viewMode = 'organizer', isMobile = false }: { cardView?: 'detailed' | 'compact'; viewMode?: 'organizer' | 'invitee'; isMobile?: boolean }) {
+  const router = useRouter();
   const [currentTab, setCurrentTab] = useState(0);
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
@@ -277,7 +279,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
                 <Tab icon={<AccessTimeIcon />} iconPosition="start" label="My Time" sx={{ textTransform: 'none', minHeight: 64 }} />
               </Tabs>
               {viewMode === 'organizer' && (
-                <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none' }}>
+                <Button variant="contained" startIcon={<EventIcon />} sx={{ textTransform: 'none' }} onClick={() => router.push('/meeting/new')}>
                   New Meeting
                 </Button>
               )}
@@ -537,6 +539,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
         <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
           <Button
             variant="contained"
+            onClick={() => router.push('/meeting/new')}
             sx={{
               width: 56,
               height: 56,
