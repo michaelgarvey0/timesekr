@@ -78,6 +78,8 @@ export default function CreateMeetingPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [duration, setDuration] = useState(60);
+  const [customDurationMode, setCustomDurationMode] = useState(false);
+  const [customDurationInput, setCustomDurationInput] = useState('');
   const [attendees, setAttendees] = useState<Attendee[]>([]); // Keep for backwards compatibility
   const [requiredAttendees, setRequiredAttendees] = useState<Attendee[]>([]);
   const [optionalAttendees, setOptionalAttendees] = useState<Attendee[]>([]);
@@ -768,18 +770,52 @@ export default function CreateMeetingPage() {
                   />
                   <Box>
                     <Typography variant="body2" sx={{ mb: 1, fontWeight: 600 }}>Duration</Typography>
-                    <Stack direction="row" spacing={1}>
+                    <Stack direction="row" spacing={1} sx={{ mb: customDurationMode ? 1.5 : 0 }}>
                       {[30, 60, 90].map((mins) => (
                         <Button
                           key={mins}
-                          variant={duration === mins ? 'contained' : 'outlined'}
-                          onClick={() => setDuration(mins)}
+                          variant={duration === mins && !customDurationMode ? 'contained' : 'outlined'}
+                          onClick={() => {
+                            setDuration(mins);
+                            setCustomDurationMode(false);
+                            setCustomDurationInput('');
+                          }}
                           sx={{ textTransform: 'none' }}
                         >
                           {mins}min
                         </Button>
                       ))}
+                      <Button
+                        variant={customDurationMode ? 'contained' : 'outlined'}
+                        onClick={() => {
+                          setCustomDurationMode(true);
+                          if (customDurationInput) {
+                            setDuration(parseInt(customDurationInput));
+                          }
+                        }}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Custom
+                      </Button>
                     </Stack>
+                    {customDurationMode && (
+                      <TextField
+                        fullWidth
+                        size="small"
+                        type="number"
+                        label="Duration (minutes)"
+                        placeholder="e.g., 180 for 3 hours"
+                        value={customDurationInput}
+                        onChange={(e) => {
+                          setCustomDurationInput(e.target.value);
+                          const value = parseInt(e.target.value);
+                          if (!isNaN(value) && value > 0) {
+                            setDuration(value);
+                          }
+                        }}
+                        inputProps={{ min: 1 }}
+                      />
+                    )}
                   </Box>
 
                   <Divider sx={{ my: 2 }} />
