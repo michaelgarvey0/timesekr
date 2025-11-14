@@ -43,7 +43,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   }
                   label={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2">Google - work@company.com</Typography>
+                      <Typography variant="body2">work@company.com</Typography>
                       <Chip label="Primary" size="small" sx={{ height: 20, fontSize: '0.65rem' }} />
                     </Box>
                   }
@@ -57,7 +57,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                     />
                   }
                   label={
-                    <Typography variant="body2">Microsoft - personal@outlook.com</Typography>
+                    <Typography variant="body2">personal@outlook.com</Typography>
                   }
                 />
               </Stack>
