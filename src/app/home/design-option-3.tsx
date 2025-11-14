@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel } from '@mui/material';
+import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel, TextField } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import GroupsIcon from '@mui/icons-material/Groups';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -15,6 +15,8 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import RemoveIcon from '@mui/icons-material/Remove';
+import SearchIcon from '@mui/icons-material/Search';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -542,22 +544,55 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
           {/* Section: People */}
           {selectedSection === 'people' && (
             <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
                   People
                 </Typography>
-                <Button variant="contained">Add Person</Button>
+                <Button variant="contained">Invite People</Button>
               </Box>
+
+              {/* Search */}
+              <TextField
+                fullWidth
+                placeholder="Search people..."
+                size="small"
+                sx={{ mb: 3 }}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />
+                }}
+              />
+
               <Stack spacing={2}>
+                {/* Administrator */}
                 <Card>
                   <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar sx={{ bgcolor: '#3b82f6', width: 48, height: 48 }}>S</Avatar>
+                      <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>M</Avatar>
+                      <Box sx={{ flex: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>Michael Garvey</Typography>
+                          <Chip label="Administrator" size="small" sx={{ height: 20, fontSize: '0.7rem', bgcolor: '#f3f4f6', color: 'text.secondary' }} />
+                        </Box>
+                        <Typography variant="body2" color="text.secondary">michael@timesekr.com</Typography>
+                      </Box>
+                      <Chip label="Active" size="small" color="success" />
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* Accepted Users */}
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Avatar sx={{ bgcolor: '#3b82f6', width: 40, height: 40 }}>S</Avatar>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="body1" sx={{ fontWeight: 600 }}>Sarah Chen</Typography>
                         <Typography variant="body2" color="text.secondary">sarah@company.com</Typography>
                       </Box>
-                      <Chip label="Connected" size="small" color="success" />
+                      <Chip label="Active" size="small" color="success" />
+                      <IconButton size="small">
+                        <MoreVertIcon />
+                      </IconButton>
                     </Box>
                   </CardContent>
                 </Card>
@@ -565,25 +600,66 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
                 <Card>
                   <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar sx={{ bgcolor: '#8b5cf6', width: 48, height: 48 }}>D</Avatar>
+                      <Avatar sx={{ bgcolor: '#8b5cf6', width: 40, height: 40 }}>J</Avatar>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600 }}>David Kim</Typography>
-                        <Typography variant="body2" color="text.secondary">david@startup.io</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600 }}>John Smith</Typography>
+                        <Typography variant="body2" color="text.secondary">john@company.com</Typography>
                       </Box>
-                      <Chip label="Connected" size="small" color="success" />
+                      <Chip label="Active" size="small" color="success" />
+                      <IconButton size="small">
+                        <MoreVertIcon />
+                      </IconButton>
                     </Box>
                   </CardContent>
                 </Card>
 
-                <Card>
+                {/* Pending Users */}
+                <Card sx={{ bgcolor: '#fef3c7', borderLeft: '4px solid #f59e0b' }}>
                   <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar sx={{ bgcolor: '#f59e0b', width: 48, height: 48 }}>E</Avatar>
+                      <Avatar sx={{ bgcolor: '#f59e0b', width: 40, height: 40 }}>A</Avatar>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600 }}>Emma Wilson</Typography>
-                        <Typography variant="body2" color="text.secondary">emma@enterprise.com</Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600 }}>Alice Johnson</Typography>
+                        <Typography variant="body2" color="text.secondary">alice@company.com</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                          Invited 3 days ago
+                        </Typography>
                       </Box>
-                      <Chip label="Connected" size="small" color="success" />
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ textTransform: 'none', minWidth: 80 }}
+                      >
+                        Nudge
+                      </Button>
+                      <IconButton size="small">
+                        <MoreVertIcon />
+                      </IconButton>
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ bgcolor: '#fef3c7', borderLeft: '4px solid #f59e0b' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Avatar sx={{ bgcolor: '#f59e0b', width: 40, height: 40 }}>B</Avatar>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600 }}>Bob Williams</Typography>
+                        <Typography variant="body2" color="text.secondary">bob@external.com</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                          Invited 1 week ago
+                        </Typography>
+                      </Box>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ textTransform: 'none', minWidth: 80 }}
+                      >
+                        Nudge
+                      </Button>
+                      <IconButton size="small">
+                        <MoreVertIcon />
+                      </IconButton>
                     </Box>
                   </CardContent>
                 </Card>

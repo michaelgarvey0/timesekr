@@ -839,7 +839,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
                                 block.type === 'busy' ? 'rgba(239, 68, 68, 0.3)' :
                                 block.type === 'tentative' ? 'rgba(245, 158, 11, 0.3)' :
                                 'rgba(34, 197, 94, 0.3)',
-                              border: `2px solid ${
+                              border: `2px dashed ${
                                 block.type === 'busy' ? '#ef4444' :
                                 block.type === 'tentative' ? '#f59e0b' :
                                 '#22c55e'
