@@ -20,7 +20,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ fontWeight: 600 }}>
-          My Availability
+          My Time
         </Typography>
       </Box>
 
@@ -43,7 +43,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   }
                   label={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2">Google - work@company.com</Typography>
+                      <Typography variant="body2">work@company.com</Typography>
                       <Chip label="Primary" size="small" sx={{ height: 20, fontSize: '0.65rem' }} />
                     </Box>
                   }
@@ -57,7 +57,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                     />
                   }
                   label={
-                    <Typography variant="body2">Microsoft - personal@outlook.com</Typography>
+                    <Typography variant="body2">personal@outlook.com</Typography>
                   }
                 />
               </Stack>
@@ -159,7 +159,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
           {/* Days Header */}
           <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', borderBottom: '1px solid #e5e7eb' }}>
             <Box sx={{ p: 1 }} />
-            {['Mon\n15', 'Tue\n16', 'Wed\n17', 'Thu\n18', 'Fri\n19', 'Sat\n20', 'Sun\n21'].map((day, i) => (
+            {['Sun\n15', 'Mon\n16', 'Tue\n17', 'Wed\n18', 'Thu\n19', 'Fri\n20', 'Sat\n21'].map((day, i) => (
               <Box key={i} sx={{ p: 1, textAlign: 'center', borderLeft: '1px solid #e5e7eb' }}>
                 <Typography variant="caption" sx={{ fontWeight: 600, whiteSpace: 'pre-line' }}>{day}</Typography>
               </Box>
@@ -231,8 +231,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                 })}
 
                 {/* Mock calendar events - all days with events */}
-                {/* Monday - day 0 - Google Calendar */}
-                {day === 0 && calendarFilters.google && (
+                {/* Monday - day 1 - Google Calendar */}
+                {day === 1 && calendarFilters.google && (
                   <>
                     {[
                       { top: (9-7), height: 60, title: 'Stand-up', time: '9:00 - 10:00' },
@@ -263,8 +263,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Tuesday - day 1 - Microsoft Calendar */}
-                {day === 1 && calendarFilters.microsoft && (
+                {/* Tuesday - day 2 - Microsoft Calendar */}
+                {day === 2 && calendarFilters.microsoft && (
                   <>
                     {[
                       { top: (8-7), height: 60, title: 'Engineering Sync', time: '8:00 - 9:00' },
@@ -295,8 +295,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Wednesday - day 2 - Google Calendar */}
-                {day === 2 && calendarFilters.google && (
+                {/* Wednesday - day 3 - Google Calendar */}
+                {day === 3 && calendarFilters.google && (
                   <>
                     {[
                       { top: (9-7), height: 60, title: 'Stand-up', time: '9:00 - 10:00' },
@@ -327,8 +327,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Thursday - day 3 - Microsoft Calendar */}
-                {day === 3 && calendarFilters.microsoft && (
+                {/* Thursday - day 4 - Microsoft Calendar */}
+                {day === 4 && calendarFilters.microsoft && (
                   <>
                     {[
                       { top: (9-7), height: 60, title: 'Team Standup', time: '9:00 - 10:00' },
@@ -359,8 +359,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Friday - day 4 - Google Calendar */}
-                {day === 4 && calendarFilters.google && (
+                {/* Friday - day 5 - Google Calendar */}
+                {day === 5 && calendarFilters.google && (
                   <>
                     {[
                       { top: (9-7), height: 60, title: 'Stand-up', time: '9:00 - 10:00' },
