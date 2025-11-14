@@ -107,7 +107,7 @@ const mockInvitedMeetings = [
   },
 ];
 
-export default function DesignOption3() {
+export default function DesignOption3({ cardView = 'detailed' }: { cardView?: 'detailed' | 'compact' }) {
   const [selectedSection, setSelectedSection] = useState('meetings');
   const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
   const [selectedMeeting, setSelectedMeeting] = useState<typeof mockOrganizingMeetings[0] | null>(null);
@@ -154,6 +154,98 @@ export default function DesignOption3() {
     });
     setSubmittedMeetings(prev => ({ ...prev, [meeting.id]: true }));
     setEditMode(prev => ({ ...prev, [meeting.id]: false }));
+  };
+
+  // Compact Card Renderer
+  const renderCompactCard = (meeting: any) => {
+    return (
+      <Card
+        key={meeting.id}
+        sx={{
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+          '&:hover': {
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            transform: 'translateY(-1px)',
+          }
+        }}
+        onClick={() => viewMode === 'organizer' ? setSelectedMeeting(meeting) : undefined}
+      >
+        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+            {/* Left: Title + Status */}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {meeting.title}
+              </Typography>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Chip
+                  label={viewMode === 'invitee' && submittedMeetings[meeting.id] ? 'Responded' : meeting.status}
+                  color={viewMode === 'invitee' && submittedMeetings[meeting.id] ? 'success' : meeting.statusColor as any}
+                  size="small"
+                  sx={{ fontWeight: 600, height: 20, fontSize: '0.7rem' }}
+                />
+                {viewMode === 'invitee' && 'organizer' in meeting && (
+                  <Typography variant="caption" color="text.secondary">
+                    {(meeting as typeof mockInvitedMeetings[0]).organizer}
+                  </Typography>
+                )}
+              </Stack>
+            </Box>
+
+            {/* Middle: Key Info */}
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                {meeting.winningTime.day}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {meeting.winningTime.time}
+              </Typography>
+            </Box>
+
+            {/* Right: Quick Action */}
+            <Box>
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ textTransform: 'none', minWidth: 80 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (viewMode === 'organizer') {
+                    setConfirmInviteMeeting(meeting);
+                  } else {
+                    setSelectedMeeting(meeting);
+                  }
+                }}
+              >
+                {viewMode === 'organizer' ? 'Send' : 'Respond'}
+              </Button>
+            </Box>
+          </Box>
+
+          {/* Response progress indicator */}
+          {viewMode === 'organizer' && (
+            <Box sx={{ mt: 1.5 }}>
+              <LinearProgress
+                variant="determinate"
+                value={(meeting.responded / meeting.totalAttendees) * 100}
+                sx={{
+                  height: 4,
+                  borderRadius: 1,
+                  bgcolor: '#e5e7eb',
+                  '& .MuiLinearProgress-bar': {
+                    bgcolor: meeting.status === 'Ready' ? '#22c55e' : '#f59e0b',
+                  }
+                }}
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                {meeting.responded}/{meeting.totalAttendees} responded
+              </Typography>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
   return (
@@ -252,7 +344,8 @@ export default function DesignOption3() {
               </Typography>
 
               <Stack spacing={2}>
-                {(viewMode === 'organizer' ? mockOrganizingMeetings : mockInvitedMeetings).map((meeting) => (
+                {(viewMode === 'organizer' ? mockOrganizingMeetings : mockInvitedMeetings).map((meeting) =>
+                  cardView === 'compact' ? renderCompactCard(meeting) : (
                   <Card
                     key={meeting.id}
                     sx={{
@@ -267,14 +360,23 @@ export default function DesignOption3() {
                     onClick={viewMode === 'organizer' ? () => setSelectedMeeting(meeting) : undefined}
                   >
                     <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
-                      {/* Status Chip at Top Left */}
-                      <Box sx={{ mb: 2 }}>
+                      {/* Status Chip at Top Left + Avatars at Top Right */}
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
                         <Chip
                           label={viewMode === 'invitee' && submittedMeetings[meeting.id] ? 'Responded' : meeting.status}
                           color={viewMode === 'invitee' && submittedMeetings[meeting.id] ? 'success' : meeting.statusColor as any}
                           size="small"
                           sx={{ fontWeight: 600 }}
                         />
+                        {viewMode === 'organizer' && (
+                          <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
+                            {meeting.attendees.map((attendee, idx) => (
+                              <Avatar key={idx} sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8' }}>
+                                {getAttendeeInitials(attendee)}
+                              </Avatar>
+                            ))}
+                          </AvatarGroup>
+                        )}
                       </Box>
 
                       {/* Title */}
@@ -299,16 +401,6 @@ export default function DesignOption3() {
 
                       {viewMode === 'organizer' ? (
                         <>
-                          {/* Organizer View: Avatars */}
-                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2.5 }}>
-                            <AvatarGroup max={6} sx={{ '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem', bgcolor: 'primary.main' } }}>
-                              {meeting.attendees.map((attendee, idx) => (
-                                <Avatar key={idx} sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8' }}>
-                                  {getAttendeeInitials(attendee)}
-                                </Avatar>
-                              ))}
-                            </AvatarGroup>
-                          </Box>
 
                           {/* Proposed Times (Read-only for organizer) */}
                           <Box sx={{ mb: 2.5 }}>
