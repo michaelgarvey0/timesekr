@@ -121,23 +121,29 @@ function AvailabilityTab({ showBanner }) {
                         {time}
                       </div>
                       {[0, 1, 2, 3, 4, 5, 6].map((dayIdx) => {
-                        // Mock some events
-                        const hasEvent = (timeIdx === 2 && dayIdx === 1) ||
-                                        (timeIdx === 4 && dayIdx === 3) ||
-                                        (timeIdx === 6 && dayIdx === 2) ||
-                                        (timeIdx === 3 && dayIdx === 4)
+                        // Mock some events - differentiate between synced calendar events and manual availability
+                        const hasSyncedEvent = (timeIdx === 2 && dayIdx === 1) ||
+                                               (timeIdx === 4 && dayIdx === 3)
+                        const hasManualAvailability = (timeIdx === 6 && dayIdx === 2) ||
+                                                      (timeIdx === 3 && dayIdx === 4)
 
                         return (
                           <div
                             key={dayIdx}
                             className={`relative min-h-[60px] p-2 border-r border-gray-200 last:border-r-0 hover:bg-teal-50 transition ${
-                              hasEvent ? 'bg-gradient-to-br from-teal-100 to-teal-50' : ''
+                              hasSyncedEvent || hasManualAvailability ? 'bg-gradient-to-br from-teal-100 to-teal-50' : ''
                             }`}
                           >
-                            {hasEvent && (
-                              <div className="absolute inset-2 bg-teal-500 rounded p-2 text-white text-xs">
+                            {hasSyncedEvent && (
+                              <div className="absolute inset-2 bg-teal-500 rounded p-2 text-white text-xs shadow-sm">
                                 <div className="font-semibold">Team Meeting</div>
                                 <div className="text-teal-100">{time} - {parseInt(time) + 1} {time.includes('AM') ? 'AM' : 'PM'}</div>
+                              </div>
+                            )}
+                            {hasManualAvailability && (
+                              <div className="absolute inset-2 bg-teal-200/50 border-2 border-dashed border-teal-400 rounded p-2 text-teal-800 text-xs">
+                                <div className="font-semibold">Available (Manual)</div>
+                                <div className="text-teal-600">{time} - {parseInt(time) + 1} {time.includes('AM') ? 'AM' : 'PM'}</div>
                               </div>
                             )}
                           </div>
@@ -152,11 +158,15 @@ function AvailabilityTab({ showBanner }) {
               <div className="mt-4 flex items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-teal-500 rounded"></div>
-                  <span>Busy</span>
+                  <span>Synced Calendar Events</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-teal-200/50 border-2 border-dashed border-teal-400 rounded"></div>
+                  <span>Manual Availability</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-white border border-gray-300 rounded"></div>
-                  <span>Available</span>
+                  <span>Unavailable</span>
                 </div>
               </div>
             </div>

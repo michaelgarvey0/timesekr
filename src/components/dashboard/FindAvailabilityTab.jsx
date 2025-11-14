@@ -25,6 +25,8 @@ function FindAvailabilityTab({ circle }) {
   const [activeTab, setActiveTab] = useState('members') // 'members' or 'teams'
   const [expandedTeams, setExpandedTeams] = useState(new Set())
   const [dragStartTime, setDragStartTime] = useState(null) // For dragging meeting duration block
+  const [meetingPlatform, setMeetingPlatform] = useState('teams') // 'in-person', 'teams', 'zoom', 'google-meet'
+  const [meetingLocation, setMeetingLocation] = useState('') // For in-person meetings
 
   // Mock teams data (same as MembersTab)
   const [teams] = useState([
@@ -278,6 +280,96 @@ function FindAvailabilityTab({ circle }) {
               </button>
             </label>
           </div>
+
+          {/* Meeting Platform Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Meeting Platform
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={() => setMeetingPlatform('in-person')}
+                className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition ${
+                  meetingPlatform === 'in-person'
+                    ? 'border-teal-500 bg-teal-50'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span className="text-xs font-medium">In Person</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMeetingPlatform('teams')}
+                className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition ${
+                  meetingPlatform === 'teams'
+                    ? 'border-teal-500 bg-teal-50'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <svg className="w-6 h-6 mb-1" viewBox="0 0 24 24">
+                  <path fill="#5059C9" d="M19.5 14.25v-4.5C19.5 6.25 16.75 3.5 13.25 3.5h-4.5C5.25 3.5 2.5 6.25 2.5 9.75v4.5c0 3.5 2.75 6.25 6.25 6.25h4.5c3.5 0 6.25-2.75 6.25-6.25z"/>
+                  <path fill="#7B83EB" d="M22.5 14.5v-5c0-1.93-1.57-3.5-3.5-3.5h-5v12h5c1.93 0 3.5-1.57 3.5-3.5z"/>
+                  <text x="7" y="15" fill="white" fontSize="8" fontWeight="bold">T</text>
+                </svg>
+                <span className="text-xs font-medium">Teams</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMeetingPlatform('zoom')}
+                className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition ${
+                  meetingPlatform === 'zoom'
+                    ? 'border-teal-500 bg-teal-50'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <svg className="w-6 h-6 mb-1" viewBox="0 0 24 24">
+                  <path fill="#2D8CFF" d="M5 9.5A1.5 1.5 0 016.5 8h7A1.5 1.5 0 0115 9.5v5a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 015 14.5v-5z"/>
+                  <path fill="#2D8CFF" d="M15.5 11l3.5-2v6l-3.5-2z"/>
+                </svg>
+                <span className="text-xs font-medium">Zoom</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMeetingPlatform('google-meet')}
+                className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg transition ${
+                  meetingPlatform === 'google-meet'
+                    ? 'border-teal-500 bg-teal-50'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <svg className="w-6 h-6 mb-1" viewBox="0 0 24 24">
+                  <path fill="#00832D" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                  <path fill="#0066DA" d="M12 2v20c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+                  <path fill="#E94235" d="M12 8.5l-3 5.5h6z"/>
+                  <path fill="#FBBC04" d="M12 8.5l3 5.5v-5.5z"/>
+                </svg>
+                <span className="text-xs font-medium">Meet</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Location Input (for in-person meetings) */}
+          {meetingPlatform === 'in-person' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meeting Location
+              </label>
+              <input
+                type="text"
+                value={meetingLocation}
+                onChange={(e) => setMeetingLocation(e.target.value)}
+                placeholder="e.g., Conference Room A, 123 Main St"
+                className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+              />
+            </div>
+          )}
 
           {/* Selected Participants */}
           <div>
