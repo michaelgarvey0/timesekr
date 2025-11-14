@@ -251,11 +251,11 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
       height: isMobile ? '100%' : 'auto',
       minHeight: isMobile ? undefined : '100vh',
       bgcolor: '#fafbfc',
-      display: isMobile ? 'flex' : 'block',
-      flexDirection: isMobile ? 'column' : undefined,
+      position: 'relative',
+      pb: isMobile ? 8 : 0,
     }}>
       {/* Top Nav */}
-      <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
+      <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
         <Box sx={{ maxWidth: isMobile ? '100%' : 900, mx: 'auto', width: '100%', px: isMobile ? 2 : 3 }}>
           <Toolbar sx={{ px: 0, minHeight: isMobile ? 56 : 64 }}>
             <Box sx={{ flexGrow: 1 }}>
@@ -290,9 +290,6 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
         mx: 'auto',
         px: isMobile ? 2 : 3,
         py: isMobile ? 2 : 4,
-        flex: isMobile ? 1 : undefined,
-        overflow: isMobile ? 'auto' : undefined,
-        position: 'relative',
       }}>
         {/* TAB 1: Meetings */}
         {currentTab === 0 && (
@@ -520,7 +517,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
 
       {/* Mobile Bottom Tab Bar */}
       {isMobile && (
-        <AppBar position="static" sx={{ bgcolor: 'white', borderTop: '1px solid #e5e7eb', flexShrink: 0 }} elevation={0}>
+        <AppBar position="absolute" sx={{ bottom: 0, left: 0, right: 0, bgcolor: 'white', borderTop: '1px solid #e5e7eb' }} elevation={0}>
           <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)} variant="fullWidth">
             <Tab icon={<EventIcon />} label="Meetings" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
             <Tab icon={<ContactsIcon />} label="People" sx={{ textTransform: 'none', minHeight: 64, fontSize: '0.75rem' }} />
@@ -531,7 +528,7 @@ export default function DesignOption1({ cardView = 'detailed', viewMode = 'organ
 
       {/* Floating Action Button - Mobile */}
       {isMobile && viewMode === 'organizer' && (
-        <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
+        <Box sx={{ position: 'absolute', bottom: 80, right: 16, zIndex: 1000 }}>
           <Button
             variant="contained"
             sx={{
