@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import ThemeRegistry from './ThemeRegistry';
-import { DeviceViewProvider } from './contexts/DeviceViewContext';
-import DeviceViewWrapper from './components/DeviceViewWrapper';
 // Lexend font (previous - keep for easy revert)
 // import '@fontsource/lexend/300.css';
 // import '@fontsource/lexend/600.css';
@@ -26,11 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeRegistry>
-          <DeviceViewProvider>
-            <DeviceViewWrapper>
-              {children}
-            </DeviceViewWrapper>
-          </DeviceViewProvider>
+          {children}
         </ThemeRegistry>
       </body>
     </html>
