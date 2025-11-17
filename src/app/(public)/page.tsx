@@ -4,11 +4,9 @@ import { Box, Typography, Link, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import LoginForm from '@/components/LoginForm';
-import SignupForm from '@/components/SignupForm';
-import VerificationForm from '@/components/VerificationForm';
-import CalendarConnectionForm from '@/components/CalendarConnectionForm';
-import ContactsConnectionForm from '@/components/ContactsConnectionForm';
+import LoginForm from './components/LoginForm';
+import SignupForm from './components/SignupForm';
+import VerificationForm from './components/VerificationForm';
 
 const valueProps = [
   'Schedule meetings across organizations instantly',
@@ -17,24 +15,15 @@ const valueProps = [
   'Save hours on meeting scheduling',
 ];
 
-interface ConnectedCalendar {
-  provider: string;
-  email?: string;
-  id: string;
-}
-
 export default function Home() {
   const [showSignup, setShowSignup] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [showContacts, setShowContacts] = useState(false);
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [currentPropIndex, setCurrentPropIndex] = useState(0);
-  const [connectedCalendars, setConnectedCalendars] = useState<ConnectedCalendar[]>([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -52,38 +41,11 @@ export default function Home() {
   };
 
   const handleVerify = () => {
-    window.location.href = '/onboarding/calendars';
+    window.location.href = '/connect-calendar';
   };
 
   const handleResend = () => {
     console.log('Resend code');
-  };
-
-  const handleConnectCalendar = (provider: string) => {
-    // Simulate connecting a calendar account
-    const mockEmail = provider === 'ics' ? undefined : `user@${provider}.com`;
-    const newCalendar: ConnectedCalendar = {
-      provider,
-      email: mockEmail,
-      id: `${provider}-${Date.now()}`,
-    };
-    setConnectedCalendars([...connectedCalendars, newCalendar]);
-  };
-
-  const handleRemoveCalendar = (id: string) => {
-    setConnectedCalendars(connectedCalendars.filter(cal => cal.id !== id));
-  };
-
-  const handleSkipCalendar = () => {
-    setShowContacts(true);
-  };
-
-  const handleConnectContacts = () => {
-    window.location.href = '/home';
-  };
-
-  const handleSkipContacts = () => {
-    window.location.href = '/home';
   };
 
   return (
@@ -99,14 +61,10 @@ export default function Home() {
           position: 'relative',
         }}
       >
-        {(showSignup || showVerify || showCalendar || showContacts) && (
+        {(showSignup || showVerify) && (
           <IconButton
             onClick={() => {
-              if (showContacts) {
-                setShowContacts(false);
-              } else if (showCalendar) {
-                setShowCalendar(false);
-              } else if (showVerify) {
+              if (showVerify) {
                 setShowVerify(false);
               } else {
                 setShowSignup(false);
@@ -130,10 +88,10 @@ export default function Home() {
           </Box>
 
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-            {showContacts ? 'Connect your contacts' : showCalendar ? 'Connect your calendars' : showVerify ? 'Verify your email' : showSignup ? 'Create your account' : 'Find meeting times instantly'}
+            {showVerify ? 'Verify your email' : showSignup ? 'Create your account' : 'Find meeting times instantly'}
           </Typography>
 
-          {!showSignup && !showVerify && !showCalendar && !showContacts && (
+          {!showSignup && !showVerify && (
             <LoginForm
               email={email}
               setEmail={setEmail}
@@ -155,7 +113,7 @@ export default function Home() {
             />
           )}
 
-          {showVerify && !showCalendar && (
+          {showVerify && (
             <VerificationForm
               email={email}
               onVerify={handleVerify}
@@ -163,23 +121,7 @@ export default function Home() {
             />
           )}
 
-          {showCalendar && !showContacts && (
-            <CalendarConnectionForm
-              onConnect={handleConnectCalendar}
-              onSkip={handleSkipCalendar}
-              connectedCalendars={connectedCalendars}
-              onRemove={handleRemoveCalendar}
-            />
-          )}
-
-          {showContacts && (
-            <ContactsConnectionForm
-              onConnect={handleConnectContacts}
-              onSkip={handleSkipContacts}
-            />
-          )}
-
-          {!showSignup && !showVerify && !showCalendar && !showContacts && (
+          {!showSignup && !showVerify && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 3, textAlign: 'center' }}>
               Already have an account?{' '}
               <Link href="/signin" underline="hover">

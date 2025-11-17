@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel, TextField } from '@mui/material';
+import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel, TextField, ButtonGroup } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import GroupsIcon from '@mui/icons-material/Groups';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -22,10 +22,10 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import MeetingDetailsModal from './MeetingDetailsModal';
-import PeopleTab from './PeopleTab';
-import MyAvailabilityTab from './MyAvailabilityTab';
-import InviteeResponseForm from './InviteeResponseForm';
+import MeetingDetailsModal from './components/MeetingDetailsModal';
+import PeopleTab from './components/PeopleTab';
+import MyAvailabilityTab from './components/MyAvailabilityTab';
+import InviteeResponseForm from './components/InviteeResponseForm';
 
 // DESIGN OPTION 3: Sidebar Navigation
 // Left sidebar navigation with main content area
@@ -114,7 +114,9 @@ const mockInvitedMeetings = [
   },
 ];
 
-export default function DesignOption3({ cardView = 'detailed', viewMode = 'organizer', isMobile = false }: { cardView?: 'detailed' | 'compact'; viewMode?: 'organizer' | 'invitee'; isMobile?: boolean }) {
+export default function DashboardPage() {
+  const cardView = 'compact';
+  const [viewMode, setViewMode] = useState<'organizer' | 'invitee'>('organizer');
   const router = useRouter();
   const [selectedSection, setSelectedSection] = useState('meetings');
   const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
@@ -264,12 +266,12 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
   return (
     <Box sx={{
       display: 'flex',
-      flexDirection: isMobile ? 'column' : 'row',
-      height: isMobile ? '100%' : 'auto',
-      minHeight: isMobile ? undefined : '100vh',
+      flexDirection: 'row',
+      height: 'auto',
+      minHeight: '100vh',
     }}>
-      {/* Left Sidebar - Desktop Only */}
-      {!isMobile && (
+      {/* Left Sidebar */}
+      {(
         <Drawer
           variant="permanent"
           sx={{
@@ -339,6 +341,29 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
             </ListItem>
           </List>
 
+          {/* View Mode Switcher */}
+          <Box sx={{ px: 2, pb: 2 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', px: 2, mb: 1, display: 'block' }}>
+              VIEW AS
+            </Typography>
+            <ButtonGroup variant="outlined" fullWidth size="small">
+              <Button
+                onClick={() => setViewMode('organizer')}
+                variant={viewMode === 'organizer' ? 'contained' : 'outlined'}
+                sx={{ textTransform: 'none', py: 0.75 }}
+              >
+                Organizer
+              </Button>
+              <Button
+                onClick={() => setViewMode('invitee')}
+                variant={viewMode === 'invitee' ? 'contained' : 'outlined'}
+                sx={{ textTransform: 'none', py: 0.75 }}
+              >
+                Invitee
+              </Button>
+            </ButtonGroup>
+          </Box>
+
           {/* User Profile at Bottom */}
           <Box sx={{ p: 2, borderTop: '1px solid #e5e7eb' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -356,27 +381,16 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
         </Drawer>
       )}
 
-      {/* Mobile Top Header */}
-      {isMobile && (
-        <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb', flexShrink: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5 }}>
-            <Image src="/images/logomark.svg" alt="timesēkr" width={100} height={27} priority />
-            <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32, fontSize: '0.875rem' }}>M</Avatar>
-          </Box>
-        </Box>
-      )}
-
       {/* Main Content */}
       <Box sx={{
         flex: 1,
         bgcolor: '#fafbfc',
-        overflow: isMobile ? 'auto' : undefined,
       }}>
-        <Box sx={{ maxWidth: isMobile ? '100%' : (selectedSection === 'availability' ? 1400 : 800), mx: 'auto', px: isMobile ? 2 : 3, py: isMobile ? 2 : 4 }}>
+        <Box sx={{ maxWidth: selectedSection === 'availability' ? 1400 : 800, mx: 'auto', px: 3, py: 4 }}>
           {/* Section: Meetings */}
           {selectedSection === 'meetings' && (
             <Box>
-              <Typography variant={isMobile ? 'h6' : 'h4'} sx={{ fontWeight: 700, mb: isMobile ? 2 : 3 }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
                 Meetings
               </Typography>
 
@@ -561,56 +575,6 @@ export default function DesignOption3({ cardView = 'detailed', viewMode = 'organ
       </Box>
 
       {/* Mobile Bottom Tab Bar */}
-      {isMobile && (
-        <Box sx={{ bgcolor: 'white', borderTop: '1px solid #e5e7eb', flexShrink: 0 }}>
-          <List sx={{ display: 'flex', p: 0 }}>
-            <ListItemButton
-              selected={selectedSection === 'meetings'}
-              onClick={() => setSelectedSection('meetings')}
-              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
-            >
-              <EventIcon sx={{ fontSize: 24, mb: 0.5 }} />
-              <Typography variant="caption">Meetings</Typography>
-            </ListItemButton>
-            <ListItemButton
-              selected={selectedSection === 'people'}
-              onClick={() => setSelectedSection('people')}
-              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
-            >
-              <ContactsIcon sx={{ fontSize: 24, mb: 0.5 }} />
-              <Typography variant="caption">People</Typography>
-            </ListItemButton>
-            <ListItemButton
-              selected={selectedSection === 'availability'}
-              onClick={() => setSelectedSection('availability')}
-              sx={{ flex: 1, flexDirection: 'column', py: 1.5, minHeight: 64 }}
-            >
-              <AccessTimeIcon sx={{ fontSize: 24, mb: 0.5 }} />
-              <Typography variant="caption">My Time</Typography>
-            </ListItemButton>
-          </List>
-        </Box>
-      )}
-
-      {/* Floating Action Button - Mobile */}
-      {isMobile && viewMode === 'organizer' && (
-        <Box sx={{ position: 'fixed', bottom: 80, right: 16, zIndex: 1000 }}>
-          <Button
-            variant="contained"
-            onClick={() => router.push('/meeting/new')}
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
-              minWidth: 'unset',
-              p: 0,
-              boxShadow: 3,
-            }}
-          >
-            <EventIcon />
-          </Button>
-        </Box>
-      )}
 
       {/* Meeting Details Modal */}
       {selectedMeeting && viewMode === 'organizer' && (
