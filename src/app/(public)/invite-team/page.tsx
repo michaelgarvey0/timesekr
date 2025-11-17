@@ -38,7 +38,7 @@ export default function InviteTeamPage() {
         </Box>
 
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-          Connect your contacts
+          Invite your team
         </Typography>
 
         <ContactsConnectionForm
