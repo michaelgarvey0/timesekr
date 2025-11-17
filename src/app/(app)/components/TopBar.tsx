@@ -70,32 +70,30 @@ export default function TopBar({ viewMode = 'organizer', onViewModeChange, showV
           <Divider />
 
           {/* View Mode Switcher */}
-          {showViewModeToggle && onViewModeChange && (
-            <>
-              <Box sx={{ px: 2, py: 1.5 }}>
-                <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
-                  VIEW AS
-                </Typography>
-                <ButtonGroup variant="outlined" fullWidth size="small">
-                  <Button
-                    onClick={() => onViewModeChange('organizer')}
-                    variant={viewMode === 'organizer' ? 'contained' : 'outlined'}
-                    sx={{ textTransform: 'none', py: 0.75 }}
-                  >
-                    Organizer
-                  </Button>
-                  <Button
-                    onClick={() => onViewModeChange('invitee')}
-                    variant={viewMode === 'invitee' ? 'contained' : 'outlined'}
-                    sx={{ textTransform: 'none', py: 0.75 }}
-                  >
-                    Invitee
-                  </Button>
-                </ButtonGroup>
-              </Box>
-              <Divider />
-            </>
-          )}
+          {showViewModeToggle && onViewModeChange && [
+            <Box key="view-mode-box" sx={{ px: 2, py: 1.5 }}>
+              <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
+                VIEW AS
+              </Typography>
+              <ButtonGroup variant="outlined" fullWidth size="small">
+                <Button
+                  onClick={() => onViewModeChange('organizer')}
+                  variant={viewMode === 'organizer' ? 'contained' : 'outlined'}
+                  sx={{ textTransform: 'none', py: 0.75 }}
+                >
+                  Organizer
+                </Button>
+                <Button
+                  onClick={() => onViewModeChange('invitee')}
+                  variant={viewMode === 'invitee' ? 'contained' : 'outlined'}
+                  sx={{ textTransform: 'none', py: 0.75 }}
+                >
+                  Invitee
+                </Button>
+              </ButtonGroup>
+            </Box>,
+            <Divider key="view-mode-divider" />
+          ]}
 
           <MenuItem onClick={() => setProfileMenuAnchor(null)}>
             <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
