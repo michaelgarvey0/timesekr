@@ -523,7 +523,7 @@ export default function CreateMeetingPage() {
                     variant="contained"
                     fullWidth
                     size="large"
-                    onClick={() => router.push('/signup?email=attendee@example.com')}
+                    onClick={() => router.push('/?email=attendee@example.com')}
                     sx={{ textTransform: 'none', fontWeight: 600 }}
                   >
                     Join timesēkr & Suggest Other Times
@@ -664,7 +664,7 @@ export default function CreateMeetingPage() {
                   <Button
                     variant="contained"
                     fullWidth
-                    onClick={() => router.push('/signup?email=attendee@example.com')}
+                    onClick={() => router.push('/?email=attendee@example.com')}
                     sx={{ textTransform: 'none' }}
                   >
                     Join & Suggest Other Times

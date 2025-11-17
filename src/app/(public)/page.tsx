@@ -121,14 +121,6 @@ export default function Home() {
             />
           )}
 
-          {!showSignup && !showVerify && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 3, textAlign: 'center' }}>
-              Already have an account?{' '}
-              <Link href="/signin" underline="hover">
-                Sign in
-              </Link>
-            </Typography>
-          )}
         </Box>
       </Box>
 
