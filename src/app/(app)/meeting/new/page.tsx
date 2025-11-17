@@ -2871,16 +2871,16 @@ export default function CreateMeetingPage() {
       <Box sx={{ minHeight: '100vh', bgcolor: showEmailPreview ? '#f5f5f5' : '#fafbfc' }}>
         {/* Header */}
         {!showEmailPreview && (
-        <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb' }}>
+        <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid', borderColor: 'grey.200' }}>
           <Box sx={{ maxWidth: 900, mx: 'auto', width: '100%', px: 3 }}>
-            <Toolbar sx={{ px: 0, minHeight: 64 }}>
-              <IconButton onClick={() => router.push('/home')} sx={{ mr: 2 }}>
+            <Toolbar sx={{ px: 0, minHeight: '56px', py: 1 }}>
+              <IconButton onClick={() => router.push('/dashboard')} sx={{ mr: 2 }}>
                 <ArrowBackIcon />
               </IconButton>
               <Box sx={{ flexGrow: 1 }}>
                 <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
               </Box>
-              <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>M</Avatar>
+              <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>M</Avatar>
             </Toolbar>
           </Box>
         </AppBar>
