@@ -279,7 +279,7 @@ export default function DashboardPage() {
           color: 'text.primary'
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ minHeight: '56px', py: 1 }}>
           {/* Logo */}
           <Box sx={{ flexGrow: 0, mr: 4 }}>
             <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
@@ -345,7 +345,7 @@ export default function DashboardPage() {
               borderRight: '1px solid',
               borderColor: 'grey.200',
               position: 'relative',
-              height: 'auto',
+              height: '100%',
             },
           }}
         >
