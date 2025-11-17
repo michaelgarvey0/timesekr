@@ -288,6 +288,24 @@ export default function DashboardPage() {
           {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
 
+          {/* View Mode Switcher */}
+          <ButtonGroup variant="outlined" size="small" sx={{ mr: 3 }}>
+            <Button
+              onClick={() => setViewMode('organizer')}
+              variant={viewMode === 'organizer' ? 'contained' : 'outlined'}
+              sx={{ textTransform: 'none', px: 2 }}
+            >
+              Organizer
+            </Button>
+            <Button
+              onClick={() => setViewMode('invitee')}
+              variant={viewMode === 'invitee' ? 'contained' : 'outlined'}
+              sx={{ textTransform: 'none', px: 2 }}
+            >
+              Invitee
+            </Button>
+          </ButtonGroup>
+
           {/* Profile */}
           <IconButton
             onClick={(e) => setProfileMenuAnchor(e.currentTarget)}
@@ -403,29 +421,6 @@ export default function DashboardPage() {
               </ListItemButton>
             </ListItem>
           </List>
-
-          {/* View Mode Switcher */}
-          <Box sx={{ px: 2, pb: 2 }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', px: 2, mb: 1, display: 'block' }}>
-              VIEW AS
-            </Typography>
-            <ButtonGroup variant="outlined" fullWidth size="small">
-              <Button
-                onClick={() => setViewMode('organizer')}
-                variant={viewMode === 'organizer' ? 'contained' : 'outlined'}
-                sx={{ textTransform: 'none', py: 0.75 }}
-              >
-                Organizer
-              </Button>
-              <Button
-                onClick={() => setViewMode('invitee')}
-                variant={viewMode === 'invitee' ? 'contained' : 'outlined'}
-                sx={{ textTransform: 'none', py: 0.75 }}
-              >
-                Invitee
-              </Button>
-            </ButtonGroup>
-          </Box>
         </Drawer>
 
       {/* Main Content */}
