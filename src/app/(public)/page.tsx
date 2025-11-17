@@ -136,20 +136,20 @@ export default function Home() {
       <Box
         sx={{
           flex: 1,
-          p: '24px',
-          pr: '24px',
-          pt: '24px',
-          pb: '24px',
+          p: 3,
+          pr: 3,
+          pt: 3,
+          pb: 3,
           pl: 0,
         }}
       >
         <Box
           sx={{
             height: '100%',
-            bgcolor: '#EDF5F9',
+            bgcolor: 'background.accentLight',
             borderRadius: 2,
             position: 'relative',
-            boxShadow: 'inset 0 2px 32px rgba(0, 0, 0, 0.05)',
+            boxShadow: 1,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -176,9 +176,9 @@ export default function Home() {
           <Box
             sx={{
               position: 'absolute',
-              bottom: 48,
-              left: 48,
-              right: 48,
+              bottom: 6,
+              left: 6,
+              right: 6,
               textAlign: 'center',
             }}
           >

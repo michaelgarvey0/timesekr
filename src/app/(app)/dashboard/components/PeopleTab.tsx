@@ -214,10 +214,10 @@ export default function PeopleTab({ isMobile = false }: { isMobile?: boolean }) 
       </Stack>
 
       {/* Table */}
-      <TableContainer component={Paper} sx={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1)' }}>
+      <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: '#f9fafb' }}>
+            <TableRow sx={{ bgcolor: 'background.level1' }}>
               <TableCell>
                 <TableSortLabel
                   active={sortColumn === 'name'}

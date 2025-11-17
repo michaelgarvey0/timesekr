@@ -70,17 +70,15 @@ export default function CalendarConnectionForm({
                 gap: 2,
                 p: 3,
                 textTransform: 'none',
-                borderRadius: '12px',
-                border: '1.5px solid',
                 borderColor: 'grey.300',
                 bgcolor: 'white',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                boxShadow: 1,
                 transition: 'all 0.2s ease-in-out',
                 '&:hover': {
                   bgcolor: 'grey.50',
                   borderColor: 'grey.400',
                   transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  boxShadow: 2,
                 }
               }}
             >
@@ -127,7 +125,6 @@ export default function CalendarConnectionForm({
             bgcolor: 'white',
             border: '1px solid',
             borderColor: 'grey.200',
-            borderRadius: '12px',
             overflow: 'hidden',
           }}
         >
@@ -196,10 +193,9 @@ export default function CalendarConnectionForm({
               py: 1.5,
               fontSize: '1rem',
               fontWeight: 600,
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(25, 118, 210, 0.2)',
+              boxShadow: 2,
               '&:hover': {
-                boxShadow: '0 4px 16px rgba(25, 118, 210, 0.3)',
+                boxShadow: 3,
               }
             }}
             onClick={onSkip}

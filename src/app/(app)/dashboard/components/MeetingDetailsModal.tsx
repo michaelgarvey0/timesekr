@@ -40,14 +40,13 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
           width: { xs: '95%', sm: '90%', md: 1400 },
           maxHeight: '85vh',
           bgcolor: 'background.paper',
-          borderRadius: '12px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: 5,
           display: 'flex',
           flexDirection: 'column',
         }}
       >
         {/* Fixed Modal Header */}
-        <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexShrink: 0 }}>
+        <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'grey.200', display: 'flex', justifyContent: 'space-between', alignItems: 'start', flexShrink: 0 }}>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
               {meeting.title}
@@ -71,7 +70,7 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
         {/* Scrollable Content Area */}
         <Box sx={{ overflowY: 'auto', flex: 1 }}>
           {/* Response Progress */}
-          <Box sx={{ p: 3, bgcolor: '#f8fafc' }}>
+          <Box sx={{ p: 3, bgcolor: 'background.level2' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>Response Progress</Typography>
               <Typography variant="body2" color="text.secondary">
@@ -84,9 +83,9 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
               sx={{
                 height: 8,
                 borderRadius: 1,
-                bgcolor: '#e5e7eb',
+                bgcolor: 'grey.200',
                 '& .MuiLinearProgress-bar': {
-                  bgcolor: meeting.status === 'Ready' ? '#22c55e' : '#f59e0b',
+                  bgcolor: meeting.status === 'Ready' ? 'success.main' : 'secondary.main',
                 }
               }}
             />
@@ -141,7 +140,7 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
               <Table sx={{ minWidth: 650 }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', position: 'sticky', left: 0, zIndex: 1 }}>
+                    <TableCell sx={{ fontWeight: 600, bgcolor: 'background.level2', borderBottom: '2px solid', borderColor: 'grey.200', position: 'sticky', left: 0, zIndex: 1 }}>
                       Attendee
                     </TableCell>
                     {meeting.proposedTimes.map((time: any) => (
@@ -150,8 +149,9 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
                         align="center"
                         sx={{
                           fontWeight: 600,
-                          bgcolor: time.id === meeting.winningTime.id ? '#f0f9ff' : '#f8fafc',
-                          borderBottom: '2px solid #e5e7eb',
+                          bgcolor: time.id === meeting.winningTime.id ? 'background.accent' : 'background.level2',
+                          borderBottom: '2px solid',
+                          borderColor: 'grey.200',
                           minWidth: 160,
                         }}
                       >
@@ -173,7 +173,7 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
                         )}
                       </TableCell>
                     ))}
-                    <TableCell sx={{ fontWeight: 600, bgcolor: '#f8fafc', borderBottom: '2px solid #e5e7eb', minWidth: 100 }} align="center">
+                    <TableCell sx={{ fontWeight: 600, bgcolor: 'background.level2', borderBottom: '2px solid', borderColor: 'grey.200', minWidth: 100 }} align="center">
                       Action
                     </TableCell>
                   </TableRow>
@@ -183,10 +183,10 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
                     <TableRow
                       key={idx}
                       sx={{
-                        '&:hover': { bgcolor: '#fafbfc' },
+                        '&:hover': { bgcolor: 'background.level1' },
                       }}
                     >
-                      <TableCell sx={{ position: 'sticky', left: 0, bgcolor: 'white', zIndex: 1, borderBottom: '1px solid #f3f4f6' }}>
+                      <TableCell sx={{ position: 'sticky', left: 0, bgcolor: 'white', zIndex: 1, borderBottom: '1px solid', borderColor: 'grey.100' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                           <Avatar sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8', width: 32, height: 32, fontSize: '0.75rem' }}>
                             {getAttendeeInitials(attendee)}
@@ -211,8 +211,9 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
                             key={time.id}
                             align="center"
                             sx={{
-                              bgcolor: isWinningTime ? '#f0f9ff' : 'inherit',
-                              borderBottom: '1px solid #f3f4f6',
+                              bgcolor: isWinningTime ? 'background.accent' : 'inherit',
+                              borderBottom: '1px solid',
+                              borderColor: 'grey.100',
                             }}
                           >
                             {availability === 'available' && (
@@ -236,7 +237,7 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
                           </TableCell>
                         );
                       })}
-                      <TableCell align="center" sx={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <TableCell align="center" sx={{ borderBottom: '1px solid', borderColor: 'grey.100' }}>
                         {!attendee.responded && (
                           <Button
                             size="small"
@@ -261,7 +262,7 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
         </Box>
 
         {/* Fixed Modal Footer */}
-        <Box sx={{ p: 3, borderTop: '1px solid #e5e7eb', bgcolor: '#fafbfc', flexShrink: 0 }}>
+        <Box sx={{ p: 3, borderTop: '1px solid', borderColor: 'grey.200', bgcolor: 'background.level1', flexShrink: 0 }}>
           <Stack direction="row" spacing={1.5}>
             <Button
               variant="outlined"
