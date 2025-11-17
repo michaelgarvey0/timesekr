@@ -148,6 +148,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: border.radius.md,
+          border: '1px solid',
+          borderColor: primitives.gray[300],
         },
       },
     },

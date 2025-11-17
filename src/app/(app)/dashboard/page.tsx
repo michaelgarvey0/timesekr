@@ -346,6 +346,8 @@ export default function DashboardPage() {
               borderColor: 'grey.200',
               position: 'relative',
               height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
             },
           }}
         >
