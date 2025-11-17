@@ -51,9 +51,10 @@ export default function InviteeResponseForm({
               sx={{
                 flex: 1,
                 p: 2,
-                bgcolor: hasConflict ? '#fef2f2' : (isSelected ? '#f0f9ff' : '#f8fafc'),
-                border: hasConflict ? '2px solid #fca5a5' : (isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb'),
-                borderRadius: '8px',
+                bgcolor: hasConflict ? '#fef2f2' : (isSelected ? 'background.accent' : 'background.level1'),
+                border: hasConflict ? '2px solid' : (isSelected ? '2px solid' : '1px solid'),
+                borderColor: hasConflict ? 'error.light' : (isSelected ? 'primary.main' : 'grey.200'),
+                borderRadius: 1,
                 position: 'relative',
                 minHeight: 120,
                 display: 'flex',
@@ -94,11 +95,11 @@ export default function InviteeResponseForm({
                   {time.votes}/{meeting.totalAttendees} available
                 </Typography>
                 {hasConflict ? (
-                  <Typography variant="caption" sx={{ color: '#dc2626', fontWeight: 500, display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 500, display: 'block' }}>
                     {conflictDetails[time.id] || 'Conflicts with your calendar'}
                   </Typography>
                 ) : (
-                  <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 500, display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: 'success.dark', fontWeight: 500, display: 'block' }}>
                     No conflicts
                   </Typography>
                 )}
@@ -109,7 +110,7 @@ export default function InviteeResponseForm({
       </Stack>
 
       {/* Cannot Make Any Option */}
-      <Box sx={{ p: 2, bgcolor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', mb: 2.5 }}>
+      <Box sx={{ p: 2, bgcolor: '#fef2f2', border: '1px solid', borderColor: 'error.light', borderRadius: 1, mb: 2.5 }}>
         <FormGroup>
           <FormControlLabel
             control={

@@ -513,17 +513,18 @@ export default function DashboardPage() {
                                       flex: 1,
                                       py: 1.5,
                                       px: 1.5,
-                                      bgcolor: isWinningTime ? '#f0f9ff' : '#f8fafc',
-                                      border: isWinningTime ? '2px solid #3b82f6' : '1px solid transparent',
+                                      bgcolor: isWinningTime ? 'background.accent' : 'background.level1',
+                                      border: isWinningTime ? '2px solid' : '1px solid transparent',
+                                      borderColor: isWinningTime ? 'primary.light' : 'transparent',
                                       borderRadius: '6px',
                                       textAlign: 'center',
                                       position: 'relative',
                                     }}
                                   >
-                                    <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                                    <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? 'primary.dark' : 'inherit' }}>
                                       {time.day}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? '#1e40af' : 'inherit' }}>
+                                    <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? 'primary.dark' : 'inherit' }}>
                                       {time.time} - {time.endTime}
                                     </Typography>
                                     <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'} sx={{ display: 'block', fontWeight: isWinningTime ? 600 : 400 }}>
@@ -559,9 +560,9 @@ export default function DashboardPage() {
                               sx={{
                                 height: 6,
                                 borderRadius: 1,
-                                bgcolor: '#e5e7eb',
+                                bgcolor: 'grey.200',
                                 '& .MuiLinearProgress-bar': {
-                                  bgcolor: meeting.status === 'Ready' ? '#22c55e' : '#f59e0b',
+                                  bgcolor: meeting.status === 'Ready' ? 'success.main' : 'secondary.main',
                                 }
                               }}
                             />

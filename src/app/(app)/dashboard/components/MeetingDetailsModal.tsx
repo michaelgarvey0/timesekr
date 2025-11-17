@@ -115,24 +115,24 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
             <Box sx={{ mb: 2, display: 'flex', gap: 3, justifyContent: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#dcfce7' }}>
-                  <CheckIcon sx={{ fontSize: 14, color: '#16a34a' }} />
+                  <CheckIcon sx={{ fontSize: 14, color: 'success.dark' }} />
                 </Box>
                 <Typography variant="caption" color="text.secondary">Available</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#fee2e2' }}>
-                  <ClearIcon sx={{ fontSize: 14, color: '#dc2626' }} />
+                  <ClearIcon sx={{ fontSize: 14, color: 'error.main' }} />
                 </Box>
                 <Typography variant="caption" color="text.secondary">Unavailable</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: '#f3f4f6' }}>
-                  <RemoveIcon sx={{ fontSize: 14, color: '#9ca3af' }} />
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', bgcolor: 'grey.100' }}>
+                  <RemoveIcon sx={{ fontSize: 14, color: 'grey.400' }} />
                 </Box>
                 <Typography variant="caption" color="text.secondary">Not Selected</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, border: '1px solid #e5e7eb' }} />
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, border: '1px solid', borderColor: 'grey.200' }} />
                 <Typography variant="caption" color="text.secondary">No Response</Typography>
               </Box>
             </Box>
@@ -188,7 +188,7 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
                     >
                       <TableCell sx={{ position: 'sticky', left: 0, bgcolor: 'white', zIndex: 1, borderBottom: '1px solid', borderColor: 'grey.100' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Avatar sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : '#94a3b8', width: 32, height: 32, fontSize: '0.75rem' }}>
+                          <Avatar sx={{ bgcolor: attendee.onPlatform ? 'primary.main' : 'grey.400', width: 32, height: 32, fontSize: '0.75rem' }}>
                             {getAttendeeInitials(attendee)}
                           </Avatar>
                           <Box sx={{ flex: 1 }}>
@@ -218,17 +218,17 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
                           >
                             {availability === 'available' && (
                               <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', bgcolor: '#dcfce7' }}>
-                                <CheckIcon sx={{ fontSize: 18, color: '#16a34a' }} />
+                                <CheckIcon sx={{ fontSize: 18, color: 'success.dark' }} />
                               </Box>
                             )}
                             {availability === 'unavailable' && (
                               <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', bgcolor: '#fee2e2' }}>
-                                <ClearIcon sx={{ fontSize: 18, color: '#dc2626' }} />
+                                <ClearIcon sx={{ fontSize: 18, color: 'error.main' }} />
                               </Box>
                             )}
                             {!availability && attendee.responded && (
-                              <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', bgcolor: '#f3f4f6' }}>
-                                <RemoveIcon sx={{ fontSize: 18, color: '#9ca3af' }} />
+                              <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', bgcolor: 'grey.100' }}>
+                                <RemoveIcon sx={{ fontSize: 18, color: 'grey.400' }} />
                               </Box>
                             )}
                             {!availability && !attendee.responded && (

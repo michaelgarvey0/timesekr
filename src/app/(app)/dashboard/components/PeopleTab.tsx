@@ -264,7 +264,7 @@ export default function PeopleTab({ isMobile = false }: { isMobile?: boolean }) 
               <TableRow key={person.id} hover>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: person.role === 'Administrator' ? 'primary.main' : '#64748b', width: 36, height: 36 }}>
+                    <Avatar sx={{ bgcolor: person.role === 'Administrator' ? 'primary.main' : 'grey.500', width: 36, height: 36 }}>
                       {person.name.charAt(0)}
                     </Avatar>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>{person.name}</Typography>
@@ -280,8 +280,8 @@ export default function PeopleTab({ isMobile = false }: { isMobile?: boolean }) 
                     sx={{
                       height: 24,
                       fontSize: '0.75rem',
-                      bgcolor: person.role === 'Administrator' ? '#e0e7ff' : '#f3f4f6',
-                      color: person.role === 'Administrator' ? '#4f46e5' : '#64748b',
+                      bgcolor: person.role === 'Administrator' ? 'background.accent' : 'grey.100',
+                      color: person.role === 'Administrator' ? 'primary.main' : 'grey.500',
                       fontWeight: 500
                     }}
                   />

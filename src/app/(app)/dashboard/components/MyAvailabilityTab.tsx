@@ -85,12 +85,12 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   onClick={() => setSelectedBlockType('busy')}
                   sx={{
                     textTransform: 'none',
-                    bgcolor: selectedBlockType === 'busy' ? '#ef4444' : 'transparent',
-                    borderColor: '#ef4444',
-                    color: selectedBlockType === 'busy' ? 'white' : '#ef4444',
+                    bgcolor: selectedBlockType === 'busy' ? 'error.main' : 'transparent',
+                    borderColor: 'error.main',
+                    color: selectedBlockType === 'busy' ? 'white' : 'error.main',
                     '&:hover': {
-                      bgcolor: selectedBlockType === 'busy' ? '#dc2626' : 'rgba(239, 68, 68, 0.1)',
-                      borderColor: '#ef4444',
+                      bgcolor: selectedBlockType === 'busy' ? 'error.dark' : 'rgba(239, 68, 68, 0.1)',
+                      borderColor: 'error.main',
                     }
                   }}
                 >
@@ -103,12 +103,12 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   onClick={() => setSelectedBlockType('tentative')}
                   sx={{
                     textTransform: 'none',
-                    bgcolor: selectedBlockType === 'tentative' ? '#f59e0b' : 'transparent',
-                    borderColor: '#f59e0b',
-                    color: selectedBlockType === 'tentative' ? 'white' : '#f59e0b',
+                    bgcolor: selectedBlockType === 'tentative' ? 'secondary.main' : 'transparent',
+                    borderColor: 'secondary.main',
+                    color: selectedBlockType === 'tentative' ? 'white' : 'secondary.main',
                     '&:hover': {
-                      bgcolor: selectedBlockType === 'tentative' ? '#d97706' : 'rgba(245, 158, 11, 0.1)',
-                      borderColor: '#f59e0b',
+                      bgcolor: selectedBlockType === 'tentative' ? 'secondary.dark' : 'rgba(252, 104, 0, 0.1)',
+                      borderColor: 'secondary.main',
                     }
                   }}
                 >
@@ -121,12 +121,12 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   onClick={() => setSelectedBlockType('available')}
                   sx={{
                     textTransform: 'none',
-                    bgcolor: selectedBlockType === 'available' ? '#22c55e' : 'transparent',
-                    borderColor: '#22c55e',
-                    color: selectedBlockType === 'available' ? 'white' : '#22c55e',
+                    bgcolor: selectedBlockType === 'available' ? 'success.main' : 'transparent',
+                    borderColor: 'success.main',
+                    color: selectedBlockType === 'available' ? 'white' : 'success.main',
                     '&:hover': {
-                      bgcolor: selectedBlockType === 'available' ? '#16a34a' : 'rgba(34, 197, 94, 0.1)',
-                      borderColor: '#22c55e',
+                      bgcolor: selectedBlockType === 'available' ? 'success.dark' : 'rgba(34, 197, 94, 0.1)',
+                      borderColor: 'success.main',
                     }
                   }}
                 >
@@ -145,7 +145,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
           <Card>
         <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
           {/* Calendar Header */}
-          <Box sx={{ p: 2, borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'grey.200', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
               Week of Jan 15, 2025
             </Typography>
@@ -157,10 +157,10 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
           </Box>
 
           {/* Days Header */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', borderBottom: '1px solid #e5e7eb' }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', borderBottom: '1px solid', borderColor: 'grey.200' }}>
             <Box sx={{ p: 1 }} />
             {['Sun\n15', 'Mon\n16', 'Tue\n17', 'Wed\n18', 'Thu\n19', 'Fri\n20', 'Sat\n21'].map((day, i) => (
-              <Box key={i} sx={{ p: 1, textAlign: 'center', borderLeft: '1px solid #e5e7eb' }}>
+              <Box key={i} sx={{ p: 1, textAlign: 'center', borderLeft: '1px solid', borderColor: 'grey.200' }}>
                 <Typography variant="caption" sx={{ fontWeight: 600, whiteSpace: 'pre-line' }}>{day}</Typography>
               </Box>
             ))}
@@ -173,7 +173,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
               {Array.from({ length: 12 }, (_, i) => {
                 const hour = i + 7; // Start at 7 AM
                 return (
-                  <Box key={hour} sx={{ height: 60, display: 'flex', alignItems: 'start', justifyContent: 'center', pt: 0.5, borderBottom: '1px solid #f3f4f6' }}>
+                  <Box key={hour} sx={{ height: 60, display: 'flex', alignItems: 'start', justifyContent: 'center', pt: 0.5, borderBottom: '1px solid', borderColor: 'grey.100' }}>
                     <Typography variant="caption" color="text.secondary">
                       {hour === 12 ? '12 PM' : hour < 12 ? `${hour} AM` : `${hour - 12} PM`}
                     </Typography>
@@ -184,7 +184,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
 
             {/* Day columns */}
             {[0, 1, 2, 3, 4, 5, 6].map((day) => (
-              <Box key={day} sx={{ borderLeft: '1px solid #e5e7eb', position: 'relative' }}>
+              <Box key={day} sx={{ borderLeft: '1px solid', borderColor: 'grey.200', position: 'relative' }}>
                 {/* Hour slots */}
                 {Array.from({ length: 12 }, (_, i) => {
                   const hour = i + 7; // Start at 7 AM
@@ -193,10 +193,11 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                       key={hour}
                       sx={{
                         height: 60,
-                        borderBottom: '1px solid #f3f4f6',
+                        borderBottom: '1px solid',
+                        borderColor: 'grey.100',
                         cursor: 'crosshair',
                         '&:hover': {
-                          bgcolor: '#f9fafb'
+                          bgcolor: 'grey.50'
                         }
                       }}
                       onMouseDown={() => {
@@ -246,9 +247,10 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: '#dbeafe',
-                        border: '1px solid #3b82f6',
-                        borderRadius: '4px',
+                        bgcolor: 'background.accent',
+                        border: '1px solid',
+                        borderColor: 'primary.main',
+                        borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
                       }}>
@@ -278,9 +280,10 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: '#dbeafe',
-                        border: '1px solid #3b82f6',
-                        borderRadius: '4px',
+                        bgcolor: 'background.accent',
+                        border: '1px solid',
+                        borderColor: 'primary.main',
+                        borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
                       }}>
@@ -310,9 +313,10 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: '#dbeafe',
-                        border: '1px solid #3b82f6',
-                        borderRadius: '4px',
+                        bgcolor: 'background.accent',
+                        border: '1px solid',
+                        borderColor: 'primary.main',
+                        borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
                       }}>
@@ -342,9 +346,10 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: '#dbeafe',
-                        border: '1px solid #3b82f6',
-                        borderRadius: '4px',
+                        bgcolor: 'background.accent',
+                        border: '1px solid',
+                        borderColor: 'primary.main',
+                        borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
                       }}>
@@ -374,9 +379,10 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: '#dbeafe',
-                        border: '1px solid #3b82f6',
-                        borderRadius: '4px',
+                        bgcolor: 'background.accent',
+                        border: '1px solid',
+                        borderColor: 'primary.main',
+                        borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
                       }}>
@@ -405,14 +411,14 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         height: (block.endHour - block.startHour) * 60 - 2,
                         bgcolor:
                           block.type === 'busy' ? 'rgba(239, 68, 68, 0.3)' :
-                          block.type === 'tentative' ? 'rgba(245, 158, 11, 0.3)' :
+                          block.type === 'tentative' ? 'rgba(252, 104, 0, 0.3)' :
                           'rgba(34, 197, 94, 0.3)',
-                        border: `2px dashed ${
-                          block.type === 'busy' ? '#ef4444' :
-                          block.type === 'tentative' ? '#f59e0b' :
-                          '#22c55e'
-                        }`,
-                        borderRadius: '4px',
+                        border: '2px dashed',
+                        borderColor:
+                          block.type === 'busy' ? 'error.main' :
+                          block.type === 'tentative' ? 'secondary.main' :
+                          'success.main',
+                        borderRadius: 0.5,
                         p: 0.5,
                         cursor: 'pointer',
                         display: 'flex',
