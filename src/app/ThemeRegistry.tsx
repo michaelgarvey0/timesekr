@@ -136,7 +136,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: border.radius.sm,
+            borderRadius: border.radius.md,
           },
         },
       },
