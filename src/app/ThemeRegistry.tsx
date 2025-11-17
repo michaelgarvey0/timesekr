@@ -29,6 +29,11 @@ const theme = createTheme({
     background: {
       default: background.default,
       paper: background.level1,
+      // @ts-ignore - Extending MUI background palette
+      level2: background.level2,
+      level3: background.level3,
+      accent: background.accent,
+      accentLight: background.accentLight,
     },
     text: {
       primary: text.primary,
