@@ -28,6 +28,7 @@ import MeetingDetailsModal from './components/MeetingDetailsModal';
 import PeopleTab from './components/PeopleTab';
 import MyAvailabilityTab from './components/MyAvailabilityTab';
 import InviteeResponseForm from './components/InviteeResponseForm';
+import TopBar from '../components/TopBar';
 
 // DESIGN OPTION 3: Sidebar Navigation
 // Left sidebar navigation with main content area
@@ -123,7 +124,6 @@ export default function DashboardPage() {
   const [selectedSection, setSelectedSection] = useState('meetings');
   const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<any>(null);
-  const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null);
 
   // Invitee response state
   const [inviteeResponses, setInviteeResponses] = useState<{ [meetingId: number]: { [timeId: number]: boolean } }>({});
@@ -269,92 +269,11 @@ export default function DashboardPage() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       {/* Top Bar */}
-      <AppBar
-        position="static"
-        elevation={0}
-        sx={{
-          bgcolor: 'white',
-          borderBottom: '1px solid',
-          borderColor: 'grey.200',
-          color: 'text.primary'
-        }}
-      >
-        <Toolbar sx={{ minHeight: '56px', py: 1 }}>
-          {/* Logo */}
-          <Box sx={{ flexGrow: 0, mr: 4 }}>
-            <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
-          </Box>
-
-          {/* Spacer */}
-          <Box sx={{ flexGrow: 1 }} />
-
-          {/* Profile */}
-          <IconButton
-            onClick={(e) => setProfileMenuAnchor(e.currentTarget)}
-            sx={{ p: 0 }}
-          >
-            <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>M</Avatar>
-          </IconButton>
-
-          {/* Profile Menu */}
-          <Menu
-            anchorEl={profileMenuAnchor}
-            open={Boolean(profileMenuAnchor)}
-            onClose={() => setProfileMenuAnchor(null)}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-          >
-            <Box sx={{ px: 2, py: 1.5, minWidth: 200 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                Michael Garvey
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                michael@example.com
-              </Typography>
-            </Box>
-            <Divider />
-
-            {/* View Mode Switcher */}
-            <Box sx={{ px: 2, py: 1.5 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block' }}>
-                VIEW AS
-              </Typography>
-              <ButtonGroup variant="outlined" fullWidth size="small">
-                <Button
-                  onClick={() => setViewMode('organizer')}
-                  variant={viewMode === 'organizer' ? 'contained' : 'outlined'}
-                  sx={{ textTransform: 'none', py: 0.75 }}
-                >
-                  Organizer
-                </Button>
-                <Button
-                  onClick={() => setViewMode('invitee')}
-                  variant={viewMode === 'invitee' ? 'contained' : 'outlined'}
-                  sx={{ textTransform: 'none', py: 0.75 }}
-                >
-                  Invitee
-                </Button>
-              </ButtonGroup>
-            </Box>
-            <Divider />
-
-            <MenuItem onClick={() => setProfileMenuAnchor(null)}>
-              <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
-              <ListItemText>Settings</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={() => router.push('/')}>
-              <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
-              <ListItemText>Logout</ListItemText>
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
+      <TopBar
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showViewModeToggle={true}
+      />
 
       {/* Main Layout with Sidebar */}
       <Box sx={{ display: 'flex', flexDirection: 'row', flex: 1 }}>

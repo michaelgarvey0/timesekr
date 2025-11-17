@@ -28,6 +28,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dayjs, { Dayjs } from 'dayjs';
+import TopBar from '../../components/TopBar';
 
 interface Attendee {
   id: string;
@@ -723,6 +724,17 @@ export default function CreateMeetingPage() {
     return (
       <Box>
         <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, py: 4 }}>
+          {/* Back button */}
+          <Box sx={{ mb: 3 }}>
+            <Button
+              startIcon={<ArrowBackIcon />}
+              onClick={() => router.push('/dashboard')}
+              sx={{ textTransform: 'none', color: 'text.secondary' }}
+            >
+              Back to Dashboard
+            </Button>
+          </Box>
+
           <Stepper activeStep={activeStep} sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
             {steps.map((label) => (
               <Step key={label}>
@@ -2870,21 +2882,7 @@ export default function CreateMeetingPage() {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ minHeight: '100vh', bgcolor: showEmailPreview ? '#f5f5f5' : '#fafbfc' }}>
         {/* Header */}
-        {!showEmailPreview && (
-        <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid', borderColor: 'grey.200' }}>
-          <Box sx={{ maxWidth: 900, mx: 'auto', width: '100%', px: 3 }}>
-            <Toolbar sx={{ px: 0, minHeight: '56px', py: 1 }}>
-              <IconButton onClick={() => router.push('/dashboard')} sx={{ mr: 2 }}>
-                <ArrowBackIcon />
-              </IconButton>
-              <Box sx={{ flexGrow: 1 }}>
-                <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
-              </Box>
-              <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>M</Avatar>
-            </Toolbar>
-          </Box>
-        </AppBar>
-        )}
+        {!showEmailPreview && <TopBar />}
 
         {/* Content */}
         {showEmailPreview ? (
