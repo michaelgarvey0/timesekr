@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel, TextField, ButtonGroup } from '@mui/material';
+import { Box, Typography, Button, Avatar, Card, CardContent, Chip, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, LinearProgress, AvatarGroup, Modal, IconButton, Divider, Table, TableHead, TableBody, TableRow, TableCell, Checkbox, FormGroup, FormControlLabel, TextField, ButtonGroup, AppBar, Toolbar, Menu, MenuItem } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import GroupsIcon from '@mui/icons-material/Groups';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -8,6 +8,8 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ContactsIcon from '@mui/icons-material/Contacts';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
+import LogoutIcon from '@mui/icons-material/Logout';
+import SettingsIcon from '@mui/icons-material/Settings';
 import EmailIcon from '@mui/icons-material/Email';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
@@ -121,6 +123,7 @@ export default function DashboardPage() {
   const [selectedSection, setSelectedSection] = useState('meetings');
   const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
   const [confirmInviteMeeting, setConfirmInviteMeeting] = useState<any>(null);
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null);
 
   // Invitee response state
   const [inviteeResponses, setInviteeResponses] = useState<{ [meetingId: number]: { [timeId: number]: boolean } }>({});
@@ -264,14 +267,73 @@ export default function DashboardPage() {
   };
 
   return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'row',
-      height: 'auto',
-      minHeight: '100vh',
-    }}>
-      {/* Left Sidebar */}
-      {(
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Top Bar */}
+      <AppBar
+        position="static"
+        elevation={0}
+        sx={{
+          bgcolor: 'white',
+          borderBottom: '1px solid',
+          borderColor: 'grey.200',
+          color: 'text.primary'
+        }}
+      >
+        <Toolbar>
+          {/* Logo */}
+          <Box sx={{ flexGrow: 0, mr: 4 }}>
+            <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
+          </Box>
+
+          {/* Spacer */}
+          <Box sx={{ flexGrow: 1 }} />
+
+          {/* Profile */}
+          <IconButton
+            onClick={(e) => setProfileMenuAnchor(e.currentTarget)}
+            sx={{ p: 0 }}
+          >
+            <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>M</Avatar>
+          </IconButton>
+
+          {/* Profile Menu */}
+          <Menu
+            anchorEl={profileMenuAnchor}
+            open={Boolean(profileMenuAnchor)}
+            onClose={() => setProfileMenuAnchor(null)}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+            <Box sx={{ px: 2, py: 1.5, minWidth: 200 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                Michael Garvey
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                michael@example.com
+              </Typography>
+            </Box>
+            <Divider />
+            <MenuItem onClick={() => setProfileMenuAnchor(null)}>
+              <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
+              <ListItemText>Settings</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={() => router.push('/')}>
+              <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
+              <ListItemText>Logout</ListItemText>
+            </MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+
+      {/* Main Layout with Sidebar */}
+      <Box sx={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
+        {/* Left Sidebar */}
         <Drawer
           variant="permanent"
           sx={{
@@ -280,14 +342,13 @@ export default function DashboardPage() {
             '& .MuiDrawer-paper': {
               width: SIDEBAR_WIDTH,
               boxSizing: 'border-box',
-              borderRight: '1px solid #e5e7eb',
+              borderRight: '1px solid',
+              borderColor: 'grey.200',
+              position: 'relative',
+              height: 'auto',
             },
           }}
         >
-          {/* Logo */}
-          <Box sx={{ p: 3, borderBottom: '1px solid #e5e7eb' }}>
-            <Image src="/images/logomark.svg" alt="timesēkr" width={120} height={32} priority />
-          </Box>
 
           {/* New Meeting Button */}
           {viewMode === 'organizer' && (
@@ -363,23 +424,7 @@ export default function DashboardPage() {
               </Button>
             </ButtonGroup>
           </Box>
-
-          {/* User Profile at Bottom */}
-          <Box sx={{ p: 2, borderTop: '1px solid #e5e7eb' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Avatar sx={{ bgcolor: 'primary.main' }}>M</Avatar>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                  Michael Garvey
-                </Typography>
-                <Typography variant="caption" color="text.secondary" noWrap>
-                  michael@example.com
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
         </Drawer>
-      )}
 
       {/* Main Content */}
       <Box sx={{
@@ -572,8 +617,7 @@ export default function DashboardPage() {
 
         </Box>
       </Box>
-
-      {/* Mobile Bottom Tab Bar */}
+      </Box>
 
       {/* Meeting Details Modal */}
       {selectedMeeting && viewMode === 'organizer' && (
