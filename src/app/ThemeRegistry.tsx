@@ -108,32 +108,20 @@ const theme = createTheme({
     borderRadius: border.radius.md,
   },
   spacing: 8, // Base unit - multiply by token values
+  // Simplified shadow system - just use 0-5 in your code
   shadows: [
-    'none',                 // 0
-    tokenShadows.sm,        // 1
-    tokenShadows.sm,        // 2
-    tokenShadows.md,        // 3 (default)
-    tokenShadows.md,        // 4
-    tokenShadows.md,        // 5
-    tokenShadows.lg,        // 6
-    tokenShadows.lg,        // 7
-    tokenShadows.lg,        // 8
-    tokenShadows.xl,        // 9
-    tokenShadows.xl,        // 10
-    tokenShadows.xl,        // 11
-    tokenShadows['2xl'],    // 12
-    tokenShadows['2xl'],    // 13
-    tokenShadows['2xl'],    // 14
-    tokenShadows['2xl'],    // 15
-    tokenShadows['2xl'],    // 16
-    tokenShadows['2xl'],    // 17
-    tokenShadows['2xl'],    // 18
-    tokenShadows['2xl'],    // 19
-    tokenShadows['2xl'],    // 20
-    tokenShadows['2xl'],    // 21
-    tokenShadows['2xl'],    // 22
-    tokenShadows['2xl'],    // 23
-    tokenShadows['2xl'],    // 24
+    'none',              // 0
+    tokenShadows.sm,     // 1
+    tokenShadows.md,     // 2 (default)
+    tokenShadows.lg,     // 3
+    tokenShadows.xl,     // 4
+    tokenShadows['2xl'], // 5
+    // MUI requires 25 levels, rest are just repeats
+    tokenShadows['2xl'], tokenShadows['2xl'], tokenShadows['2xl'], tokenShadows['2xl'],
+    tokenShadows['2xl'], tokenShadows['2xl'], tokenShadows['2xl'], tokenShadows['2xl'],
+    tokenShadows['2xl'], tokenShadows['2xl'], tokenShadows['2xl'], tokenShadows['2xl'],
+    tokenShadows['2xl'], tokenShadows['2xl'], tokenShadows['2xl'], tokenShadows['2xl'],
+    tokenShadows['2xl'], tokenShadows['2xl'], tokenShadows['2xl'],
   ],
   components: {
     MuiButton: {
@@ -155,7 +143,7 @@ const theme = createTheme({
     },
     MuiCard: {
       defaultProps: {
-        elevation: 3, // Use shadow md by default
+        elevation: 2, // Use shadow md by default
       },
       styleOverrides: {
         root: {
@@ -165,7 +153,7 @@ const theme = createTheme({
     },
     MuiPaper: {
       defaultProps: {
-        elevation: 3, // Use shadow md by default
+        elevation: 2, // Use shadow md by default
       },
     },
     MuiChip: {
