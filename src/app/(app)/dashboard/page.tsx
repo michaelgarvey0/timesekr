@@ -180,7 +180,7 @@ export default function DashboardPage() {
           cursor: 'pointer',
           transition: 'all 0.2s',
           '&:hover': {
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            boxShadow: 3,
             transform: 'translateY(-1px)',
           }
         }}
@@ -402,9 +402,8 @@ export default function DashboardPage() {
                     sx={{
                       cursor: viewMode === 'organizer' ? 'pointer' : 'default',
                       transition: 'all 0.2s',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1)',
                       '&:hover': viewMode === 'organizer' ? {
-                        boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.3)',
+                        boxShadow: 5,
                         transform: 'translateY(-2px)',
                       } : {}
                     }}
@@ -599,7 +598,7 @@ export default function DashboardPage() {
               width: { xs: '90%', sm: 500 },
               bgcolor: 'background.paper',
               borderRadius: '12px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              boxShadow: 5,
               p: 4,
             }}
           >
