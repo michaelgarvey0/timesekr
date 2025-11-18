@@ -1,6 +1,6 @@
 'use client';
 
-import { Dialog, DialogContent, DialogActions, Box } from '@mui/material';
+import { Dialog, DialogContent, DialogActions, DialogTitle, Box, Divider } from '@mui/material';
 import { ReactNode } from 'react';
 import { border } from '@/theme/tokens';
 
@@ -9,6 +9,7 @@ interface ModalProps {
   onClose: () => void;
   children: ReactNode;
   actions?: ReactNode;
+  header?: ReactNode;
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
   customMaxWidth?: number;
 }
@@ -18,6 +19,7 @@ export default function Modal({
   onClose,
   children,
   actions,
+  header,
   maxWidth = 'sm',
   customMaxWidth
 }: ModalProps) {
@@ -34,13 +36,24 @@ export default function Modal({
         }
       }}
     >
+      {header && (
+        <>
+          <DialogTitle sx={{ p: 3, pb: 2 }}>
+            {header}
+          </DialogTitle>
+          <Divider />
+        </>
+      )}
       <DialogContent sx={{ p: 3 }}>
         {children}
       </DialogContent>
       {actions && (
-        <DialogActions sx={{ p: 3, pt: 0 }}>
-          {actions}
-        </DialogActions>
+        <>
+          <Divider />
+          <DialogActions sx={{ p: 3 }}>
+            {actions}
+          </DialogActions>
+        </>
       )}
     </Dialog>
   );
