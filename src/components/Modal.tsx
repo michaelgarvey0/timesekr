@@ -38,7 +38,7 @@ export default function Modal({
     >
       {header && (
         <>
-          <DialogTitle sx={{ p: 3, pb: 2 }}>
+          <DialogTitle sx={{ px: 3, py: 2 }}>
             {header}
           </DialogTitle>
           <Divider />
@@ -50,7 +50,7 @@ export default function Modal({
       {actions && (
         <>
           <Divider />
-          <DialogActions sx={{ p: 3 }}>
+          <DialogActions sx={{ px: 3, py: 2 }}>
             {actions}
           </DialogActions>
         </>
