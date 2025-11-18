@@ -36,8 +36,8 @@ export default function ConnectCalendarPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', p: 4, display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ mb: 6 }}>
+    <Box sx={{ minHeight: '100vh', p: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+      <Box sx={{ position: 'absolute', top: 32, left: 32 }}>
         <Image
           src="/images/logomark.svg"
           alt="timesēkr"
@@ -47,23 +47,21 @@ export default function ConnectCalendarPage() {
         />
       </Box>
 
-      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Box sx={{ maxWidth: 600, width: '100%' }}>
-          <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
-            Welcome! Let's connect your calendars
-          </Typography>
+      <Box sx={{ maxWidth: 600, width: '100%' }}>
+        <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
+          Welcome! Let's connect your calendars
+        </Typography>
 
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            Connect your calendars so we can instantly find meeting times
-          </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+          Connect your calendars so we can instantly find meeting times
+        </Typography>
 
-          <CalendarConnectionForm
-            onConnect={handleConnectCalendar}
-            onSkip={handleSkip}
-            connectedCalendars={connectedCalendars}
-            onRemove={handleRemoveCalendar}
-          />
-        </Box>
+        <CalendarConnectionForm
+          onConnect={handleConnectCalendar}
+          onSkip={handleSkip}
+          connectedCalendars={connectedCalendars}
+          onRemove={handleRemoveCalendar}
+        />
       </Box>
     </Box>
   );
