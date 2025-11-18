@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CalendarConnectionForm from './components/CalendarConnectionForm';
 import CalendarSelectionModal from './components/CalendarSelectionModal';
+import AppleCalendarModal from './components/AppleCalendarModal';
 
 interface ConnectedCalendar {
   provider: string;
@@ -110,15 +111,23 @@ export default function ConnectCalendarPage() {
         />
       </Box>
 
-      <CalendarSelectionModal
-        open={modalState.open}
-        onClose={handleCloseModal}
-        providerName={modalState.providerName}
-        providerIcon={modalState.providerIcon}
-        email={`user@${modalState.provider}.com`}
-        calendars={mockCalendars}
-        onAuthorize={handleAuthorize}
-      />
+      {modalState.provider === 'apple' ? (
+        <AppleCalendarModal
+          open={modalState.open}
+          onClose={handleCloseModal}
+          providerIcon={modalState.providerIcon}
+        />
+      ) : (
+        <CalendarSelectionModal
+          open={modalState.open}
+          onClose={handleCloseModal}
+          providerName={modalState.providerName}
+          providerIcon={modalState.providerIcon}
+          email={`user@${modalState.provider}.com`}
+          calendars={mockCalendars}
+          onAuthorize={handleAuthorize}
+        />
+      )}
     </Box>
   );
 }
