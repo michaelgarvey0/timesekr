@@ -1,8 +1,20 @@
 'use client';
 
-import { Box, Button, Stack, Divider, TextField } from '@mui/material';
+import { Box, Button, Stack, Divider, TextField, SvgIcon } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import AppleIcon from '@mui/icons-material/Apple';
+
+// Microsoft icon component
+function MicrosoftIcon(props: any) {
+  return (
+    <SvgIcon {...props} viewBox="0 0 21 21">
+      <rect x="1" y="1" width="9" height="9" fill="currentColor"/>
+      <rect x="1" y="11" width="9" height="9" fill="currentColor"/>
+      <rect x="11" y="1" width="9" height="9" fill="currentColor"/>
+      <rect x="11" y="11" width="9" height="9" fill="currentColor"/>
+    </SvgIcon>
+  );
+}
 
 interface LoginFormProps {
   email: string;
@@ -33,6 +45,16 @@ export default function LoginForm({ email, setEmail, onContinue }: LoginFormProp
         Continue with Apple
       </Button>
 
+      <Button
+        variant="outlined"
+        size="large"
+        startIcon={<MicrosoftIcon />}
+        fullWidth
+        sx={{ textTransform: 'none' }}
+      >
+        Continue with Microsoft
+      </Button>
+
       <Divider>or</Divider>
 
       <TextField
@@ -42,11 +64,6 @@ export default function LoginForm({ email, setEmail, onContinue }: LoginFormProp
         variant="outlined"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            height: '42px',
-          },
-        }}
       />
 
       <Button
@@ -57,7 +74,7 @@ export default function LoginForm({ email, setEmail, onContinue }: LoginFormProp
         sx={{ textTransform: 'none' }}
         onClick={onContinue}
       >
-        Continue with Email
+        Continue with email
       </Button>
     </Stack>
   );

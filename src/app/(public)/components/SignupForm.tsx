@@ -14,12 +14,6 @@ interface SignupFormProps {
   onCreateAccount: () => void;
 }
 
-const textFieldStyle = {
-  '& .MuiOutlinedInput-root': {
-    height: '42px',
-  },
-};
-
 export default function SignupForm({
   firstName,
   setFirstName,
@@ -40,7 +34,6 @@ export default function SignupForm({
         variant="outlined"
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
-        sx={textFieldStyle}
       />
       <TextField
         fullWidth
@@ -49,7 +42,6 @@ export default function SignupForm({
         variant="outlined"
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
-        sx={textFieldStyle}
       />
       <TextField
         fullWidth
@@ -59,7 +51,6 @@ export default function SignupForm({
         variant="outlined"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
-        sx={textFieldStyle}
       />
       <TextField
         fullWidth
@@ -69,7 +60,6 @@ export default function SignupForm({
         variant="outlined"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        sx={textFieldStyle}
       />
 
       <Button
@@ -79,7 +69,7 @@ export default function SignupForm({
         sx={{ textTransform: 'none', mt: 1 }}
         onClick={onCreateAccount}
       >
-        Create Account
+        Create account
       </Button>
     </Stack>
   );

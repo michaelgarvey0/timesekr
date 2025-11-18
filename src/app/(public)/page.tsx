@@ -168,7 +168,7 @@ export default function Home() {
           <Box
             sx={{
               position: 'absolute',
-              bottom: 6,
+              bottom: 24,
               left: 6,
               right: 6,
               textAlign: 'center',

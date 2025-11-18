@@ -29,6 +29,11 @@ const theme = createTheme({
     background: {
       default: background.default,
       paper: background.level1,
+      // @ts-ignore - Extending MUI background palette
+      level2: background.level2,
+      level3: background.level3,
+      accent: background.accent,
+      accentLight: background.accentLight,
     },
     text: {
       primary: text.primary,
@@ -129,6 +134,14 @@ const theme = createTheme({
         root: {
           borderRadius: border.radius.md,
           textTransform: 'none',
+          minHeight: '42px',
+          transition: 'all 0.2s ease-in-out',
+        },
+        outlined: {
+          backgroundColor: '#ffffff',
+          '&:hover': {
+            backgroundColor: primitives.gray[50],
+          },
         },
       },
     },
@@ -136,8 +149,16 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: border.radius.sm,
+            borderRadius: border.radius.md,
+            minHeight: '42px',
           },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          minHeight: '42px',
         },
       },
     },
@@ -150,6 +171,8 @@ const theme = createTheme({
           borderRadius: border.radius.md,
           border: '1px solid',
           borderColor: primitives.gray[300],
+          backgroundColor: '#ffffff',
+          transition: 'all 0.2s ease-in-out',
         },
       },
     },

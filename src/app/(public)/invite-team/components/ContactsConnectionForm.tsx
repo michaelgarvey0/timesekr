@@ -1,9 +1,10 @@
 'use client';
 
-import { Stack, Box, Typography, Button, TextField, Chip } from '@mui/material';
+import { Stack, Box, Typography, Button } from '@mui/material';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import SendIcon from '@mui/icons-material/Send';
-import { useState } from 'react';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import { useState, useRef } from 'react';
+import MultiEmailInput from '@/components/MultiEmailInput';
 
 interface ContactsConnectionFormProps {
   onConnect: () => void;
@@ -11,96 +12,90 @@ interface ContactsConnectionFormProps {
 }
 
 export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsConnectionFormProps) {
-  const [email, setEmail] = useState('');
   const [invitedEmails, setInvitedEmails] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleAddEmail = () => {
-    if (email && email.includes('@')) {
-      setInvitedEmails([...invitedEmails, email]);
-      setEmail('');
-    }
-  };
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handleRemoveEmail = (emailToRemove: string) => {
-    setInvitedEmails(invitedEmails.filter(e => e !== emailToRemove));
-  };
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const emails = text
+        .split(/[\n,;\s\t]+/)
+        .map(email => email.trim())
+        .filter(email => email.includes('@') && email.length > 0);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddEmail();
+      setInvitedEmails([...new Set([...invitedEmails, ...emails])]);
+    };
+    reader.readAsText(file);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
   return (
-    <Stack spacing={2} alignItems="stretch">
-      <Box sx={{ textAlign: 'center', mb: 1 }}>
-        <GroupAddIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-        <Typography variant="body2" color="text.secondary">
-          Invite your team members to collaborate on meetings
-        </Typography>
-      </Box>
-
-      <TextField
-        fullWidth
-        size="small"
-        label="Email address"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        onKeyPress={handleKeyPress}
-        placeholder="colleague@company.com"
-      />
-
-      <Button
-        variant="outlined"
-        size="large"
-        startIcon={<SendIcon />}
-        fullWidth
-        sx={{ textTransform: 'none' }}
-        onClick={handleAddEmail}
-        disabled={!email || !email.includes('@')}
-      >
-        Add Email
-      </Button>
-
-      {invitedEmails.length > 0 && (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, py: 1 }}>
-          {invitedEmails.map((invitedEmail) => (
-            <Chip
-              key={invitedEmail}
-              label={invitedEmail}
-              onDelete={() => handleRemoveEmail(invitedEmail)}
-              size="small"
-            />
-          ))}
-        </Box>
-      )}
-
-      {invitedEmails.length > 0 && (
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          sx={{ textTransform: 'none' }}
-          onClick={onConnect}
-        >
-          Send Invites
-        </Button>
-      )}
-
-      <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', px: 2 }}>
-        Invites will be sent via email to join your team
+    <Box sx={{ width: 600 }}>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
+        Invite your team
       </Typography>
 
-      <Button
-        variant="text"
-        fullWidth
-        sx={{ textTransform: 'none', mt: 1 }}
-        onClick={onSkip}
-      >
-        I'll do this later
-      </Button>
-    </Stack>
+      <Stack spacing={2} alignItems="stretch">
+        <Box sx={{ textAlign: 'center', mb: 1 }}>
+          <GroupAddIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+          <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+            Add your team members
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Type emails and press Enter, or paste multiple at once
+          </Typography>
+        </Box>
+
+        <MultiEmailInput
+          value={invitedEmails}
+          onChange={setInvitedEmails}
+        />
+
+        <Button
+          variant="outlined"
+          size="medium"
+          startIcon={<UploadFileIcon />}
+          sx={{ textTransform: 'none' }}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Upload CSV
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.txt"
+          style={{ display: 'none' }}
+          onChange={handleFileUpload}
+        />
+
+        {invitedEmails.length > 0 && (
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{ textTransform: 'none' }}
+            onClick={onConnect}
+          >
+            Send {invitedEmails.length} Invite{invitedEmails.length !== 1 ? 's' : ''}
+          </Button>
+        )}
+
+        <Button
+          variant="text"
+          fullWidth
+          sx={{ textTransform: 'none' }}
+          onClick={onSkip}
+        >
+          I'll do this later
+        </Button>
+      </Stack>
+    </Box>
   );
 }
