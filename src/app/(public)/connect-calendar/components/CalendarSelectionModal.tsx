@@ -48,7 +48,7 @@ export default function CalendarSelectionModal({
     <Modal
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      customMaxWidth={450}
       actions={
         <Stack direction="row" spacing={2} width="100%">
           <Button variant="outlined" onClick={onClose} fullWidth>

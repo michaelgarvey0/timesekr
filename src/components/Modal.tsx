@@ -9,7 +9,8 @@ interface ModalProps {
   onClose: () => void;
   children: ReactNode;
   actions?: ReactNode;
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
+  customMaxWidth?: number;
 }
 
 export default function Modal({
@@ -17,25 +18,27 @@ export default function Modal({
   onClose,
   children,
   actions,
-  maxWidth = 'sm'
+  maxWidth = 'sm',
+  customMaxWidth
 }: ModalProps) {
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth={maxWidth}
-      fullWidth
+      maxWidth={customMaxWidth ? false : maxWidth}
+      fullWidth={!customMaxWidth}
       PaperProps={{
         sx: {
           borderRadius: `${border.radius.md}px`,
+          ...(customMaxWidth && { maxWidth: `${customMaxWidth}px`, width: '100%' }),
         }
       }}
     >
-      <DialogContent sx={{ p: 2 }}>
+      <DialogContent sx={{ p: 3 }}>
         {children}
       </DialogContent>
       {actions && (
-        <DialogActions sx={{ p: 2, pt: 0 }}>
+        <DialogActions sx={{ p: 3, pt: 0 }}>
           {actions}
         </DialogActions>
       )}
