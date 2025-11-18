@@ -131,10 +131,14 @@ export default function CalendarConnectionForm({
                 >
                   <img
                     src={providerIcon}
-                    width={32}
-                    height={32}
                     alt={providerName}
-                    style={{ objectFit: 'contain', marginRight: '12px' }}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      objectFit: 'contain',
+                      marginRight: '12px',
+                      imageRendering: 'crisp-edges'
+                    }}
                   />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
