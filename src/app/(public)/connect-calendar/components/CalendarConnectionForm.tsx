@@ -1,11 +1,9 @@
 'use client';
 
 import { Box, Button, Stack, Typography, IconButton, Alert } from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
-import AppleIcon from '@mui/icons-material/Apple';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CloseIcon from '@mui/icons-material/Close';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import Image from 'next/image';
 
 interface ConnectedCalendar {
   provider: string;
@@ -21,24 +19,19 @@ interface CalendarConnectionFormProps {
 }
 
 const calendarProviders = [
-  { id: 'google', name: 'Google Calendar', description: 'Calendar & Contacts', icon: GoogleIcon, color: '#4285F4' },
-  { id: 'apple', name: 'Apple Calendar', description: 'iOS App Required', icon: AppleIcon, color: '#000000' },
-  { id: 'microsoft', name: 'Microsoft Calendar', description: 'Calendar & Contacts', icon: CalendarTodayIcon, color: '#00A4EF' },
+  { id: 'google', name: 'Google Calendar', description: 'Calendar & Contacts', icon: '/images/icons/google.svg' },
+  { id: 'apple', name: 'Apple Calendar', description: 'iOS App Required', icon: '/images/icons/apple.svg' },
+  { id: 'microsoft', name: 'Microsoft Calendar', description: 'Calendar & Contacts', icon: '/images/icons/microsoft.svg' },
 ];
 
 const getProviderIcon = (providerId: string) => {
   const provider = calendarProviders.find(p => p.id === providerId);
-  return provider ? provider.icon : CalendarTodayIcon;
+  return provider ? provider.icon : '/images/icons/google.svg';
 };
 
 const getProviderName = (providerId: string) => {
   const provider = calendarProviders.find(p => p.id === providerId);
   return provider ? provider.name : providerId;
-};
-
-const getProviderColor = (providerId: string) => {
-  const provider = calendarProviders.find(p => p.id === providerId);
-  return provider ? provider.color : '#000000';
 };
 
 export default function CalendarConnectionForm({
@@ -58,6 +51,7 @@ export default function CalendarConnectionForm({
           mb: 4,
           bgcolor: 'background.accentLight',
           borderColor: 'transparent',
+          alignItems: 'center',
           '& .MuiAlert-icon': {
             color: 'primary.main',
           },
@@ -76,8 +70,6 @@ export default function CalendarConnectionForm({
         }}
       >
         {calendarProviders.map((provider) => {
-          const Icon = provider.icon;
-
           return (
             <Button
               key={provider.id}
@@ -92,7 +84,13 @@ export default function CalendarConnectionForm({
                 boxShadow: 2,
               }}
             >
-              <Icon sx={{ fontSize: 72, color: provider.color }} />
+              <Image
+                src={provider.icon}
+                width={72}
+                height={72}
+                alt={provider.name}
+                style={{ objectFit: 'contain' }}
+              />
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem', mb: 0.5 }}>
                   {provider.name}
@@ -114,9 +112,8 @@ export default function CalendarConnectionForm({
           </Typography>
           <Stack spacing={1}>
             {connectedCalendars.map((calendar) => {
-              const Icon = getProviderIcon(calendar.provider);
+              const providerIcon = getProviderIcon(calendar.provider);
               const providerName = getProviderName(calendar.provider);
-              const providerColor = getProviderColor(calendar.provider);
 
               return (
                 <Box
@@ -131,7 +128,13 @@ export default function CalendarConnectionForm({
                     bgcolor: 'background.paper',
                   }}
                 >
-                  <Icon sx={{ color: providerColor, fontSize: 24, mr: 1.5 }} />
+                  <Image
+                    src={providerIcon}
+                    width={24}
+                    height={24}
+                    alt={providerName}
+                    style={{ objectFit: 'contain', marginRight: '12px' }}
+                  />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                       {calendar.email || `${providerName}`}
