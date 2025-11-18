@@ -49,11 +49,6 @@ export default function CalendarSelectionModal({
       open={open}
       onClose={onClose}
       customMaxWidth={450}
-      header={
-        <Typography variant="h5" sx={{ fontWeight: 600, textAlign: 'center' }}>
-          Select Calendars to Connect
-        </Typography>
-      }
       actions={
         <Stack direction="row" spacing={2} width="100%">
           <Button variant="outlined" onClick={onClose} fullWidth>
@@ -77,12 +72,16 @@ export default function CalendarSelectionModal({
           }}
         />
 
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, textAlign: 'center' }}>
+          Select Calendars to Connect
+        </Typography>
+
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
           We found {calendars.length} calendar{calendars.length !== 1 ? 's' : ''} from {email}. Select which are relevant to your availability below.
         </Typography>
       </Box>
 
-      <Stack divider={<Divider />}>
+      <Stack spacing={1}>
         {calendars.map(calendar => (
           <FormControlLabel
             key={calendar.id}
@@ -93,7 +92,6 @@ export default function CalendarSelectionModal({
               />
             }
             label={calendar.name}
-            sx={{ py: 1 }}
           />
         ))}
       </Stack>
