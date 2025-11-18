@@ -138,8 +138,9 @@ const theme = createTheme({
           transition: 'all 0.2s ease-in-out',
         },
         outlined: {
+          backgroundColor: '#ffffff',
           '&:hover': {
-            backgroundColor: '#ffffff',
+            backgroundColor: primitives.gray[50],
           },
         },
       },
@@ -171,6 +172,7 @@ const theme = createTheme({
           border: '1px solid',
           borderColor: primitives.gray[300],
           transition: 'all 0.2s ease-in-out',
+          backgroundColor: '#ffffff',
           '&:hover': {
             backgroundColor: primitives.gray[50],
           },
