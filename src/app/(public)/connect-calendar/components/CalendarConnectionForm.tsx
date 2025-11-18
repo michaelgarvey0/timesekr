@@ -67,7 +67,7 @@ export default function CalendarConnectionForm({
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
           gap: 1.5,
-          mb: connectedCalendars.length > 0 ? 3 : 4,
+          my: 4,
         }}
       >
         {calendarProviders.map((provider) => {
@@ -129,7 +129,7 @@ export default function CalendarConnectionForm({
                     bgcolor: 'background.paper',
                   }}
                 >
-                  <Image
+                  <img
                     src={providerIcon}
                     width={32}
                     height={32}
