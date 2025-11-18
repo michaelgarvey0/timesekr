@@ -56,7 +56,7 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
   };
 
   return (
-    <Box sx={{ maxWidth: invitedEmails.length > 0 ? 500 : 320, width: '100%', transition: 'max-width 0.3s ease' }}>
+    <Box sx={{ maxWidth: 600, width: '100%' }}>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
         Invite your team
       </Typography>
@@ -64,8 +64,11 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
       <Stack spacing={2} alignItems="stretch">
         <Box sx={{ textAlign: 'center', mb: 1 }}>
           <GroupAddIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+          <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+            Add your team members
+          </Typography>
           <Typography variant="body2" color="text.secondary">
-            Invite your team members to collaborate on meetings
+            Enter multiple email addresses to invite your team
           </Typography>
         </Box>
 
@@ -94,8 +97,11 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
             <TextField
               {...params}
               label="Email addresses"
-              placeholder="Type email and press Enter"
+              placeholder="colleague@company.com, teammate@company.com"
               onPaste={handlePaste}
+              multiline
+              minRows={4}
+              maxRows={10}
             />
           )}
           ChipProps={{
@@ -106,7 +112,7 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             variant="outlined"
-            size="small"
+            size="medium"
             startIcon={<UploadFileIcon />}
             fullWidth
             sx={{ textTransform: 'none' }}
@@ -124,7 +130,7 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
         </Box>
 
         <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', px: 2 }}>
-          Type emails, paste multiple at once, or upload a CSV file
+          Paste multiple emails separated by commas or upload a CSV file
         </Typography>
 
         {invitedEmails.length > 0 && (
