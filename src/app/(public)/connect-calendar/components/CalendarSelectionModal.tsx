@@ -50,17 +50,17 @@ export default function CalendarSelectionModal({
       onClose={onClose}
       maxWidth="sm"
       actions={
-        <Stack direction="row" spacing={2} width="100%" justifyContent="flex-end">
-          <Button variant="outlined" onClick={onClose}>
+        <Stack direction="row" spacing={2} width="100%">
+          <Button variant="outlined" onClick={onClose} fullWidth>
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleAuthorize}>
+          <Button variant="contained" onClick={handleAuthorize} fullWidth>
             Authorize
           </Button>
         </Stack>
       }
     >
-      <Box sx={{ textAlign: 'center' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
         <img
           src={providerIcon}
           alt={providerName}
@@ -68,15 +68,15 @@ export default function CalendarSelectionModal({
             width: '72px',
             height: '72px',
             objectFit: 'contain',
-            marginBottom: '24px'
+            marginBottom: '16px'
           }}
         />
 
-        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, textAlign: 'center' }}>
           Select Calendars to Connect
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
           We found {calendars.length} calendar{calendars.length !== 1 ? 's' : ''} from {email}. Select which are relevant to your availability below.
         </Typography>
       </Box>

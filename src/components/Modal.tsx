@@ -28,15 +28,14 @@ export default function Modal({
       PaperProps={{
         sx: {
           borderRadius: `${border.radius.md}px`,
-          p: 2,
         }
       }}
     >
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent sx={{ p: 2 }}>
         {children}
       </DialogContent>
       {actions && (
-        <DialogActions sx={{ px: 3, pb: 3 }}>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
           {actions}
         </DialogActions>
       )}
