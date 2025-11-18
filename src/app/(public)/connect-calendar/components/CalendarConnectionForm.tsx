@@ -4,6 +4,7 @@ import { Box, Button, Stack, Typography, IconButton, Alert } from '@mui/material
 import CloseIcon from '@mui/icons-material/Close';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Image from 'next/image';
+import { border } from '@/theme/tokens';
 
 interface ConnectedCalendar {
   provider: string;
@@ -124,23 +125,20 @@ export default function CalendarConnectionForm({
                     p: 1.5,
                     border: '1px solid',
                     borderColor: 'grey.300',
-                    borderRadius: 1.5,
+                    borderRadius: `${border.radius.md}px`,
                     bgcolor: 'background.paper',
                   }}
                 >
                   <Image
                     src={providerIcon}
-                    width={24}
-                    height={24}
+                    width={32}
+                    height={32}
                     alt={providerName}
                     style={{ objectFit: 'contain', marginRight: '12px' }}
                   />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                       {calendar.email || `${providerName}`}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {providerName}
                     </Typography>
                   </Box>
                   <IconButton
