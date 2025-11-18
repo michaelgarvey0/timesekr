@@ -56,7 +56,7 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
   };
 
   return (
-    <Box sx={{ maxWidth: 600, width: '100%' }}>
+    <Box sx={{ width: 600 }}>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
         Invite your team
       </Typography>
