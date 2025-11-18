@@ -74,7 +74,6 @@ export default function AppleCalendarModal({
         {/* Left Column - iPhone Mockup */}
         <Box
           sx={{
-            width: 200,
             bgcolor: 'grey.100',
             borderRadius: `${border.radius.lg}px`,
             border: '1px solid',
@@ -82,6 +81,8 @@ export default function AppleCalendarModal({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            px: 3,
+            py: 2,
           }}
         >
           <Typography variant="body2" color="text.secondary">
