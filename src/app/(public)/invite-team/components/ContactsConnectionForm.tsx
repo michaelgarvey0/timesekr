@@ -1,9 +1,9 @@
 'use client';
 
-import { Stack, Box, Typography, Button, TextField, Chip } from '@mui/material';
+import { Stack, Box, Typography, Button, Autocomplete, TextField } from '@mui/material';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import { useState, useRef, KeyboardEvent } from 'react';
+import { useState, useRef } from 'react';
 
 interface ContactsConnectionFormProps {
   onConnect: () => void;
@@ -12,39 +12,7 @@ interface ContactsConnectionFormProps {
 
 export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsConnectionFormProps) {
   const [invitedEmails, setInvitedEmails] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const addEmails = (emailsToAdd: string[]) => {
-    const validEmails = emailsToAdd
-      .map(email => email.trim())
-      .filter(email => email.includes('@') && email.length > 0);
-
-    if (validEmails.length > 0) {
-      setInvitedEmails([...new Set([...invitedEmails, ...validEmails])]);
-    }
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      if (inputValue.trim()) {
-        addEmails([inputValue]);
-        setInputValue('');
-      }
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    const pastedText = e.clipboardData.getData('text');
-    const emails = pastedText.split(/[\n,;\s\t]+/);
-
-    if (emails.length > 1) {
-      e.preventDefault();
-      addEmails(emails);
-      setInputValue('');
-    }
-  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,18 +21,18 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
-      const emails = text.split(/[\n,;\s\t]+/);
-      addEmails(emails);
+      const emails = text
+        .split(/[\n,;\s\t]+/)
+        .map(email => email.trim())
+        .filter(email => email.includes('@') && email.length > 0);
+
+      setInvitedEmails([...new Set([...invitedEmails, ...emails])]);
     };
     reader.readAsText(file);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  };
-
-  const handleRemoveEmail = (emailToRemove: string) => {
-    setInvitedEmails(invitedEmails.filter(email => email !== emailToRemove));
   };
 
   return (
@@ -80,59 +48,65 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
             Add your team members
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Enter email addresses and press Enter or comma
+            Type emails and press Enter, or paste multiple at once
           </Typography>
         </Box>
 
-        <TextField
-          fullWidth
-          label="Email addresses"
-          placeholder="colleague@company.com"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onPaste={handlePaste}
-          multiline
-          minRows={4}
-          maxRows={10}
+        <Autocomplete
+          multiple
+          freeSolo
+          options={[]}
+          value={invitedEmails}
+          onChange={(_, newValue) => {
+            const validEmails = newValue.filter(email =>
+              typeof email === 'string' && email.includes('@')
+            );
+            setInvitedEmails(validEmails);
+          }}
+          onPaste={(e) => {
+            const pastedText = e.clipboardData.getData('text');
+            const emails = pastedText
+              .split(/[\n,;\s\t]+/)
+              .map(email => email.trim())
+              .filter(email => email.includes('@') && email.length > 0);
+
+            if (emails.length > 1) {
+              e.preventDefault();
+              setInvitedEmails([...new Set([...invitedEmails, ...emails])]);
+            }
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Email addresses"
+              placeholder="Type or paste emails here"
+            />
+          )}
+          sx={{
+            '& .MuiAutocomplete-inputRoot': {
+              minHeight: 120,
+              alignItems: 'flex-start',
+              paddingTop: 1,
+            },
+          }}
         />
 
-        {invitedEmails.length > 0 && (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-            {invitedEmails.map((email) => (
-              <Chip
-                key={email}
-                label={email}
-                onDelete={() => handleRemoveEmail(email)}
-                size="small"
-              />
-            ))}
-          </Box>
-        )}
-
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            size="medium"
-            startIcon={<UploadFileIcon />}
-            fullWidth
-            sx={{ textTransform: 'none' }}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Upload CSV
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv,.txt"
-            style={{ display: 'none' }}
-            onChange={handleFileUpload}
-          />
-        </Box>
-
-        <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', px: 2 }}>
-          Type or paste multiple emails, upload CSV, or press Enter/comma after each
-        </Typography>
+        <Button
+          variant="outlined"
+          size="medium"
+          startIcon={<UploadFileIcon />}
+          sx={{ textTransform: 'none' }}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Upload CSV
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.txt"
+          style={{ display: 'none' }}
+          onChange={handleFileUpload}
+        />
 
         {invitedEmails.length > 0 && (
           <Button
@@ -149,7 +123,7 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
         <Button
           variant="text"
           fullWidth
-          sx={{ textTransform: 'none', mt: 1 }}
+          sx={{ textTransform: 'none' }}
           onClick={onSkip}
         >
           I'll do this later
