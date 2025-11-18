@@ -1,10 +1,11 @@
 'use client';
 
-import { Box, Button, Stack, Typography, IconButton } from '@mui/material';
+import { Box, Button, Stack, Typography, IconButton, Alert } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import AppleIcon from '@mui/icons-material/Apple';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CloseIcon from '@mui/icons-material/Close';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 interface ConnectedCalendar {
   provider: string;
@@ -20,9 +21,9 @@ interface CalendarConnectionFormProps {
 }
 
 const calendarProviders = [
-  { id: 'google', name: 'Google', description: 'Calendar & Contacts', icon: GoogleIcon },
-  { id: 'apple', name: 'Apple', description: 'iOS App Required', icon: AppleIcon },
-  { id: 'microsoft', name: 'Microsoft', description: 'Calendar & Contacts', icon: CalendarTodayIcon },
+  { id: 'google', name: 'Google Calendar', description: 'Calendar & Contacts', icon: GoogleIcon, color: '#4285F4' },
+  { id: 'apple', name: 'Apple Calendar', description: 'iOS App Required', icon: AppleIcon, color: '#000000' },
+  { id: 'microsoft', name: 'Microsoft Calendar', description: 'Calendar & Contacts', icon: CalendarTodayIcon, color: '#00A4EF' },
 ];
 
 const getProviderIcon = (providerId: string) => {
@@ -35,6 +36,11 @@ const getProviderName = (providerId: string) => {
   return provider ? provider.name : providerId;
 };
 
+const getProviderColor = (providerId: string) => {
+  const provider = calendarProviders.find(p => p.id === providerId);
+  return provider ? provider.color : '#000000';
+};
+
 export default function CalendarConnectionForm({
   onConnect,
   onSkip,
@@ -44,8 +50,31 @@ export default function CalendarConnectionForm({
 
   return (
     <Box>
+      {/* Callout alert box */}
+      <Alert
+        icon={<AutoAwesomeIcon />}
+        severity="info"
+        sx={{
+          mb: 4,
+          bgcolor: 'background.accentLight',
+          borderColor: 'transparent',
+          '& .MuiAlert-icon': {
+            color: 'primary.main',
+          },
+        }}
+      >
+        When everyone connects their calendars, scheduling becomes instant. No back-and-forth needed!
+      </Alert>
+
       {/* Calendar provider buttons */}
-      <Stack spacing={2} sx={{ mb: connectedCalendars.length > 0 ? 3 : 4 }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 2,
+          mb: connectedCalendars.length > 0 ? 3 : 4,
+        }}
+      >
         {calendarProviders.map((provider) => {
           const Icon = provider.icon;
 
@@ -54,27 +83,27 @@ export default function CalendarConnectionForm({
               key={provider.id}
               variant="outlined"
               onClick={() => onConnect(provider.id)}
-              startIcon={<Icon />}
-              fullWidth
               sx={{
-                justifyContent: 'flex-start',
-                py: 1.5,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+                py: 3,
                 px: 2,
-                textTransform: 'none',
               }}
             >
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', ml: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <Icon sx={{ fontSize: 40, color: provider.color }} />
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem', mb: 0.5 }}>
                   {provider.name}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
                   {provider.description}
                 </Typography>
               </Box>
             </Button>
           );
         })}
-      </Stack>
+      </Box>
 
       {/* Connected calendars list */}
       {connectedCalendars.length > 0 && (
@@ -86,6 +115,7 @@ export default function CalendarConnectionForm({
             {connectedCalendars.map((calendar) => {
               const Icon = getProviderIcon(calendar.provider);
               const providerName = getProviderName(calendar.provider);
+              const providerColor = getProviderColor(calendar.provider);
 
               return (
                 <Box
@@ -100,10 +130,10 @@ export default function CalendarConnectionForm({
                     bgcolor: 'background.paper',
                   }}
                 >
-                  <Icon sx={{ color: 'primary.main', fontSize: 24, mr: 1.5 }} />
+                  <Icon sx={{ color: providerColor, fontSize: 24, mr: 1.5 }} />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {calendar.email || `${providerName} Calendar`}
+                      {calendar.email || `${providerName}`}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {providerName}

@@ -36,20 +36,24 @@ export default function ConnectCalendarPage() {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', p: 4, position: 'relative' }}>
-      <Box sx={{ maxWidth: 320, width: '100%' }}>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
-          <Image
-            src="/images/logomark.svg"
-            alt="timesēkr"
-            width={150}
-            height={40}
-            priority
-          />
-        </Box>
+    <Box sx={{ minHeight: '100vh', p: 4 }}>
+      <Box sx={{ mb: 6 }}>
+        <Image
+          src="/images/logomark.svg"
+          alt="timesēkr"
+          width={150}
+          height={40}
+          priority
+        />
+      </Box>
 
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-          Connect your calendars
+      <Box sx={{ maxWidth: 600, mx: 'auto' }}>
+        <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
+          Welcome! Let's connect your calendars
+        </Typography>
+
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+          Connect your calendars so we can instantly find meeting times
         </Typography>
 
         <CalendarConnectionForm
