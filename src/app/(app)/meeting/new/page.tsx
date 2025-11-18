@@ -724,15 +724,17 @@ export default function CreateMeetingPage() {
     return (
       <Box>
         <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, py: 4 }}>
-          {/* Back button */}
-          <Box sx={{ mb: 3 }}>
+          {/* Header with Cancel button */}
+          <Box sx={{ mb: 4 }}>
             <Button
-              startIcon={<ArrowBackIcon />}
               onClick={() => router.push('/dashboard')}
-              sx={{ textTransform: 'none', color: 'text.secondary' }}
+              sx={{ textTransform: 'none', color: 'text.secondary', mb: 2 }}
             >
-              Back to Dashboard
+              Cancel
             </Button>
+            <Typography variant="h4" sx={{ fontWeight: 600 }}>
+              New meeting
+            </Typography>
           </Box>
 
           <Stepper activeStep={activeStep} sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
