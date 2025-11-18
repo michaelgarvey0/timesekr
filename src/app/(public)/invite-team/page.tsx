@@ -28,13 +28,9 @@ export default function InviteTeamPage() {
         />
       </Box>
 
-      <Box sx={{ maxWidth: 600, width: '100%' }}>
-        <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, textAlign: 'center' }}>
-          Invite your team
-        </Typography>
-
+      <Box sx={{ maxWidth: 320, width: '100%' }}>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-          Share access with your team members to collaborate on scheduling
+          Invite your team
         </Typography>
 
         <ContactsConnectionForm
