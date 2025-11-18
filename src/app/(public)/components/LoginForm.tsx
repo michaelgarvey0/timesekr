@@ -64,11 +64,6 @@ export default function LoginForm({ email, setEmail, onContinue }: LoginFormProp
         variant="outlined"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            height: '42px',
-          },
-        }}
       />
 
       <Button

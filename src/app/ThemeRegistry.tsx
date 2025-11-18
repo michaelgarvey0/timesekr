@@ -134,6 +134,7 @@ const theme = createTheme({
         root: {
           borderRadius: border.radius.md,
           textTransform: 'none',
+          minHeight: '42px',
         },
       },
     },
@@ -142,7 +143,15 @@ const theme = createTheme({
         root: {
           '& .MuiOutlinedInput-root': {
             borderRadius: border.radius.md,
+            minHeight: '42px',
           },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          minHeight: '42px',
         },
       },
     },
