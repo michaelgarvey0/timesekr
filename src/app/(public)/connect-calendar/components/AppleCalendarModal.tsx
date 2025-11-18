@@ -29,7 +29,7 @@ export default function AppleCalendarModal({
       }
     >
       {/* Header Section */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 6 }}>
         <img
           src={providerIcon}
           alt="Apple Calendar"
@@ -49,7 +49,7 @@ export default function AppleCalendarModal({
       </Box>
 
       {/* QR Code Section */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 6 }}>
         <Box
           sx={{
             width: 200,
