@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, Stack, Typography, IconButton, List, ListItem, ListItemText, ListItemIcon } from '@mui/material';
+import { Box, Button, Stack, Typography, IconButton } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import AppleIcon from '@mui/icons-material/Apple';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -45,15 +45,7 @@ export default function CalendarConnectionForm({
   return (
     <Box>
       {/* Calendar provider buttons */}
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 2.5,
-          width: '100%',
-          mb: connectedCalendars.length > 0 ? 4 : 5,
-        }}
-      >
+      <Stack spacing={2} sx={{ mb: connectedCalendars.length > 0 ? 3 : 4 }}>
         {calendarProviders.map((provider) => {
           const Icon = provider.icon;
 
@@ -62,142 +54,85 @@ export default function CalendarConnectionForm({
               key={provider.id}
               variant="outlined"
               onClick={() => onConnect(provider.id)}
+              startIcon={<Icon />}
+              fullWidth
               sx={{
-                width: '100%',
-                height: 140,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                p: 3,
+                justifyContent: 'flex-start',
+                py: 1.5,
+                px: 2,
                 textTransform: 'none',
-                borderColor: 'grey.300',
-                bgcolor: 'white',
-                boxShadow: 1,
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  bgcolor: 'grey.50',
-                  borderColor: 'grey.400',
-                  transform: 'translateY(-2px)',
-                  boxShadow: 2,
-                }
               }}
             >
-              <Icon sx={{
-                fontSize: 44,
-                color: 'text.secondary',
-              }} />
-              <Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 600,
-                    color: 'text.primary',
-                    textAlign: 'center',
-                    fontSize: '0.875rem',
-                    lineHeight: 1.3,
-                    mb: 0.5,
-                  }}
-                >
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', ml: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {provider.name}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                    textAlign: 'center',
-                    fontSize: '0.75rem',
-                    display: 'block',
-                  }}
-                >
+                <Typography variant="caption" color="text.secondary">
                   {provider.description}
                 </Typography>
               </Box>
             </Button>
           );
         })}
-      </Box>
+      </Stack>
 
       {/* Connected calendars list */}
       {connectedCalendars.length > 0 && (
-        <Box
-          sx={{
-            mb: 4,
-            bgcolor: 'white',
-            border: '1px solid',
-            borderColor: 'grey.200',
-            overflow: 'hidden',
-          }}
-        >
-          <Box sx={{ px: 3, py: 2, bgcolor: 'grey.50', borderBottom: '1px solid', borderColor: 'grey.200' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-              Connected Accounts ({connectedCalendars.length})
-            </Typography>
-          </Box>
-          <List sx={{ py: 0 }}>
-            {connectedCalendars.map((calendar, index) => {
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
+            Connected accounts ({connectedCalendars.length})
+          </Typography>
+          <Stack spacing={1}>
+            {connectedCalendars.map((calendar) => {
               const Icon = getProviderIcon(calendar.provider);
               const providerName = getProviderName(calendar.provider);
 
               return (
-                <ListItem
+                <Box
                   key={calendar.id}
                   sx={{
-                    borderBottom: index < connectedCalendars.length - 1 ? '1px solid' : 'none',
-                    borderColor: 'grey.100',
-                    py: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    p: 1.5,
+                    border: '1px solid',
+                    borderColor: 'grey.300',
+                    borderRadius: 1.5,
+                    bgcolor: 'background.paper',
                   }}
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      onClick={() => onRemove(calendar.id)}
-                      sx={{
-                        '&:hover': {
-                          bgcolor: 'error.50',
-                          color: 'error.main',
-                        }
-                      }}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  }
                 >
-                  <ListItemIcon sx={{ minWidth: 40 }}>
-                    <Icon sx={{ color: 'primary.main', fontSize: 28 }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={calendar.email || `${providerName} Calendar`}
-                    secondary={providerName}
-                    primaryTypographyProps={{
-                      fontWeight: 500,
-                      fontSize: '0.95rem',
+                  <Icon sx={{ color: 'primary.main', fontSize: 24, mr: 1.5 }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {calendar.email || `${providerName} Calendar`}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {providerName}
+                    </Typography>
+                  </Box>
+                  <IconButton
+                    size="small"
+                    onClick={() => onRemove(calendar.id)}
+                    sx={{
+                      '&:hover': {
+                        color: 'error.main',
+                      }
                     }}
-                    secondaryTypographyProps={{
-                      fontSize: '0.8rem',
-                    }}
-                  />
-                </ListItem>
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </Box>
               );
             })}
-          </List>
+          </Stack>
         </Box>
       )}
 
-      <Stack spacing={2} alignItems="center">
+      <Stack spacing={2}>
         {connectedCalendars.length > 0 && (
           <Button
             variant="contained"
             size="large"
-            sx={{
-              textTransform: 'none',
-              px: 6,
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 600,
-              boxShadow: 2,
-              '&:hover': {
-                boxShadow: 3,
-              }
-            }}
+            fullWidth
             onClick={onSkip}
           >
             Continue
@@ -206,16 +141,7 @@ export default function CalendarConnectionForm({
 
         <Button
           variant="text"
-          sx={{
-            textTransform: 'none',
-            color: 'text.secondary',
-            fontSize: '0.95rem',
-            fontWeight: 500,
-            '&:hover': {
-              bgcolor: 'transparent',
-              color: 'text.primary',
-            }
-          }}
+          fullWidth
           onClick={onSkip}
         >
           I'll do this later

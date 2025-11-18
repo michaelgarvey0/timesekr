@@ -1,7 +1,6 @@
 'use client';
 
-import { Box, Typography, IconButton } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Box, Typography } from '@mui/material';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -38,13 +37,6 @@ export default function ConnectCalendarPage() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', p: 4, position: 'relative' }}>
-      <IconButton
-        onClick={() => router.back()}
-        sx={{ position: 'absolute', top: 16, left: 16 }}
-      >
-        <ArrowBackIcon />
-      </IconButton>
-
       <Box sx={{ maxWidth: 320, width: '100%' }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
           <Image
