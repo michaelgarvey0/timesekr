@@ -49,7 +49,7 @@ export default function CalendarConnectionForm({
         icon={<AutoAwesomeIcon />}
         severity="info"
         sx={{
-          mb: 4,
+          mb: 0,
           bgcolor: 'background.accentLight',
           borderColor: 'transparent',
           alignItems: 'center',
@@ -67,7 +67,8 @@ export default function CalendarConnectionForm({
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
           gap: 1.5,
-          my: 4,
+          mt: 6,
+          mb: 6,
         }}
       >
         {calendarProviders.map((provider) => {
