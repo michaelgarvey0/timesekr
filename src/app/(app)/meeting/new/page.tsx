@@ -725,7 +725,7 @@ export default function CreateMeetingPage() {
       <Box>
         <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, py: 4 }}>
           {/* Header with Cancel button */}
-          <Box sx={{ maxWidth: 800, mx: 'auto', mb: 4, position: 'relative' }}>
+          <Box sx={{ maxWidth: 800, mx: 'auto', mb: 6, position: 'relative' }}>
             <Button
               onClick={() => router.push('/dashboard')}
               sx={{
