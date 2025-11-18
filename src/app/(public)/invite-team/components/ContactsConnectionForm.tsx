@@ -78,8 +78,7 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Team members"
-              placeholder="Type or paste here"
+              placeholder="colleague@company.com, teammate@company.com..."
               autoComplete="off"
               inputProps={{
                 ...params.inputProps,
