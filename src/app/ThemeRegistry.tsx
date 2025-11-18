@@ -169,6 +169,10 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: border.radius.md,
+          border: '1px solid',
+          borderColor: primitives.gray[300],
+          backgroundColor: '#ffffff',
+          transition: 'all 0.2s ease-in-out',
         },
       },
     },
