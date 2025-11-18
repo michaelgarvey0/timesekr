@@ -81,7 +81,7 @@ export default function CalendarSelectionModal({
         </Typography>
       </Box>
 
-      <Stack spacing={1}>
+      <Stack divider={<Divider />}>
         {calendars.map(calendar => (
           <FormControlLabel
             key={calendar.id}
@@ -92,6 +92,7 @@ export default function CalendarSelectionModal({
               />
             }
             label={calendar.name}
+            sx={{ py: 1, my: 0 }}
           />
         ))}
       </Stack>
