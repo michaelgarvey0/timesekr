@@ -19,10 +19,10 @@ export default function AppleCalendarModal({
     <Modal
       open={open}
       onClose={onClose}
-      customMaxWidth={1200}
+      customMaxWidth={650}
       actions={
         <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-          <Button variant="outlined" onClick={onClose}>
+          <Button variant="text" onClick={onClose}>
             Close
           </Button>
         </Box>
