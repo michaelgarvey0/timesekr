@@ -103,7 +103,7 @@ export default function CalendarConnectionForm({
         </Box>
       )}
 
-      <Stack spacing={2}>
+      <Stack spacing={2} alignItems="center">
         {connectedCalendars.length > 0 && (
           <Button
             variant="contained"
@@ -117,7 +117,6 @@ export default function CalendarConnectionForm({
 
         <Button
           variant="text"
-          fullWidth
           onClick={onSkip}
         >
           I'll do this later
