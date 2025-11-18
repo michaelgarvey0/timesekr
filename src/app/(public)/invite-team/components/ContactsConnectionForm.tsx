@@ -1,9 +1,10 @@
 'use client';
 
-import { Stack, Box, Typography, Button, Autocomplete, TextField } from '@mui/material';
+import { Stack, Box, Typography, Button } from '@mui/material';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { useState, useRef } from 'react';
+import MultiEmailInput from '@/components/MultiEmailInput';
 
 interface ContactsConnectionFormProps {
   onConnect: () => void;
@@ -52,51 +53,9 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
           </Typography>
         </Box>
 
-        <Autocomplete
-          multiple
-          freeSolo
-          options={[]}
+        <MultiEmailInput
           value={invitedEmails}
-          onChange={(_, newValue) => {
-            const validEmails = newValue.filter(email =>
-              typeof email === 'string' && email.includes('@')
-            );
-            setInvitedEmails(validEmails);
-          }}
-          onPaste={(e) => {
-            const pastedText = e.clipboardData.getData('text');
-            const emails = pastedText
-              .split(/[\n,;\s\t]+/)
-              .map(email => email.trim())
-              .filter(email => email.includes('@') && email.length > 0);
-
-            if (emails.length > 1) {
-              e.preventDefault();
-              setInvitedEmails([...new Set([...invitedEmails, ...emails])]);
-            }
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              placeholder="colleague@company.com, teammate@company.com..."
-              autoComplete="off"
-              inputProps={{
-                ...params.inputProps,
-                autoComplete: 'off',
-                readOnly: true,
-                onFocus: (e) => {
-                  e.target.removeAttribute('readonly');
-                },
-              }}
-            />
-          )}
-          sx={{
-            '& .MuiAutocomplete-inputRoot': {
-              minHeight: 120,
-              alignItems: 'flex-start',
-              paddingTop: 1,
-            },
-          }}
+          onChange={setInvitedEmails}
         />
 
         <Button
