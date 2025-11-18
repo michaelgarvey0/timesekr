@@ -1,6 +1,6 @@
 'use client';
 
-import { Stack, Box, Typography, Button, TextField, Chip } from '@mui/material';
+import { Stack, Box, Typography, Button, Autocomplete, TextField } from '@mui/material';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import SendIcon from '@mui/icons-material/Send';
 import { useState } from 'react';
@@ -11,25 +11,19 @@ interface ContactsConnectionFormProps {
 }
 
 export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsConnectionFormProps) {
-  const [email, setEmail] = useState('');
   const [invitedEmails, setInvitedEmails] = useState<string[]>([]);
 
-  const handleAddEmail = () => {
-    if (email && email.includes('@')) {
-      setInvitedEmails([...invitedEmails, email]);
-      setEmail('');
-    }
-  };
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
 
-  const handleRemoveEmail = (emailToRemove: string) => {
-    setInvitedEmails(invitedEmails.filter(e => e !== emailToRemove));
-  };
+    // Split by common delimiters: newline, comma, semicolon, space
+    const emails = pastedText
+      .split(/[\n,;\s]+/)
+      .map(email => email.trim())
+      .filter(email => email.includes('@'));
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddEmail();
-    }
+    setInvitedEmails([...new Set([...invitedEmails, ...emails])]);
   };
 
   return (
@@ -41,41 +35,34 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
         </Typography>
       </Box>
 
-      <TextField
-        fullWidth
-        size="small"
-        label="Email address"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        onKeyPress={handleKeyPress}
-        placeholder="colleague@company.com"
+      <Autocomplete
+        multiple
+        freeSolo
+        options={[]}
+        value={invitedEmails}
+        onChange={(_, newValue) => {
+          // Filter out invalid emails
+          const validEmails = newValue.filter(email =>
+            typeof email === 'string' && email.includes('@')
+          );
+          setInvitedEmails(validEmails);
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Email addresses"
+            placeholder="Type email and press Enter"
+            onPaste={handlePaste}
+          />
+        )}
+        ChipProps={{
+          size: 'small',
+        }}
       />
 
-      <Button
-        variant="outlined"
-        size="large"
-        startIcon={<SendIcon />}
-        fullWidth
-        sx={{ textTransform: 'none' }}
-        onClick={handleAddEmail}
-        disabled={!email || !email.includes('@')}
-      >
-        Add Email
-      </Button>
-
-      {invitedEmails.length > 0 && (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, py: 1 }}>
-          {invitedEmails.map((invitedEmail) => (
-            <Chip
-              key={invitedEmail}
-              label={invitedEmail}
-              onDelete={() => handleRemoveEmail(invitedEmail)}
-              size="small"
-            />
-          ))}
-        </Box>
-      )}
+      <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', px: 2 }}>
+        Press Enter after each email, or paste multiple emails at once
+      </Typography>
 
       {invitedEmails.length > 0 && (
         <Button
@@ -85,13 +72,9 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
           sx={{ textTransform: 'none' }}
           onClick={onConnect}
         >
-          Send Invites
+          Send {invitedEmails.length} Invite{invitedEmails.length !== 1 ? 's' : ''}
         </Button>
       )}
-
-      <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', px: 2 }}>
-        Invites will be sent via email to join your team
-      </Typography>
 
       <Button
         variant="text"
