@@ -141,7 +141,7 @@ const theme = createTheme({
           '&:hover': {
             transform: 'translateY(-2px)',
             boxShadow: tokenShadows.lg,
-            backgroundColor: 'transparent',
+            backgroundColor: '#ffffff',
           },
         },
       },

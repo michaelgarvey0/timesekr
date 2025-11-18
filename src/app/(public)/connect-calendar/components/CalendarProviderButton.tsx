@@ -38,14 +38,9 @@ export default function CalendarProviderButton({
         alt={name}
         style={{ objectFit: 'contain' }}
       />
-      <Box>
-        <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem', mb: 0.5 }}>
-          {name}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-          {description}
-        </Typography>
-      </Box>
+      <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+        {name}
+      </Typography>
     </Button>
   );
 }
