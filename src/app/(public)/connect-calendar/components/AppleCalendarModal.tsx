@@ -70,25 +70,23 @@ export default function AppleCalendarModal({
       </Box>
 
       {/* Two Column Layout */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, alignItems: 'stretch' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 4, alignItems: 'stretch' }}>
         {/* Left Column - iPhone Mockup */}
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Box
-            sx={{
-              width: 200,
-              bgcolor: 'grey.100',
-              borderRadius: `${border.radius.lg}px`,
-              border: '1px solid',
-              borderColor: 'grey.300',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              iPhone Mockup
-            </Typography>
-          </Box>
+        <Box
+          sx={{
+            width: 200,
+            bgcolor: 'grey.100',
+            borderRadius: `${border.radius.lg}px`,
+            border: '1px solid',
+            borderColor: 'grey.300',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            iPhone Mockup
+          </Typography>
         </Box>
 
         {/* Right Column - Steps */}
