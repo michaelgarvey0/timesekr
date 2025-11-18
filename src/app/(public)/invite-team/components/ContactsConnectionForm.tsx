@@ -78,12 +78,16 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Email addresses"
-              placeholder="Type or paste emails here"
-              autoComplete="new-password"
+              label="Team members"
+              placeholder="Type or paste here"
+              autoComplete="off"
               inputProps={{
                 ...params.inputProps,
-                autoComplete: 'new-password',
+                autoComplete: 'off',
+                readOnly: true,
+                onFocus: (e) => {
+                  e.target.removeAttribute('readonly');
+                },
               }}
             />
           )}
