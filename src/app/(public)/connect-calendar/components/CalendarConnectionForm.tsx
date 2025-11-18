@@ -71,7 +71,7 @@ export default function CalendarConnectionForm({
         sx={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 2,
+          gap: 1.5,
           mb: connectedCalendars.length > 0 ? 3 : 4,
         }}
       >
@@ -87,11 +87,12 @@ export default function CalendarConnectionForm({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 1,
-                py: 3,
-                px: 2,
+                p: 3,
+                borderColor: 'grey.300',
+                boxShadow: 2,
               }}
             >
-              <Icon sx={{ fontSize: 40, color: provider.color }} />
+              <Icon sx={{ fontSize: 72, color: provider.color }} />
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem', mb: 0.5 }}>
                   {provider.name}
