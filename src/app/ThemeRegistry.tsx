@@ -139,8 +139,6 @@ const theme = createTheme({
         },
         outlined: {
           '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: tokenShadows.lg,
             backgroundColor: '#ffffff',
           },
         },
@@ -174,8 +172,7 @@ const theme = createTheme({
           borderColor: primitives.gray[300],
           transition: 'all 0.2s ease-in-out',
           '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: tokenShadows.lg,
+            backgroundColor: primitives.gray[50],
           },
         },
       },
