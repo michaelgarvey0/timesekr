@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CalendarConnectionForm from './components/CalendarConnectionForm';
+import CalendarSelectionModal from './components/CalendarSelectionModal';
 
 interface ConnectedCalendar {
   provider: string;
@@ -12,19 +13,64 @@ interface ConnectedCalendar {
   id: string;
 }
 
+interface ModalState {
+  open: boolean;
+  provider: string;
+  providerName: string;
+  providerIcon: string;
+}
+
+const calendarProviders = [
+  { id: 'google', name: 'Google Calendar', icon: '/images/icons/google.svg' },
+  { id: 'apple', name: 'Apple Calendar', icon: '/images/icons/apple.svg' },
+  { id: 'microsoft', name: 'Microsoft Calendar', icon: '/images/icons/microsoft.svg' },
+];
+
+// Mock calendar data - in real app this would come from API after OAuth
+const mockCalendars = [
+  { id: 'cal-1', name: 'Work Calendar' },
+  { id: 'cal-2', name: 'Personal Calendar' },
+  { id: 'cal-3', name: 'Team Events' },
+];
+
 export default function ConnectCalendarPage() {
   const router = useRouter();
   const [connectedCalendars, setConnectedCalendars] = useState<ConnectedCalendar[]>([]);
+  const [modalState, setModalState] = useState<ModalState>({
+    open: false,
+    provider: '',
+    providerName: '',
+    providerIcon: '',
+  });
 
   const handleConnectCalendar = (provider: string) => {
-    // Simulate connecting a calendar account
-    const mockEmail = provider === 'ics' ? undefined : `user@${provider}.com`;
+    // In real app, this would trigger OAuth flow
+    // For now, just open the modal
+    const providerData = calendarProviders.find(p => p.id === provider);
+    if (providerData) {
+      setModalState({
+        open: true,
+        provider: provider,
+        providerName: providerData.name,
+        providerIcon: providerData.icon,
+      });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalState(prev => ({ ...prev, open: false }));
+  };
+
+  const handleAuthorize = (selectedCalendarIds: string[]) => {
+    // Simulate connecting calendars
+    const mockEmail = `user@${modalState.provider}.com`;
     const newCalendar: ConnectedCalendar = {
-      provider,
+      provider: modalState.provider,
       email: mockEmail,
-      id: `${provider}-${Date.now()}`,
+      id: `${modalState.provider}-${Date.now()}`,
     };
     setConnectedCalendars([...connectedCalendars, newCalendar]);
+    handleCloseModal();
   };
 
   const handleRemoveCalendar = (id: string) => {
@@ -63,6 +109,16 @@ export default function ConnectCalendarPage() {
           onRemove={handleRemoveCalendar}
         />
       </Box>
+
+      <CalendarSelectionModal
+        open={modalState.open}
+        onClose={handleCloseModal}
+        providerName={modalState.providerName}
+        providerIcon={modalState.providerIcon}
+        email={`user@${modalState.provider}.com`}
+        calendars={mockCalendars}
+        onAuthorize={handleAuthorize}
+      />
     </Box>
   );
 }
