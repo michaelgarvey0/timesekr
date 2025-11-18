@@ -2,8 +2,8 @@
 
 import { Stack, Box, Typography, Button, Autocomplete, TextField } from '@mui/material';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import SendIcon from '@mui/icons-material/Send';
-import { useState } from 'react';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import { useState, useRef } from 'react';
 
 interface ContactsConnectionFormProps {
   onConnect: () => void;
@@ -12,78 +12,142 @@ interface ContactsConnectionFormProps {
 
 export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsConnectionFormProps) {
   const [invitedEmails, setInvitedEmails] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
     const pastedText = e.clipboardData.getData('text');
 
-    // Split by common delimiters: newline, comma, semicolon, space
+    // Split by common delimiters: newline, comma, semicolon, space, tab
     const emails = pastedText
-      .split(/[\n,;\s]+/)
+      .split(/[\n,;\s\t]+/)
       .map(email => email.trim())
-      .filter(email => email.includes('@'));
+      .filter(email => email.includes('@') && email.length > 0);
 
-    setInvitedEmails([...new Set([...invitedEmails, ...emails])]);
+    if (emails.length > 0) {
+      e.preventDefault();
+      setInvitedEmails([...new Set([...invitedEmails, ...emails])]);
+      setInputValue('');
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+
+      // Parse CSV - handle both comma and newline separated
+      const emails = text
+        .split(/[\n,;\s\t]+/)
+        .map(email => email.trim())
+        .filter(email => email.includes('@') && email.length > 0);
+
+      setInvitedEmails([...new Set([...invitedEmails, ...emails])]);
+    };
+    reader.readAsText(file);
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
-    <Stack spacing={2} alignItems="stretch">
-      <Box sx={{ textAlign: 'center', mb: 1 }}>
-        <GroupAddIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-        <Typography variant="body2" color="text.secondary">
-          Invite your team members to collaborate on meetings
-        </Typography>
-      </Box>
-
-      <Autocomplete
-        multiple
-        freeSolo
-        options={[]}
-        value={invitedEmails}
-        onChange={(_, newValue) => {
-          // Filter out invalid emails
-          const validEmails = newValue.filter(email =>
-            typeof email === 'string' && email.includes('@')
-          );
-          setInvitedEmails(validEmails);
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Email addresses"
-            placeholder="Type email and press Enter"
-            onPaste={handlePaste}
-          />
-        )}
-        ChipProps={{
-          size: 'small',
-        }}
-      />
-
-      <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', px: 2 }}>
-        Press Enter after each email, or paste multiple emails at once
+    <Box sx={{ maxWidth: invitedEmails.length > 0 ? 500 : 320, width: '100%', transition: 'max-width 0.3s ease' }}>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
+        Invite your team
       </Typography>
 
-      {invitedEmails.length > 0 && (
-        <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          sx={{ textTransform: 'none' }}
-          onClick={onConnect}
-        >
-          Send {invitedEmails.length} Invite{invitedEmails.length !== 1 ? 's' : ''}
-        </Button>
-      )}
+      <Stack spacing={2} alignItems="stretch">
+        <Box sx={{ textAlign: 'center', mb: 1 }}>
+          <GroupAddIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+          <Typography variant="body2" color="text.secondary">
+            Invite your team members to collaborate on meetings
+          </Typography>
+        </Box>
 
-      <Button
-        variant="text"
-        fullWidth
-        sx={{ textTransform: 'none', mt: 1 }}
-        onClick={onSkip}
-      >
-        I'll do this later
-      </Button>
-    </Stack>
+        <Autocomplete
+          multiple
+          freeSolo
+          options={[]}
+          value={invitedEmails}
+          inputValue={inputValue}
+          onInputChange={(_, newInputValue, reason) => {
+            // Only update input value if user is typing (not when adding chips)
+            if (reason === 'input') {
+              setInputValue(newInputValue);
+            } else if (reason === 'reset') {
+              setInputValue('');
+            }
+          }}
+          onChange={(_, newValue) => {
+            // Filter out invalid emails
+            const validEmails = newValue.filter(email =>
+              typeof email === 'string' && email.includes('@')
+            );
+            setInvitedEmails(validEmails);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Email addresses"
+              placeholder="Type email and press Enter"
+              onPaste={handlePaste}
+            />
+          )}
+          ChipProps={{
+            size: 'small',
+          }}
+        />
+
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<UploadFileIcon />}
+            fullWidth
+            sx={{ textTransform: 'none' }}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Upload CSV
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.txt"
+            style={{ display: 'none' }}
+            onChange={handleFileUpload}
+          />
+        </Box>
+
+        <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', px: 2 }}>
+          Type emails, paste multiple at once, or upload a CSV file
+        </Typography>
+
+        {invitedEmails.length > 0 && (
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            sx={{ textTransform: 'none' }}
+            onClick={onConnect}
+          >
+            Send {invitedEmails.length} Invite{invitedEmails.length !== 1 ? 's' : ''}
+          </Button>
+        )}
+
+        <Button
+          variant="text"
+          fullWidth
+          sx={{ textTransform: 'none', mt: 1 }}
+          onClick={onSkip}
+        >
+          I'll do this later
+        </Button>
+      </Stack>
+    </Box>
   );
 }

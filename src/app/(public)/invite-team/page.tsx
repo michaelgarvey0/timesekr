@@ -28,16 +28,10 @@ export default function InviteTeamPage() {
         />
       </Box>
 
-      <Box sx={{ maxWidth: 320, width: '100%' }}>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-          Invite your team
-        </Typography>
-
-        <ContactsConnectionForm
-          onConnect={handleConnect}
-          onSkip={handleSkip}
-        />
-      </Box>
+      <ContactsConnectionForm
+        onConnect={handleConnect}
+        onSkip={handleSkip}
+      />
     </Box>
   );
 }
