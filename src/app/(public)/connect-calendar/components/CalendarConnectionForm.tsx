@@ -118,6 +118,7 @@ export default function CalendarConnectionForm({
         <Button
           variant="text"
           onClick={onSkip}
+          sx={{ px: 2 }}
         >
           I'll do this later
         </Button>
