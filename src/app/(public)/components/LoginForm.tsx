@@ -74,7 +74,7 @@ export default function LoginForm({ email, setEmail, onContinue }: LoginFormProp
         sx={{ textTransform: 'none' }}
         onClick={onContinue}
       >
-        Continue with Email
+        Continue with email
       </Button>
     </Stack>
   );

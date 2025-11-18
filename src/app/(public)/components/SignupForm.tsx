@@ -69,7 +69,7 @@ export default function SignupForm({
         sx={{ textTransform: 'none', mt: 1 }}
         onClick={onCreateAccount}
       >
-        Create Account
+        Create account
       </Button>
     </Stack>
   );
