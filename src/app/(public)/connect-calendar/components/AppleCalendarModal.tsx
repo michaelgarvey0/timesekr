@@ -70,7 +70,7 @@ export default function AppleCalendarModal({
       </Box>
 
       {/* Two Column Layout */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 4, alignItems: 'stretch' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 6, alignItems: 'stretch' }}>
         {/* Left Column - iPhone Mockup */}
         <Box
           sx={{
