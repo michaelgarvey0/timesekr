@@ -725,14 +725,21 @@ export default function CreateMeetingPage() {
       <Box>
         <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, py: 4 }}>
           {/* Header with Cancel button */}
-          <Box sx={{ maxWidth: 800, mx: 'auto', mb: 4 }}>
+          <Box sx={{ maxWidth: 800, mx: 'auto', mb: 4, position: 'relative' }}>
             <Button
               onClick={() => router.push('/dashboard')}
-              sx={{ textTransform: 'none', color: 'text.secondary', mb: 2 }}
+              sx={{
+                textTransform: 'none',
+                color: 'text.secondary',
+                position: 'absolute',
+                left: 0,
+                top: '50%',
+                transform: 'translateY(-50%)'
+              }}
             >
               Cancel
             </Button>
-            <Typography variant="h4" sx={{ fontWeight: 600 }}>
+            <Typography variant="h4" sx={{ fontWeight: 600, textAlign: 'center' }}>
               New meeting
             </Typography>
           </Box>
