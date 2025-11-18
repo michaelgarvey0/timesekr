@@ -1,10 +1,9 @@
 'use client';
 
-import { Box, Button, Stack, Typography, IconButton, Alert } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { Box, Button, Stack, Typography, Alert } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import Image from 'next/image';
-import { border } from '@/theme/tokens';
+import CalendarProviderButton from './CalendarProviderButton';
+import ConnectedCalendarItem from './ConnectedCalendarItem';
 
 interface ConnectedCalendar {
   provider: string;
@@ -71,39 +70,16 @@ export default function CalendarConnectionForm({
           mb: 6,
         }}
       >
-        {calendarProviders.map((provider) => {
-          return (
-            <Button
-              key={provider.id}
-              variant="outlined"
-              onClick={() => onConnect(provider.id)}
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1,
-                p: 3,
-                borderColor: 'grey.300',
-                boxShadow: 2,
-              }}
-            >
-              <Image
-                src={provider.icon}
-                width={72}
-                height={72}
-                alt={provider.name}
-                style={{ objectFit: 'contain' }}
-              />
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem', mb: 0.5 }}>
-                  {provider.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                  {provider.description}
-                </Typography>
-              </Box>
-            </Button>
-          );
-        })}
+        {calendarProviders.map((provider) => (
+          <CalendarProviderButton
+            key={provider.id}
+            id={provider.id}
+            name={provider.name}
+            description={provider.description}
+            icon={provider.icon}
+            onClick={onConnect}
+          />
+        ))}
       </Box>
 
       {/* Connected calendars list */}
@@ -113,53 +89,16 @@ export default function CalendarConnectionForm({
             Connected accounts ({connectedCalendars.length})
           </Typography>
           <Stack spacing={1}>
-            {connectedCalendars.map((calendar) => {
-              const providerIcon = getProviderIcon(calendar.provider);
-              const providerName = getProviderName(calendar.provider);
-
-              return (
-                <Box
-                  key={calendar.id}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    p: 1.5,
-                    border: '1px solid',
-                    borderColor: 'grey.300',
-                    borderRadius: `${border.radius.md}px`,
-                    bgcolor: 'background.paper',
-                  }}
-                >
-                  <img
-                    src={providerIcon}
-                    alt={providerName}
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      objectFit: 'contain',
-                      marginRight: '12px',
-                      imageRendering: 'crisp-edges'
-                    }}
-                  />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {calendar.email || `${providerName}`}
-                    </Typography>
-                  </Box>
-                  <IconButton
-                    size="small"
-                    onClick={() => onRemove(calendar.id)}
-                    sx={{
-                      '&:hover': {
-                        color: 'error.main',
-                      }
-                    }}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              );
-            })}
+            {connectedCalendars.map((calendar) => (
+              <ConnectedCalendarItem
+                key={calendar.id}
+                id={calendar.id}
+                providerIcon={getProviderIcon(calendar.provider)}
+                providerName={getProviderName(calendar.provider)}
+                email={calendar.email}
+                onRemove={onRemove}
+              />
+            ))}
           </Stack>
         </Box>
       )}
