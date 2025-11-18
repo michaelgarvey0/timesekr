@@ -2,7 +2,7 @@
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import { semantic, background, text, typography, border, primitives, shadows as tokenShadows } from '@/theme/tokens';
 
 const theme = createTheme({
