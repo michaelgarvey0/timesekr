@@ -135,6 +135,13 @@ const theme = createTheme({
           borderRadius: border.radius.md,
           textTransform: 'none',
           minHeight: '42px',
+          transition: 'all 0.2s ease-in-out',
+        },
+        outlined: {
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: tokenShadows.lg,
+          },
         },
       },
     },
@@ -164,6 +171,11 @@ const theme = createTheme({
           borderRadius: border.radius.md,
           border: '1px solid',
           borderColor: primitives.gray[300],
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: tokenShadows.lg,
+          },
         },
       },
     },
