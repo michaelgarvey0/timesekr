@@ -30,7 +30,7 @@ export default function Modal({
       PaperProps={{
         sx: {
           borderRadius: `${border.radius.md}px`,
-          ...(customMaxWidth && { maxWidth: `${customMaxWidth}px`, width: '100%' }),
+          ...(customMaxWidth && { maxWidth: `${customMaxWidth}px` }),
         }
       }}
     >
