@@ -48,11 +48,11 @@ export default function ConnectCalendarPage() {
       </Box>
 
       <Box sx={{ maxWidth: 600, width: '100%' }}>
-        <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
+        <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, textAlign: 'center' }}>
           Welcome! Let's connect your calendars
         </Typography>
 
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
           Connect your calendars so we can instantly find meeting times
         </Typography>
 
