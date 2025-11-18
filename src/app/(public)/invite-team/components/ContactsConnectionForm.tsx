@@ -80,7 +80,11 @@ export default function ContactsConnectionForm({ onConnect, onSkip }: ContactsCo
               {...params}
               label="Email addresses"
               placeholder="Type or paste emails here"
-              autoComplete="off"
+              autoComplete="new-password"
+              inputProps={{
+                ...params.inputProps,
+                autoComplete: 'new-password',
+              }}
             />
           )}
           sx={{
