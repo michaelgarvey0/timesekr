@@ -2,7 +2,6 @@
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import { semantic, background, text, typography, border, primitives, shadows as tokenShadows } from '@/theme/tokens';
 
 const theme = createTheme({
@@ -202,11 +201,9 @@ export default function ThemeRegistry({
   children: React.ReactNode;
 }) {
   return (
-    <AppRouterCacheProvider>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
-    </AppRouterCacheProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
   );
 }
