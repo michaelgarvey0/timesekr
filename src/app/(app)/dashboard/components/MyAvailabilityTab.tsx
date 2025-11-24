@@ -9,12 +9,15 @@ import { useState } from 'react';
 export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boolean }) {
   const [availabilityBlocks, setAvailabilityBlocks] = useState<any[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<{ day: number; hour: number } | null>(null);
+  const [dragStart, setDragStart] = useState<{ day: number; slot: number } | null>(null);
   const [selectedBlockType, setSelectedBlockType] = useState<'busy' | 'available'>('busy');
   const [activeTab, setActiveTab] = useState(0);
   const [calendarFilters, setCalendarFilters] = useState({
-    google: true,
-    microsoft: true
+    google1: true,
+    google2: true,
+    microsoft: true,
+    apple: true,
+    outlook: true
   });
 
   return (
@@ -47,8 +50,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                     <FormControlLabel
                       control={
                         <Checkbox
-                          checked={calendarFilters.google}
-                          onChange={(e) => setCalendarFilters({ ...calendarFilters, google: e.target.checked })}
+                          checked={calendarFilters.google1}
+                          onChange={(e) => setCalendarFilters({ ...calendarFilters, google1: e.target.checked })}
                           size="small"
                           sx={{
                             color: '#4285F4',
@@ -62,6 +65,27 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#4285F4' }} />
                           <Typography variant="body2">work@company.com</Typography>
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={calendarFilters.google2}
+                          onChange={(e) => setCalendarFilters({ ...calendarFilters, google2: e.target.checked })}
+                          size="small"
+                          sx={{
+                            color: '#0F9D58',
+                            '&.Mui-checked': {
+                              color: '#0F9D58',
+                            },
+                          }}
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#0F9D58' }} />
+                          <Typography variant="body2">personal@gmail.com</Typography>
                         </Box>
                       }
                     />
@@ -82,7 +106,49 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                       label={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#EA4335' }} />
-                          <Typography variant="body2">personal@outlook.com</Typography>
+                          <Typography variant="body2">corp@microsoft.com</Typography>
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={calendarFilters.apple}
+                          onChange={(e) => setCalendarFilters({ ...calendarFilters, apple: e.target.checked })}
+                          size="small"
+                          sx={{
+                            color: '#F4B400',
+                            '&.Mui-checked': {
+                              color: '#F4B400',
+                            },
+                          }}
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#F4B400' }} />
+                          <Typography variant="body2">me@icloud.com</Typography>
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={calendarFilters.outlook}
+                          onChange={(e) => setCalendarFilters({ ...calendarFilters, outlook: e.target.checked })}
+                          size="small"
+                          sx={{
+                            color: '#AB47BC',
+                            '&.Mui-checked': {
+                              color: '#AB47BC',
+                            },
+                          }}
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#AB47BC' }} />
+                          <Typography variant="body2">family@outlook.com</Typography>
                         </Box>
                       }
                     />
@@ -170,13 +236,28 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
           <Box sx={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', maxHeight: 600, overflow: 'auto' }}>
             {/* Hours column */}
             <Box>
-              {Array.from({ length: 12 }, (_, i) => {
-                const hour = i + 7; // Start at 7 AM
+              {Array.from({ length: 48 }, (_, i) => {
+                const slotStartHour = 7 + Math.floor(i / 4); // Start at 7 AM, 4 slots per hour
+                const slotMinutes = (i % 4) * 15;
+                const isHourMark = slotMinutes === 0;
                 return (
-                  <Box key={hour} sx={{ height: 60, display: 'flex', alignItems: 'start', justifyContent: 'center', pt: 0.5, borderBottom: '1px solid', borderColor: 'grey.100' }}>
-                    <Typography variant="caption" color="text.secondary">
-                      {hour === 12 ? '12 PM' : hour < 12 ? `${hour} AM` : `${hour - 12} PM`}
-                    </Typography>
+                  <Box
+                    key={i}
+                    sx={{
+                      height: 15,
+                      display: 'flex',
+                      alignItems: 'start',
+                      justifyContent: 'center',
+                      pt: 0.25,
+                      borderBottom: isHourMark ? '1px solid' : '1px solid',
+                      borderColor: isHourMark ? 'grey.300' : 'grey.100'
+                    }}
+                  >
+                    {isHourMark && (
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                        {slotStartHour === 12 ? '12 PM' : slotStartHour < 12 ? `${slotStartHour} AM` : `${slotStartHour - 12} PM`}
+                      </Typography>
+                    )}
                   </Box>
                 );
               })}
@@ -185,16 +266,16 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
             {/* Day columns */}
             {[0, 1, 2, 3, 4, 5, 6].map((day) => (
               <Box key={day} sx={{ borderLeft: '1px solid', borderColor: 'grey.200', position: 'relative' }}>
-                {/* Hour slots */}
-                {Array.from({ length: 12 }, (_, i) => {
-                  const hour = i + 7; // Start at 7 AM
+                {/* 15-minute slots */}
+                {Array.from({ length: 48 }, (_, i) => {
+                  const isHourMark = (i % 4) === 0;
                   return (
                     <Box
-                      key={hour}
+                      key={i}
                       sx={{
-                        height: 60,
-                        borderBottom: '1px solid',
-                        borderColor: 'grey.100',
+                        height: 15,
+                        borderBottom: isHourMark ? '1px solid' : '1px solid',
+                        borderColor: isHourMark ? 'grey.300' : 'grey.100',
                         cursor: 'crosshair',
                         '&:hover': {
                           bgcolor: 'grey.50'
@@ -202,7 +283,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                       }}
                       onMouseDown={() => {
                         setIsDragging(true);
-                        setDragStart({ day, hour });
+                        setDragStart({ day, slot: i });
                       }}
                       onMouseUp={() => {
                         if (isDragging && dragStart) {
@@ -210,8 +291,8 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                           const newBlock = {
                             id: Date.now(),
                             day,
-                            startHour: Math.min(dragStart.hour, hour),
-                            endHour: Math.max(dragStart.hour, hour) + 1,
+                            startSlot: Math.min(dragStart.slot, i),
+                            endSlot: Math.max(dragStart.slot, i) + 1,
                             type: selectedBlockType
                           };
                           setAvailabilityBlocks([...availabilityBlocks, newBlock]);
@@ -232,20 +313,20 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
 
                 {/* Mock calendar events - all days with events */}
                 {/* Monday - day 1 - Google Calendar */}
-                {day === 1 && calendarFilters.google && (
+                {day === 1 && calendarFilters.google1 && (
                   <>
                     {[
-                      { top: (9-7), height: 60, title: 'Stand-up', time: '9:00 - 10:00' },
-                      { top: (10.5-7), height: 90, title: 'Product Review', time: '10:30 - 12:00' },
-                      { top: (14-7), height: 60, title: '1:1 with Sarah', time: '2:00 - 3:00' },
-                      { top: (15.5-7), height: 90, title: 'Client Call', time: '3:30 - 5:00' },
+                      { slot: 8, duration: 4, title: 'Stand-up', time: '9:00 - 10:00' }, // 9am = slot 8 (2 hours * 4)
+                      { slot: 14, duration: 6, title: 'Product Review', time: '10:30 - 12:00' }, // 10:30am = slot 14
+                      { slot: 28, duration: 4, title: '1:1 with Sarah', time: '2:00 - 3:00' }, // 2pm = slot 28
+                      { slot: 34, duration: 6, title: 'Client Call', time: '3:30 - 5:00' }, // 3:30pm = slot 34
                     ].map((event, i) => (
                       <Box key={i} sx={{
                         position: 'absolute',
-                        top: event.top * 60,
+                        top: event.slot * 15,
                         left: 4,
                         right: 4,
-                        height: event.height,
+                        height: event.duration * 15,
                         bgcolor: 'rgba(66, 133, 244, 0.1)',
                         border: '2px solid',
                         borderColor: '#4285F4',
@@ -268,17 +349,17 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                 {day === 2 && calendarFilters.microsoft && (
                   <>
                     {[
-                      { top: (8-7), height: 60, title: 'Engineering Sync', time: '8:00 - 9:00' },
-                      { top: (10-7), height: 120, title: 'Q2 Planning', time: '10:00 - 12:00' },
-                      { top: (13-7), height: 60, title: 'Lunch w/ Team', time: '1:00 - 2:00' },
-                      { top: (15-7), height: 90, title: 'Design Review', time: '3:00 - 4:30' },
+                      { slot: 4, duration: 4, title: 'Engineering Sync', time: '8:00 - 9:00' }, // 8am = slot 4
+                      { slot: 12, duration: 8, title: 'Q2 Planning', time: '10:00 - 12:00' }, // 10am = slot 12
+                      { slot: 24, duration: 4, title: 'Lunch w/ Team', time: '1:00 - 2:00' }, // 1pm = slot 24
+                      { slot: 32, duration: 6, title: 'Design Review', time: '3:00 - 4:30' }, // 3pm = slot 32
                     ].map((event, i) => (
                       <Box key={i} sx={{
                         position: 'absolute',
-                        top: event.top * 60,
+                        top: event.slot * 15,
                         left: 4,
                         right: 4,
-                        height: event.height,
+                        height: event.duration * 15,
                         bgcolor: 'rgba(234, 67, 53, 0.1)',
                         border: '2px solid',
                         borderColor: '#EA4335',
@@ -298,23 +379,23 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                 )}
 
                 {/* Wednesday - day 3 - Google Calendar */}
-                {day === 3 && calendarFilters.google && (
+                {day === 3 && calendarFilters.google2 && (
                   <>
                     {[
-                      { top: (9-7), height: 60, title: 'Stand-up', time: '9:00 - 10:00' },
-                      { top: (11-7), height: 90, title: 'Board Meeting', time: '11:00 - 12:30' },
-                      { top: (14-7), height: 60, title: 'Interview - Dev', time: '2:00 - 3:00' },
-                      { top: (16-7), height: 60, title: 'Vendor Demo', time: '4:00 - 5:00' },
+                      { slot: 8, duration: 4, title: 'Stand-up', time: '9:00 - 10:00' }, // 9am = slot 8
+                      { slot: 16, duration: 6, title: 'Board Meeting', time: '11:00 - 12:30' }, // 11am = slot 16
+                      { slot: 28, duration: 4, title: 'Interview - Dev', time: '2:00 - 3:00' }, // 2pm = slot 28
+                      { slot: 36, duration: 4, title: 'Vendor Demo', time: '4:00 - 5:00' }, // 4pm = slot 36
                     ].map((event, i) => (
                       <Box key={i} sx={{
                         position: 'absolute',
-                        top: event.top * 60,
+                        top: event.slot * 15,
                         left: 4,
                         right: 4,
-                        height: event.height,
-                        bgcolor: 'rgba(66, 133, 244, 0.1)',
+                        height: event.duration * 15,
+                        bgcolor: 'rgba(15, 157, 88, 0.1)',
                         border: '2px solid',
-                        borderColor: '#4285F4',
+                        borderColor: '#0F9D58',
                         borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
@@ -330,24 +411,24 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Thursday - day 4 - Microsoft Calendar */}
-                {day === 4 && calendarFilters.microsoft && (
+                {/* Thursday - day 4 - Apple Calendar */}
+                {day === 4 && calendarFilters.apple && (
                   <>
                     {[
-                      { top: (9-7), height: 60, title: 'Team Standup', time: '9:00 - 10:00' },
-                      { top: (10-7), height: 60, title: 'Sales Call', time: '10:00 - 11:00' },
-                      { top: (13-7), height: 120, title: 'All Hands', time: '1:00 - 3:00' },
-                      { top: (15-7), height: 60, title: '1:1 with John', time: '3:00 - 4:00' },
+                      { slot: 8, duration: 4, title: 'Team Standup', time: '9:00 - 10:00' }, // 9am = slot 8
+                      { slot: 12, duration: 4, title: 'Sales Call', time: '10:00 - 11:00' }, // 10am = slot 12
+                      { slot: 24, duration: 8, title: 'All Hands', time: '1:00 - 3:00' }, // 1pm = slot 24
+                      { slot: 32, duration: 4, title: '1:1 with John', time: '3:00 - 4:00' }, // 3pm = slot 32
                     ].map((event, i) => (
                       <Box key={i} sx={{
                         position: 'absolute',
-                        top: event.top * 60,
+                        top: event.slot * 15,
                         left: 4,
                         right: 4,
-                        height: event.height,
-                        bgcolor: 'rgba(234, 67, 53, 0.1)',
+                        height: event.duration * 15,
+                        bgcolor: 'rgba(244, 180, 0, 0.1)',
                         border: '2px solid',
-                        borderColor: '#EA4335',
+                        borderColor: '#F4B400',
                         borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
@@ -363,24 +444,24 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                   </>
                 )}
 
-                {/* Friday - day 5 - Google Calendar */}
-                {day === 5 && calendarFilters.google && (
+                {/* Friday - day 5 - Outlook Calendar */}
+                {day === 5 && calendarFilters.outlook && (
                   <>
                     {[
-                      { top: (9-7), height: 60, title: 'Stand-up', time: '9:00 - 10:00' },
-                      { top: (10-7), height: 90, title: 'Sprint Planning', time: '10:00 - 11:30' },
-                      { top: (13-7), height: 60, title: 'Tech Review', time: '1:00 - 2:00' },
-                      { top: (15-7), height: 60, title: 'Happy Hour', time: '3:00 - 4:00' },
+                      { slot: 8, duration: 4, title: 'Stand-up', time: '9:00 - 10:00' }, // 9am = slot 8
+                      { slot: 12, duration: 6, title: 'Sprint Planning', time: '10:00 - 11:30' }, // 10am = slot 12
+                      { slot: 24, duration: 4, title: 'Tech Review', time: '1:00 - 2:00' }, // 1pm = slot 24
+                      { slot: 32, duration: 4, title: 'Happy Hour', time: '3:00 - 4:00' }, // 3pm = slot 32
                     ].map((event, i) => (
                       <Box key={i} sx={{
                         position: 'absolute',
-                        top: event.top * 60,
+                        top: event.slot * 15,
                         left: 4,
                         right: 4,
-                        height: event.height,
-                        bgcolor: 'rgba(66, 133, 244, 0.1)',
+                        height: event.duration * 15,
+                        bgcolor: 'rgba(171, 71, 188, 0.1)',
                         border: '2px solid',
-                        borderColor: '#4285F4',
+                        borderColor: '#AB47BC',
                         borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
@@ -404,10 +485,10 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                       key={block.id}
                       sx={{
                         position: 'absolute',
-                        top: (block.startHour - 7) * 60,
+                        top: block.startSlot * 15,
                         left: 4,
                         right: 4,
-                        height: (block.endHour - block.startHour) * 60 - 2,
+                        height: (block.endSlot - block.startSlot) * 15 - 2,
                         bgcolor:
                           block.type === 'busy' ? 'rgba(239, 68, 68, 0.3)' :
                           'rgba(34, 197, 94, 0.3)',
@@ -464,10 +545,46 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
               </Box>
               <Box sx={{ p: 2, border: '1px solid', borderColor: 'grey.200', borderRadius: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: '#0F9D58' }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>personal@gmail.com</Typography>
+                    <Typography variant="caption" color="text.secondary">Google Calendar</Typography>
+                  </Box>
+                  <Button variant="outlined" size="small" sx={{ textTransform: 'none' }}>
+                    Disconnect
+                  </Button>
+                </Box>
+              </Box>
+              <Box sx={{ p: 2, border: '1px solid', borderColor: 'grey.200', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: '#EA4335' }} />
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="body1" sx={{ fontWeight: 600 }}>personal@outlook.com</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>corp@microsoft.com</Typography>
                     <Typography variant="caption" color="text.secondary">Microsoft Calendar</Typography>
+                  </Box>
+                  <Button variant="outlined" size="small" sx={{ textTransform: 'none' }}>
+                    Disconnect
+                  </Button>
+                </Box>
+              </Box>
+              <Box sx={{ p: 2, border: '1px solid', borderColor: 'grey.200', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: '#F4B400' }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>me@icloud.com</Typography>
+                    <Typography variant="caption" color="text.secondary">Apple Calendar</Typography>
+                  </Box>
+                  <Button variant="outlined" size="small" sx={{ textTransform: 'none' }}>
+                    Disconnect
+                  </Button>
+                </Box>
+              </Box>
+              <Box sx={{ p: 2, border: '1px solid', borderColor: 'grey.200', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: '#AB47BC' }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>family@outlook.com</Typography>
+                    <Typography variant="caption" color="text.secondary">Outlook Calendar</Typography>
                   </Box>
                   <Button variant="outlined" size="small" sx={{ textTransform: 'none' }}>
                     Disconnect
