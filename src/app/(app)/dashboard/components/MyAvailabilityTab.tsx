@@ -42,50 +42,52 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
             <Card sx={{ flex: 1 }}>
               <CardContent>
                 <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Filter Calendars</Typography>
-                <Stack spacing={1}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={calendarFilters.google}
-                        onChange={(e) => setCalendarFilters({ ...calendarFilters, google: e.target.checked })}
-                        size="small"
-                        sx={{
-                          color: '#4285F4',
-                          '&.Mui-checked': {
+                <Box sx={{ maxHeight: 120, overflow: 'auto' }}>
+                  <Stack spacing={1}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={calendarFilters.google}
+                          onChange={(e) => setCalendarFilters({ ...calendarFilters, google: e.target.checked })}
+                          size="small"
+                          sx={{
                             color: '#4285F4',
-                          },
-                        }}
-                      />
-                    }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#4285F4' }} />
-                        <Typography variant="body2">work@company.com</Typography>
-                      </Box>
-                    }
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={calendarFilters.microsoft}
-                        onChange={(e) => setCalendarFilters({ ...calendarFilters, microsoft: e.target.checked })}
-                        size="small"
-                        sx={{
-                          color: '#EA4335',
-                          '&.Mui-checked': {
+                            '&.Mui-checked': {
+                              color: '#4285F4',
+                            },
+                          }}
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#4285F4' }} />
+                          <Typography variant="body2">work@company.com</Typography>
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={calendarFilters.microsoft}
+                          onChange={(e) => setCalendarFilters({ ...calendarFilters, microsoft: e.target.checked })}
+                          size="small"
+                          sx={{
                             color: '#EA4335',
-                          },
-                        }}
-                      />
-                    }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#EA4335' }} />
-                        <Typography variant="body2">personal@outlook.com</Typography>
-                      </Box>
-                    }
-                  />
-                </Stack>
+                            '&.Mui-checked': {
+                              color: '#EA4335',
+                            },
+                          }}
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#EA4335' }} />
+                          <Typography variant="body2">personal@outlook.com</Typography>
+                        </Box>
+                      }
+                    />
+                  </Stack>
+                </Box>
               </CardContent>
             </Card>
 
