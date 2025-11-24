@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Typography, Button, Card, CardContent, Stack, Checkbox, FormControlLabel, Chip, IconButton } from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, Stack, Checkbox, FormControlLabel, IconButton, Tabs, Tab } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -11,6 +11,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ day: number; hour: number } | null>(null);
   const [selectedBlockType, setSelectedBlockType] = useState<'busy' | 'available'>('busy');
+  const [activeTab, setActiveTab] = useState(0);
   const [calendarFilters, setCalendarFilters] = useState({
     google: true,
     microsoft: true
@@ -24,104 +25,121 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
         </Typography>
       </Box>
 
-      {/* Controls Row - Horizontal Layout */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexDirection: isMobile ? 'column' : 'row' }}>
-        {/* Connected Calendars Summary with Filters */}
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Connected Calendars</Typography>
-            <Stack spacing={1}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={calendarFilters.google}
-                    onChange={(e) => setCalendarFilters({ ...calendarFilters, google: e.target.checked })}
-                    size="small"
-                  />
-                }
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body2">work@company.com</Typography>
-                    <Chip label="Primary" size="small" sx={{ height: 20, fontSize: '0.65rem' }} />
-                  </Box>
-                }
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={calendarFilters.microsoft}
-                    onChange={(e) => setCalendarFilters({ ...calendarFilters, microsoft: e.target.checked })}
-                    size="small"
-                  />
-                }
-                label={
-                  <Typography variant="body2">personal@outlook.com</Typography>
-                }
-              />
-            </Stack>
-            <Button
-              variant="text"
-              size="small"
-              fullWidth
-              startIcon={<CalendarTodayIcon />}
-              sx={{ textTransform: 'none', mt: 2 }}
-            >
-              Connect more
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Availability Block Type Selector */}
-        <Card sx={{ flex: 1 }}>
-          <CardContent>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Set Availability</Typography>
-            <Stack direction="row" spacing={1}>
-              <Button
-                variant={selectedBlockType === 'busy' ? 'contained' : 'outlined'}
-                fullWidth
-                size="small"
-                onClick={() => setSelectedBlockType('busy')}
-                sx={{
-                  textTransform: 'none',
-                  bgcolor: selectedBlockType === 'busy' ? 'error.main' : 'transparent',
-                  borderColor: 'error.main',
-                  color: selectedBlockType === 'busy' ? 'white' : 'error.main',
-                  '&:hover': {
-                    bgcolor: selectedBlockType === 'busy' ? 'error.dark' : 'rgba(239, 68, 68, 0.1)',
-                    borderColor: 'error.main',
-                  }
-                }}
-              >
-                Busy
-              </Button>
-              <Button
-                variant={selectedBlockType === 'available' ? 'contained' : 'outlined'}
-                fullWidth
-                size="small"
-                onClick={() => setSelectedBlockType('available')}
-                sx={{
-                  textTransform: 'none',
-                  bgcolor: selectedBlockType === 'available' ? 'success.main' : 'transparent',
-                  borderColor: 'success.main',
-                  color: selectedBlockType === 'available' ? 'white' : 'success.main',
-                  '&:hover': {
-                    bgcolor: selectedBlockType === 'available' ? 'success.dark' : 'rgba(34, 197, 94, 0.1)',
-                    borderColor: 'success.main',
-                  }
-                }}
-              >
-                Available
-              </Button>
-            </Stack>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
-              Click and drag on the calendar to set your {selectedBlockType} times
-            </Typography>
-          </CardContent>
-        </Card>
+      {/* Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+          <Tab label="Availability" sx={{ textTransform: 'none' }} />
+          <Tab label="Connected Calendars" sx={{ textTransform: 'none' }} />
+        </Tabs>
       </Box>
 
-      {/* Calendar - Full Width */}
-      <Box>
+      {/* Availability Tab Content */}
+      {activeTab === 0 && (
+        <>
+          {/* Controls Row - Horizontal Layout */}
+          <Box sx={{ display: 'flex', gap: 2, mb: 3, flexDirection: isMobile ? 'column' : 'row' }}>
+            {/* Calendar Filters */}
+            <Card sx={{ flex: 1 }}>
+              <CardContent>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Filter Calendars</Typography>
+                <Stack spacing={1}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={calendarFilters.google}
+                        onChange={(e) => setCalendarFilters({ ...calendarFilters, google: e.target.checked })}
+                        size="small"
+                        sx={{
+                          color: '#4285F4',
+                          '&.Mui-checked': {
+                            color: '#4285F4',
+                          },
+                        }}
+                      />
+                    }
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#4285F4' }} />
+                        <Typography variant="body2">work@company.com</Typography>
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={calendarFilters.microsoft}
+                        onChange={(e) => setCalendarFilters({ ...calendarFilters, microsoft: e.target.checked })}
+                        size="small"
+                        sx={{
+                          color: '#EA4335',
+                          '&.Mui-checked': {
+                            color: '#EA4335',
+                          },
+                        }}
+                      />
+                    }
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#EA4335' }} />
+                        <Typography variant="body2">personal@outlook.com</Typography>
+                      </Box>
+                    }
+                  />
+                </Stack>
+              </CardContent>
+            </Card>
+
+            {/* Availability Block Type Selector */}
+            <Card sx={{ flex: 1 }}>
+              <CardContent>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Set Availability</Typography>
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    variant={selectedBlockType === 'busy' ? 'contained' : 'outlined'}
+                    fullWidth
+                    size="small"
+                    onClick={() => setSelectedBlockType('busy')}
+                    sx={{
+                      textTransform: 'none',
+                      bgcolor: selectedBlockType === 'busy' ? 'error.main' : 'transparent',
+                      borderColor: 'error.main',
+                      color: selectedBlockType === 'busy' ? 'white' : 'error.main',
+                      '&:hover': {
+                        bgcolor: selectedBlockType === 'busy' ? 'error.dark' : 'rgba(239, 68, 68, 0.1)',
+                        borderColor: 'error.main',
+                      }
+                    }}
+                  >
+                    Busy
+                  </Button>
+                  <Button
+                    variant={selectedBlockType === 'available' ? 'contained' : 'outlined'}
+                    fullWidth
+                    size="small"
+                    onClick={() => setSelectedBlockType('available')}
+                    sx={{
+                      textTransform: 'none',
+                      bgcolor: selectedBlockType === 'available' ? 'success.main' : 'transparent',
+                      borderColor: 'success.main',
+                      color: selectedBlockType === 'available' ? 'white' : 'success.main',
+                      '&:hover': {
+                        bgcolor: selectedBlockType === 'available' ? 'success.dark' : 'rgba(34, 197, 94, 0.1)',
+                        borderColor: 'success.main',
+                      }
+                    }}
+                  >
+                    Available
+                  </Button>
+                </Stack>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+                  Click and drag on the calendar to set your {selectedBlockType} times
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+
+          {/* Calendar - Full Width */}
+          <Box>
         <Card>
         <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
           {/* Calendar Header */}
@@ -226,9 +244,9 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: 'background.accent',
-                        border: '1px solid',
-                        borderColor: 'primary.main',
+                        bgcolor: 'rgba(66, 133, 244, 0.1)',
+                        border: '2px solid',
+                        borderColor: '#4285F4',
                         borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
@@ -259,9 +277,9 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: 'background.accent',
-                        border: '1px solid',
-                        borderColor: 'primary.main',
+                        bgcolor: 'rgba(234, 67, 53, 0.1)',
+                        border: '2px solid',
+                        borderColor: '#EA4335',
                         borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
@@ -292,9 +310,9 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: 'background.accent',
-                        border: '1px solid',
-                        borderColor: 'primary.main',
+                        bgcolor: 'rgba(66, 133, 244, 0.1)',
+                        border: '2px solid',
+                        borderColor: '#4285F4',
                         borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
@@ -325,9 +343,9 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: 'background.accent',
-                        border: '1px solid',
-                        borderColor: 'primary.main',
+                        bgcolor: 'rgba(234, 67, 53, 0.1)',
+                        border: '2px solid',
+                        borderColor: '#EA4335',
                         borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
@@ -358,9 +376,9 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         left: 4,
                         right: 4,
                         height: event.height,
-                        bgcolor: 'background.accent',
-                        border: '1px solid',
-                        borderColor: 'primary.main',
+                        bgcolor: 'rgba(66, 133, 244, 0.1)',
+                        border: '2px solid',
+                        borderColor: '#4285F4',
                         borderRadius: 0.5,
                         p: 0.5,
                         overflow: 'hidden'
@@ -420,7 +438,53 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
           </Box>
         </CardContent>
         </Card>
-      </Box>
+          </Box>
+        </>
+      )}
+
+      {/* Connected Calendars Tab Content */}
+      {activeTab === 1 && (
+        <Card>
+          <CardContent>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>Connected Calendars</Typography>
+            <Stack spacing={2}>
+              <Box sx={{ p: 2, border: '1px solid', borderColor: 'grey.200', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: '#4285F4' }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>work@company.com</Typography>
+                    <Typography variant="caption" color="text.secondary">Google Calendar</Typography>
+                  </Box>
+                  <Button variant="outlined" size="small" sx={{ textTransform: 'none' }}>
+                    Disconnect
+                  </Button>
+                </Box>
+              </Box>
+              <Box sx={{ p: 2, border: '1px solid', borderColor: 'grey.200', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: '#EA4335' }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>personal@outlook.com</Typography>
+                    <Typography variant="caption" color="text.secondary">Microsoft Calendar</Typography>
+                  </Box>
+                  <Button variant="outlined" size="small" sx={{ textTransform: 'none' }}>
+                    Disconnect
+                  </Button>
+                </Box>
+              </Box>
+            </Stack>
+            <Button
+              variant="contained"
+              size="medium"
+              fullWidth
+              startIcon={<CalendarTodayIcon />}
+              sx={{ textTransform: 'none', mt: 3 }}
+            >
+              Connect more calendars
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </Box>
   );
 }
