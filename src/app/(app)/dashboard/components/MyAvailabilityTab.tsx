@@ -17,7 +17,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
   });
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 1000, mx: 'auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ fontWeight: 600 }}>
           My Time
