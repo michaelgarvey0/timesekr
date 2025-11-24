@@ -32,77 +32,142 @@ export default function InviteeResponseForm({
   conflicts = {},
   conflictDetails = {}
 }: InviteeResponseFormProps) {
+  const selectedCount = Object.values(inviteeResponses).filter(Boolean).length;
+  const totalTimes = meeting.proposedTimes.length;
+
   return (
     <>
-      {/* Invitee View: Response Form */}
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Please select which times work for you:
-      </Typography>
+      {/* Selection Status Header */}
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="body2" color="text.secondary">
+            Select all times that work for you
+          </Typography>
+          {selectedCount > 0 && (
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main', mt: 0.5 }}>
+              {selectedCount} of {totalTimes} selected
+            </Typography>
+          )}
+        </Box>
+        {selectedCount === totalTimes && (
+          <Chip
+            label="All times selected"
+            color="success"
+            size="small"
+            icon={<CheckIcon />}
+            sx={{ fontWeight: 600 }}
+          />
+        )}
+      </Box>
 
-      {/* Proposed Times with Checkboxes - Horizontal Layout */}
-      <Stack direction="row" spacing={1.5} sx={{ mb: 2 }}>
-        {meeting.proposedTimes.map((time: any) => {
+      {/* Proposed Times - Compact Card Design */}
+      <Stack spacing={1.5} sx={{ mb: 2 }}>
+        {meeting.proposedTimes.map((time: any, index: number) => {
           const isWinningTime = time.id === meeting.winningTime.id;
           const isSelected = inviteeResponses[time.id] || false;
           const hasConflict = conflicts[time.id] || false;
+          const availabilityPercent = (time.votes / meeting.totalAttendees) * 100;
+
           return (
             <Box
               key={time.id}
+              onClick={() => {
+                if (!cannotMakeAny && isEditing) {
+                  onResponseChange(time.id, !isSelected);
+                }
+              }}
               sx={{
-                flex: 1,
-                p: 2,
-                bgcolor: hasConflict ? '#fef2f2' : (isSelected ? 'background.accent' : 'background.level1'),
-                border: hasConflict ? '2px solid' : (isSelected ? '2px solid' : '1px solid'),
-                borderColor: hasConflict ? 'error.light' : (isSelected ? 'primary.main' : 'grey.200'),
-                borderRadius: 1,
-                position: 'relative',
-                minHeight: 120,
+                p: 2.5,
+                bgcolor: hasConflict ? '#fef2f2' : (isSelected ? '#f0f9ff' : 'background.paper'),
+                border: '2px solid',
+                borderColor: hasConflict ? '#fca5a5' : (isSelected ? '#3b82f6' : '#e5e7eb'),
+                borderRadius: 2,
+                cursor: (cannotMakeAny || !isEditing) ? 'default' : 'pointer',
+                transition: 'all 0.2s',
+                '&:hover': (cannotMakeAny || !isEditing) ? {} : {
+                  borderColor: isSelected ? '#2563eb' : '#9ca3af',
+                  boxShadow: 1,
+                },
                 display: 'flex',
-                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 3,
               }}
             >
-              {/* Top row: Chips and Checkbox aligned */}
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 'auto', gap: 0.5 }}>
-                {isWinningTime && (
-                  <Chip
-                    label="Most Popular"
-                    size="small"
-                    color="primary"
-                    sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }}
-                  />
+              {/* Selection Number Badge */}
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  bgcolor: isSelected ? 'primary.main' : 'grey.200',
+                  color: isSelected ? 'white' : 'text.secondary',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'all 0.2s',
+                }}
+              >
+                {isSelected ? (
+                  <CheckIcon sx={{ fontSize: 28 }} />
+                ) : (
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {index + 1}
+                  </Typography>
                 )}
-                {!isWinningTime && <Box />}
-                <Checkbox
-                  checked={isSelected}
-                  onChange={(e) => onResponseChange(time.id, e.target.checked)}
-                  disabled={cannotMakeAny || !isEditing}
-                  sx={{
-                    p: 0,
-                    '& .MuiSvgIcon-root': { fontSize: 28 }
-                  }}
-                />
               </Box>
 
-              {/* Bottom aligned time info */}
-              <Box sx={{ textAlign: 'center', mt: 'auto' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                  {time.day}
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                  {time.time}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                  {time.votes}/{meeting.totalAttendees} available
-                </Typography>
-                {hasConflict ? (
-                  <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 500, display: 'block' }}>
-                    {conflictDetails[time.id] || 'Conflicts with your calendar'}
+              {/* Time Details */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {time.day}
                   </Typography>
+                  {isWinningTime && (
+                    <Chip
+                      label="Most Popular"
+                      size="small"
+                      color="primary"
+                      sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }}
+                    />
+                  )}
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  {time.time} - {time.endTime}
+                </Typography>
+
+                {hasConflict ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <WarningIcon sx={{ fontSize: 16, color: 'error.main' }} />
+                    <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 500 }}>
+                      {conflictDetails[time.id] || 'Conflicts with your calendar'}
+                    </Typography>
+                  </Box>
                 ) : (
-                  <Typography variant="caption" sx={{ color: 'success.dark', fontWeight: 500, display: 'block' }}>
-                    No conflicts
+                  <Typography variant="caption" sx={{ color: 'success.dark', fontWeight: 500 }}>
+                    ✓ No conflicts
                   </Typography>
                 )}
+              </Box>
+
+              {/* Availability Indicator */}
+              <Box sx={{ textAlign: 'right', minWidth: 120 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: availabilityPercent >= 70 ? 'success.main' : availabilityPercent >= 40 ? 'warning.main' : 'error.main' }}>
+                  {time.votes}/{meeting.totalAttendees}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                  available
+                </Typography>
+                <Box sx={{ mt: 1, height: 6, bgcolor: 'grey.200', borderRadius: 1, overflow: 'hidden' }}>
+                  <Box
+                    sx={{
+                      height: '100%',
+                      width: `${availabilityPercent}%`,
+                      bgcolor: availabilityPercent >= 70 ? 'success.main' : availabilityPercent >= 40 ? 'warning.main' : 'error.main',
+                      transition: 'width 0.3s',
+                    }}
+                  />
+                </Box>
               </Box>
             </Box>
           );

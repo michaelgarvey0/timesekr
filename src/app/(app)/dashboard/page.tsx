@@ -422,41 +422,79 @@ export default function DashboardPage() {
 
                           {/* Proposed Times (Read-only for organizer) */}
                           <Box sx={{ mb: 2.5 }}>
-                            <Stack direction="row" spacing={1.5}>
-                              {meeting.proposedTimes.map((time) => {
+                            <Stack spacing={1.5}>
+                              {meeting.proposedTimes.map((time, index) => {
                                 const isWinningTime = time.id === meeting.winningTime.id;
+                                const availabilityPercent = (time.votes / meeting.totalAttendees) * 100;
                                 return (
                                   <Box
                                     key={time.id}
                                     sx={{
-                                      flex: 1,
-                                      py: 1.5,
-                                      px: 1.5,
-                                      bgcolor: isWinningTime ? 'background.accent' : 'background.level1',
-                                      border: isWinningTime ? '2px solid' : '1px solid transparent',
-                                      borderColor: isWinningTime ? 'primary.light' : 'transparent',
-                                      borderRadius: '6px',
-                                      textAlign: 'center',
-                                      position: 'relative',
+                                      py: 2,
+                                      px: 2.5,
+                                      bgcolor: isWinningTime ? '#f0f9ff' : 'background.level1',
+                                      border: '2px solid',
+                                      borderColor: isWinningTime ? 'primary.main' : 'grey.200',
+                                      borderRadius: 2,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 2,
                                     }}
                                   >
-                                    <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? 'primary.dark' : 'inherit' }}>
-                                      {time.day}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ fontWeight: isWinningTime ? 600 : 500, mb: 0.25, color: isWinningTime ? 'primary.dark' : 'inherit' }}>
-                                      {time.time} - {time.endTime}
-                                    </Typography>
-                                    <Typography variant="caption" color={isWinningTime ? 'primary' : 'text.secondary'} sx={{ display: 'block', fontWeight: isWinningTime ? 600 : 400 }}>
-                                      {time.votes}/{meeting.totalAttendees} available
-                                    </Typography>
-                                    {isWinningTime && (
-                                      <Chip
-                                        label="Best"
-                                        size="small"
-                                        color="primary"
-                                        sx={{ position: 'absolute', top: -8, right: -8, height: 20, fontSize: '0.7rem', fontWeight: 600 }}
-                                      />
-                                    )}
+                                    {/* Option Number */}
+                                    <Box
+                                      sx={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: '50%',
+                                        bgcolor: isWinningTime ? 'primary.main' : 'grey.300',
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                        {index + 1}
+                                      </Typography>
+                                    </Box>
+
+                                    {/* Time Details */}
+                                    <Box sx={{ flex: 1 }}>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                          {time.day}
+                                        </Typography>
+                                        {isWinningTime && (
+                                          <Chip
+                                            label="Best"
+                                            size="small"
+                                            color="primary"
+                                            sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600 }}
+                                          />
+                                        )}
+                                      </Box>
+                                      <Typography variant="caption" color="text.secondary">
+                                        {time.time} - {time.endTime}
+                                      </Typography>
+                                    </Box>
+
+                                    {/* Votes */}
+                                    <Box sx={{ textAlign: 'right', minWidth: 80 }}>
+                                      <Typography variant="h6" sx={{ fontWeight: 700, color: availabilityPercent >= 70 ? 'success.main' : availabilityPercent >= 40 ? 'warning.main' : 'error.main' }}>
+                                        {time.votes}/{meeting.totalAttendees}
+                                      </Typography>
+                                      <Box sx={{ mt: 0.5, height: 4, bgcolor: 'grey.200', borderRadius: 1, overflow: 'hidden', width: 60 }}>
+                                        <Box
+                                          sx={{
+                                            height: '100%',
+                                            width: `${availabilityPercent}%`,
+                                            bgcolor: availabilityPercent >= 70 ? 'success.main' : availabilityPercent >= 40 ? 'warning.main' : 'error.main',
+                                          }}
+                                        />
+                                      </Box>
+                                    </Box>
                                   </Box>
                                 );
                               })}

@@ -91,11 +91,95 @@ export default function MeetingDetailsModal({ meeting, onClose }: MeetingDetails
             />
           </Box>
 
+          {/* Time Slot Summary Cards */}
+          <Box sx={{ p: 3, bgcolor: 'background.level2' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+              Suggested Times Overview
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              {meeting.proposedTimes.map((time: any) => {
+                const isWinningTime = time.id === meeting.winningTime.id;
+                const availabilityPercent = (time.votes / meeting.totalAttendees) * 100;
+                const unavailableCount = meeting.attendees.filter((a: any) => a.availability?.[time.id] === 'unavailable').length;
+                const noResponseCount = meeting.attendees.filter((a: any) => !a.availability?.[time.id] && !a.responded).length;
+
+                return (
+                  <Box
+                    key={time.id}
+                    sx={{
+                      flex: 1,
+                      p: 2.5,
+                      bgcolor: isWinningTime ? '#f0f9ff' : 'background.paper',
+                      border: '2px solid',
+                      borderColor: isWinningTime ? 'primary.main' : 'grey.200',
+                      borderRadius: 2,
+                      position: 'relative',
+                    }}
+                  >
+                    {isWinningTime && (
+                      <Chip
+                        label="Best Option"
+                        size="small"
+                        color="primary"
+                        sx={{ position: 'absolute', top: -10, right: 10, height: 20, fontSize: '0.65rem', fontWeight: 600 }}
+                      />
+                    )}
+                    <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      {time.day}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                      {time.time} - {time.endTime}
+                    </Typography>
+
+                    {/* Large Vote Count */}
+                    <Box sx={{ textAlign: 'center', mb: 2 }}>
+                      <Typography variant="h3" sx={{ fontWeight: 700, color: availabilityPercent >= 70 ? 'success.main' : availabilityPercent >= 40 ? 'warning.main' : 'error.main' }}>
+                        {time.votes}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        of {meeting.totalAttendees} available
+                      </Typography>
+                    </Box>
+
+                    {/* Progress Bar */}
+                    <Box sx={{ mb: 2 }}>
+                      <Box sx={{ height: 8, bgcolor: 'grey.200', borderRadius: 1, overflow: 'hidden' }}>
+                        <Box
+                          sx={{
+                            height: '100%',
+                            width: `${availabilityPercent}%`,
+                            bgcolor: availabilityPercent >= 70 ? 'success.main' : availabilityPercent >= 40 ? 'warning.main' : 'error.main',
+                          }}
+                        />
+                      </Box>
+                    </Box>
+
+                    {/* Breakdown */}
+                    <Stack spacing={0.5}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Unavailable
+                        </Typography>
+                        <Chip label={unavailableCount} size="small" sx={{ height: 18, fontSize: '0.7rem', bgcolor: '#fee2e2', color: 'error.main' }} />
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="caption" color="text.secondary">
+                          No response
+                        </Typography>
+                        <Chip label={noResponseCount} size="small" sx={{ height: 18, fontSize: '0.7rem', bgcolor: 'grey.200' }} />
+                      </Box>
+                    </Stack>
+                  </Box>
+                );
+              })}
+            </Stack>
+          </Box>
+
           {/* Availability Grid */}
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                Availability Grid
+                Detailed Availability by Participant
               </Typography>
               {meeting.responded < meeting.totalAttendees && (
                 <Button
