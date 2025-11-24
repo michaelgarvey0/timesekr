@@ -1115,17 +1115,54 @@ export default function CreateMeetingPage() {
                     </Box>
                   ) : (
                     <Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                        <Box>
+                      <Box sx={{ mb: 3 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                           <Typography variant="h6" sx={{ fontWeight: 700 }}>Suggested Times</Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Select up to 3 times • {startDate?.format('MMM D')} - {endDate?.format('MMM D, YYYY')}
-                          </Typography>
+                          <Chip
+                            label={`${selectedSlots.length}/3 selected`}
+                            color={selectedSlots.length > 0 ? 'success' : 'default'}
+                            sx={{ fontWeight: 600 }}
+                          />
                         </Box>
-                        <Chip
-                          label={`${selectedSlots.length}/3 selected`}
-                          color={selectedSlots.length > 0 ? 'primary' : 'default'}
-                        />
+                        <Typography variant="body2" color="text.secondary">
+                          Select up to 3 times • {startDate?.format('MMM D')} - {endDate?.format('MMM D, YYYY')}
+                        </Typography>
+                        {selectedSlots.length > 0 && (
+                          <Box sx={{ mt: 2, p: 2, bgcolor: '#f0f9ff', borderRadius: 2, border: '2px solid #3b82f6' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
+                              Your selected times (in order):
+                            </Typography>
+                            <Stack spacing={0.5}>
+                              {selectedSlots.map((slotId, index) => {
+                                const slot = suggestedTimes.find(s => s.id === slotId);
+                                if (!slot) return null;
+                                return (
+                                  <Box key={slotId} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                    <Box
+                                      sx={{
+                                        width: 24,
+                                        height: 24,
+                                        borderRadius: '50%',
+                                        bgcolor: 'primary.main',
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 700,
+                                      }}
+                                    >
+                                      {index + 1}
+                                    </Box>
+                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                      {slot.day} at {slot.time}
+                                    </Typography>
+                                  </Box>
+                                );
+                              })}
+                            </Stack>
+                          </Box>
+                        )}
                       </Box>
 
                       {allAttendees.length === 0 ? (
@@ -1141,55 +1178,81 @@ export default function CreateMeetingPage() {
                                 ✓ Everyone Available ({everyoneAvailable.length})
                               </Typography>
                               <Stack spacing={1}>
-                                {everyoneAvailable.map((slot) => (
-                                  <Box key={slot.id}>
-                                    <Box
-                                      onClick={() => {
-                                        if (selectedSlots.includes(slot.id)) {
-                                          setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
-                                        } else if (selectedSlots.length < 3) {
-                                          setSelectedSlots([...selectedSlots, slot.id]);
-                                        }
-                                      }}
-                                      sx={{
-                                        p: 2,
-                                        border: '2px solid',
-                                        borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        bgcolor: selectedSlots.includes(slot.id) ? '#f0f9ff' : 'white',
-                                        '&:hover': { borderColor: 'primary.main' },
-                                      }}
-                                    >
-                                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <Box>
-                                          <Typography variant="body2" color="text.secondary">{slot.day}</Typography>
-                                          <Typography variant="h6" sx={{ fontWeight: 700 }}>{slot.time}</Typography>
-                                          <Typography variant="caption" color="text.secondary">
-                                            All {slot.total} available
-                                          </Typography>
-                                        </Box>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                {everyoneAvailable.map((slot) => {
+                                  const isSelected = selectedSlots.includes(slot.id);
+                                  const selectionOrder = isSelected ? selectedSlots.indexOf(slot.id) + 1 : null;
+                                  return (
+                                    <Box key={slot.id}>
+                                      <Box
+                                        onClick={() => {
+                                          if (selectedSlots.includes(slot.id)) {
+                                            setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                          } else if (selectedSlots.length < 3) {
+                                            setSelectedSlots([...selectedSlots, slot.id]);
+                                          }
+                                        }}
+                                        sx={{
+                                          p: 2.5,
+                                          border: '2px solid',
+                                          borderColor: isSelected ? 'primary.main' : '#e5e7eb',
+                                          borderRadius: 2,
+                                          cursor: 'pointer',
+                                          bgcolor: isSelected ? '#f0f9ff' : 'white',
+                                          transition: 'all 0.2s',
+                                          '&:hover': { borderColor: 'primary.main', boxShadow: 1 },
+                                        }}
+                                      >
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                          {/* Selection Badge */}
+                                          <Box
+                                            sx={{
+                                              width: 48,
+                                              height: 48,
+                                              borderRadius: '50%',
+                                              bgcolor: isSelected ? 'primary.main' : 'grey.200',
+                                              color: isSelected ? 'white' : 'text.secondary',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              flexShrink: 0,
+                                              fontSize: '1.25rem',
+                                              fontWeight: 700,
+                                              transition: 'all 0.2s',
+                                            }}
+                                          >
+                                            {isSelected ? selectionOrder : <CheckCircleIcon sx={{ fontSize: 28 }} />}
+                                          </Box>
+
+                                          {/* Time Details */}
+                                          <Box sx={{ flex: 1 }}>
+                                            <Typography variant="body2" color="text.secondary">{slot.day}</Typography>
+                                            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>{slot.time}</Typography>
+                                            <Typography variant="caption" sx={{ color: 'success.dark', fontWeight: 500 }}>
+                                              ✓ All {slot.total} available
+                                            </Typography>
+                                          </Box>
+
+                                          {/* Expand Button */}
                                           <IconButton
                                             size="small"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
                                             }}
+                                            sx={{ flexShrink: 0 }}
                                           >
                                             {expandedSlot === slot.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                                           </IconButton>
-                                          {selectedSlots.includes(slot.id) && <CheckCircleIcon color="primary" />}
                                         </Box>
                                       </Box>
+                                      <Collapse in={expandedSlot === slot.id}>
+                                        <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                          {renderParticipantStatus(slot.participants)}
+                                        </Box>
+                                      </Collapse>
                                     </Box>
-                                    <Collapse in={expandedSlot === slot.id}>
-                                      <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
-                                        {renderParticipantStatus(slot.participants)}
-                                      </Box>
-                                    </Collapse>
-                                  </Box>
-                                ))}
+                                  );
+                                })}
                               </Stack>
                             </Box>
                           )}
@@ -1200,55 +1263,81 @@ export default function CreateMeetingPage() {
                                 Most Available ({mostAvailable.length})
                               </Typography>
                               <Stack spacing={1}>
-                                {mostAvailable.map((slot) => (
-                                  <Box key={slot.id}>
-                                    <Box
-                                      onClick={() => {
-                                        if (selectedSlots.includes(slot.id)) {
-                                          setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
-                                        } else if (selectedSlots.length < 3) {
-                                          setSelectedSlots([...selectedSlots, slot.id]);
-                                        }
-                                      }}
-                                      sx={{
-                                        p: 2,
-                                        border: '2px solid',
-                                        borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        bgcolor: selectedSlots.includes(slot.id) ? '#f0f9ff' : 'white',
-                                        '&:hover': { borderColor: 'primary.main' },
-                                      }}
-                                    >
-                                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <Box>
-                                          <Typography variant="body2" color="text.secondary">{slot.day}</Typography>
-                                          <Typography variant="h6" sx={{ fontWeight: 700 }}>{slot.time}</Typography>
-                                          <Typography variant="caption" color="text.secondary">
-                                            {slot.available} of {slot.total} available
-                                          </Typography>
-                                        </Box>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                {mostAvailable.map((slot) => {
+                                  const isSelected = selectedSlots.includes(slot.id);
+                                  const selectionOrder = isSelected ? selectedSlots.indexOf(slot.id) + 1 : null;
+                                  return (
+                                    <Box key={slot.id}>
+                                      <Box
+                                        onClick={() => {
+                                          if (selectedSlots.includes(slot.id)) {
+                                            setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                          } else if (selectedSlots.length < 3) {
+                                            setSelectedSlots([...selectedSlots, slot.id]);
+                                          }
+                                        }}
+                                        sx={{
+                                          p: 2.5,
+                                          border: '2px solid',
+                                          borderColor: isSelected ? 'primary.main' : '#e5e7eb',
+                                          borderRadius: 2,
+                                          cursor: 'pointer',
+                                          bgcolor: isSelected ? '#f0f9ff' : 'white',
+                                          transition: 'all 0.2s',
+                                          '&:hover': { borderColor: 'primary.main', boxShadow: 1 },
+                                        }}
+                                      >
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                          {/* Selection Badge */}
+                                          <Box
+                                            sx={{
+                                              width: 48,
+                                              height: 48,
+                                              borderRadius: '50%',
+                                              bgcolor: isSelected ? 'primary.main' : 'grey.200',
+                                              color: isSelected ? 'white' : 'text.secondary',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              flexShrink: 0,
+                                              fontSize: '1.25rem',
+                                              fontWeight: 700,
+                                              transition: 'all 0.2s',
+                                            }}
+                                          >
+                                            {isSelected ? selectionOrder : <CheckCircleIcon sx={{ fontSize: 28 }} />}
+                                          </Box>
+
+                                          {/* Time Details */}
+                                          <Box sx={{ flex: 1 }}>
+                                            <Typography variant="body2" color="text.secondary">{slot.day}</Typography>
+                                            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>{slot.time}</Typography>
+                                            <Typography variant="caption" sx={{ color: 'warning.main', fontWeight: 500 }}>
+                                              {slot.available} of {slot.total} available
+                                            </Typography>
+                                          </Box>
+
+                                          {/* Expand Button */}
                                           <IconButton
                                             size="small"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
                                             }}
+                                            sx={{ flexShrink: 0 }}
                                           >
                                             {expandedSlot === slot.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                                           </IconButton>
-                                          {selectedSlots.includes(slot.id) && <CheckCircleIcon color="primary" />}
                                         </Box>
                                       </Box>
+                                      <Collapse in={expandedSlot === slot.id}>
+                                        <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                          {renderParticipantStatus(slot.participants)}
+                                        </Box>
+                                      </Collapse>
                                     </Box>
-                                    <Collapse in={expandedSlot === slot.id}>
-                                      <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
-                                        {renderParticipantStatus(slot.participants)}
-                                      </Box>
-                                    </Collapse>
-                                  </Box>
-                                ))}
+                                  );
+                                })}
                               </Stack>
                             </Box>
                           )}
@@ -1259,55 +1348,81 @@ export default function CreateMeetingPage() {
                                 Some Conflicts ({someConflicts.length})
                               </Typography>
                               <Stack spacing={1}>
-                                {someConflicts.map((slot) => (
-                                  <Box key={slot.id}>
-                                    <Box
-                                      onClick={() => {
-                                        if (selectedSlots.includes(slot.id)) {
-                                          setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
-                                        } else if (selectedSlots.length < 3) {
-                                          setSelectedSlots([...selectedSlots, slot.id]);
-                                        }
-                                      }}
-                                      sx={{
-                                        p: 2,
-                                        border: '2px solid',
-                                        borderColor: selectedSlots.includes(slot.id) ? 'primary.main' : '#e5e7eb',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        bgcolor: selectedSlots.includes(slot.id) ? '#f0f9ff' : 'white',
-                                        '&:hover': { borderColor: 'primary.main' },
-                                      }}
-                                    >
-                                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <Box>
-                                          <Typography variant="body2" color="text.secondary">{slot.day}</Typography>
-                                          <Typography variant="h6" sx={{ fontWeight: 700 }}>{slot.time}</Typography>
-                                          <Typography variant="caption" color="text.secondary">
-                                            {slot.available} of {slot.total} available
-                                          </Typography>
-                                        </Box>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                {someConflicts.map((slot) => {
+                                  const isSelected = selectedSlots.includes(slot.id);
+                                  const selectionOrder = isSelected ? selectedSlots.indexOf(slot.id) + 1 : null;
+                                  return (
+                                    <Box key={slot.id}>
+                                      <Box
+                                        onClick={() => {
+                                          if (selectedSlots.includes(slot.id)) {
+                                            setSelectedSlots(selectedSlots.filter(id => id !== slot.id));
+                                          } else if (selectedSlots.length < 3) {
+                                            setSelectedSlots([...selectedSlots, slot.id]);
+                                          }
+                                        }}
+                                        sx={{
+                                          p: 2.5,
+                                          border: '2px solid',
+                                          borderColor: isSelected ? 'primary.main' : '#e5e7eb',
+                                          borderRadius: 2,
+                                          cursor: 'pointer',
+                                          bgcolor: isSelected ? '#f0f9ff' : 'white',
+                                          transition: 'all 0.2s',
+                                          '&:hover': { borderColor: 'primary.main', boxShadow: 1 },
+                                        }}
+                                      >
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                          {/* Selection Badge */}
+                                          <Box
+                                            sx={{
+                                              width: 48,
+                                              height: 48,
+                                              borderRadius: '50%',
+                                              bgcolor: isSelected ? 'primary.main' : 'grey.200',
+                                              color: isSelected ? 'white' : 'text.secondary',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              flexShrink: 0,
+                                              fontSize: '1.25rem',
+                                              fontWeight: 700,
+                                              transition: 'all 0.2s',
+                                            }}
+                                          >
+                                            {isSelected ? selectionOrder : <CheckCircleIcon sx={{ fontSize: 28 }} />}
+                                          </Box>
+
+                                          {/* Time Details */}
+                                          <Box sx={{ flex: 1 }}>
+                                            <Typography variant="body2" color="text.secondary">{slot.day}</Typography>
+                                            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>{slot.time}</Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                              {slot.available} of {slot.total} available
+                                            </Typography>
+                                          </Box>
+
+                                          {/* Expand Button */}
                                           <IconButton
                                             size="small"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               setExpandedSlot(expandedSlot === slot.id ? null : slot.id);
                                             }}
+                                            sx={{ flexShrink: 0 }}
                                           >
                                             {expandedSlot === slot.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                                           </IconButton>
-                                          {selectedSlots.includes(slot.id) && <CheckCircleIcon color="primary" />}
                                         </Box>
                                       </Box>
+                                      <Collapse in={expandedSlot === slot.id}>
+                                        <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
+                                          {renderParticipantStatus(slot.participants)}
+                                        </Box>
+                                      </Collapse>
                                     </Box>
-                                    <Collapse in={expandedSlot === slot.id}>
-                                      <Box sx={{ pl: 2, pr: 2, pt: 1 }}>
-                                        {renderParticipantStatus(slot.participants)}
-                                      </Box>
-                                    </Collapse>
-                                  </Box>
-                                ))}
+                                  );
+                                })}
                               </Stack>
                             </Box>
                           )}
