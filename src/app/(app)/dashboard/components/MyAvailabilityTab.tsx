@@ -10,7 +10,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
   const [availabilityBlocks, setAvailabilityBlocks] = useState<any[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ day: number; hour: number } | null>(null);
-  const [selectedBlockType, setSelectedBlockType] = useState<'busy' | 'tentative' | 'available'>('busy');
+  const [selectedBlockType, setSelectedBlockType] = useState<'busy' | 'available'>('busy');
   const [calendarFilters, setCalendarFilters] = useState({
     google: true,
     microsoft: true
@@ -24,125 +24,105 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
         </Typography>
       </Box>
 
-      {/* Main Layout: Sidebar + Calendar */}
-      <Box sx={{ display: 'flex', gap: 3, flexDirection: isMobile ? 'column' : 'row' }}>
-        {/* Left Sidebar */}
-        <Box sx={{ width: isMobile ? '100%' : 280, flexShrink: 0 }}>
-          {/* Connected Calendars Summary with Filters */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Connected Calendars</Typography>
-              <Stack spacing={1}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={calendarFilters.google}
-                      onChange={(e) => setCalendarFilters({ ...calendarFilters, google: e.target.checked })}
-                      size="small"
-                    />
-                  }
-                  label={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2">work@company.com</Typography>
-                      <Chip label="Primary" size="small" sx={{ height: 20, fontSize: '0.65rem' }} />
-                    </Box>
-                  }
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={calendarFilters.microsoft}
-                      onChange={(e) => setCalendarFilters({ ...calendarFilters, microsoft: e.target.checked })}
-                      size="small"
-                    />
-                  }
-                  label={
-                    <Typography variant="body2">personal@outlook.com</Typography>
-                  }
-                />
-              </Stack>
+      {/* Controls Row - Horizontal Layout */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexDirection: isMobile ? 'column' : 'row' }}>
+        {/* Connected Calendars Summary with Filters */}
+        <Card sx={{ flex: 1 }}>
+          <CardContent>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Connected Calendars</Typography>
+            <Stack spacing={1}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={calendarFilters.google}
+                    onChange={(e) => setCalendarFilters({ ...calendarFilters, google: e.target.checked })}
+                    size="small"
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2">work@company.com</Typography>
+                    <Chip label="Primary" size="small" sx={{ height: 20, fontSize: '0.65rem' }} />
+                  </Box>
+                }
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={calendarFilters.microsoft}
+                    onChange={(e) => setCalendarFilters({ ...calendarFilters, microsoft: e.target.checked })}
+                    size="small"
+                  />
+                }
+                label={
+                  <Typography variant="body2">personal@outlook.com</Typography>
+                }
+              />
+            </Stack>
+            <Button
+              variant="text"
+              size="small"
+              fullWidth
+              startIcon={<CalendarTodayIcon />}
+              sx={{ textTransform: 'none', mt: 2 }}
+            >
+              Connect more
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Availability Block Type Selector */}
+        <Card sx={{ flex: 1 }}>
+          <CardContent>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Set Availability</Typography>
+            <Stack direction="row" spacing={1}>
               <Button
-                variant="text"
-                size="small"
+                variant={selectedBlockType === 'busy' ? 'contained' : 'outlined'}
                 fullWidth
-                startIcon={<CalendarTodayIcon />}
-                sx={{ textTransform: 'none', mt: 2 }}
-              >
-                Connect more
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Availability Block Type Selector */}
-          <Card>
-            <CardContent>
-              <Typography variant="body2" sx={{ fontWeight: 600, mb: 2 }}>Set Availability</Typography>
-              <Stack spacing={1}>
-                <Button
-                  variant={selectedBlockType === 'busy' ? 'contained' : 'outlined'}
-                  fullWidth
-                  size="small"
-                  onClick={() => setSelectedBlockType('busy')}
-                  sx={{
-                    textTransform: 'none',
-                    bgcolor: selectedBlockType === 'busy' ? 'error.main' : 'transparent',
+                size="small"
+                onClick={() => setSelectedBlockType('busy')}
+                sx={{
+                  textTransform: 'none',
+                  bgcolor: selectedBlockType === 'busy' ? 'error.main' : 'transparent',
+                  borderColor: 'error.main',
+                  color: selectedBlockType === 'busy' ? 'white' : 'error.main',
+                  '&:hover': {
+                    bgcolor: selectedBlockType === 'busy' ? 'error.dark' : 'rgba(239, 68, 68, 0.1)',
                     borderColor: 'error.main',
-                    color: selectedBlockType === 'busy' ? 'white' : 'error.main',
-                    '&:hover': {
-                      bgcolor: selectedBlockType === 'busy' ? 'error.dark' : 'rgba(239, 68, 68, 0.1)',
-                      borderColor: 'error.main',
-                    }
-                  }}
-                >
-                  Busy
-                </Button>
-                <Button
-                  variant={selectedBlockType === 'tentative' ? 'contained' : 'outlined'}
-                  fullWidth
-                  size="small"
-                  onClick={() => setSelectedBlockType('tentative')}
-                  sx={{
-                    textTransform: 'none',
-                    bgcolor: selectedBlockType === 'tentative' ? 'secondary.main' : 'transparent',
-                    borderColor: 'secondary.main',
-                    color: selectedBlockType === 'tentative' ? 'white' : 'secondary.main',
-                    '&:hover': {
-                      bgcolor: selectedBlockType === 'tentative' ? 'secondary.dark' : 'rgba(252, 104, 0, 0.1)',
-                      borderColor: 'secondary.main',
-                    }
-                  }}
-                >
-                  Tentative
-                </Button>
-                <Button
-                  variant={selectedBlockType === 'available' ? 'contained' : 'outlined'}
-                  fullWidth
-                  size="small"
-                  onClick={() => setSelectedBlockType('available')}
-                  sx={{
-                    textTransform: 'none',
-                    bgcolor: selectedBlockType === 'available' ? 'success.main' : 'transparent',
+                  }
+                }}
+              >
+                Busy
+              </Button>
+              <Button
+                variant={selectedBlockType === 'available' ? 'contained' : 'outlined'}
+                fullWidth
+                size="small"
+                onClick={() => setSelectedBlockType('available')}
+                sx={{
+                  textTransform: 'none',
+                  bgcolor: selectedBlockType === 'available' ? 'success.main' : 'transparent',
+                  borderColor: 'success.main',
+                  color: selectedBlockType === 'available' ? 'white' : 'success.main',
+                  '&:hover': {
+                    bgcolor: selectedBlockType === 'available' ? 'success.dark' : 'rgba(34, 197, 94, 0.1)',
                     borderColor: 'success.main',
-                    color: selectedBlockType === 'available' ? 'white' : 'success.main',
-                    '&:hover': {
-                      bgcolor: selectedBlockType === 'available' ? 'success.dark' : 'rgba(34, 197, 94, 0.1)',
-                      borderColor: 'success.main',
-                    }
-                  }}
-                >
-                  Available
-                </Button>
-              </Stack>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
-                Click and drag on the calendar to set your {selectedBlockType} times
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
+                  }
+                }}
+              >
+                Available
+              </Button>
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+              Click and drag on the calendar to set your {selectedBlockType} times
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
 
-        {/* Calendar */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Card>
+      {/* Calendar - Full Width */}
+      <Box>
+        <Card>
         <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
           {/* Calendar Header */}
           <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'grey.200', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -223,7 +203,6 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         if (isDragging) {
                           e.currentTarget.style.backgroundColor =
                             selectedBlockType === 'busy' ? 'rgba(239, 68, 68, 0.1)' :
-                            selectedBlockType === 'tentative' ? 'rgba(245, 158, 11, 0.1)' :
                             'rgba(34, 197, 94, 0.1)';
                         }
                       }}
@@ -411,12 +390,10 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
                         height: (block.endHour - block.startHour) * 60 - 2,
                         bgcolor:
                           block.type === 'busy' ? 'rgba(239, 68, 68, 0.3)' :
-                          block.type === 'tentative' ? 'rgba(252, 104, 0, 0.3)' :
                           'rgba(34, 197, 94, 0.3)',
                         border: '2px dashed',
                         borderColor:
                           block.type === 'busy' ? 'error.main' :
-                          block.type === 'tentative' ? 'secondary.main' :
                           'success.main',
                         borderRadius: 0.5,
                         p: 0.5,
@@ -442,8 +419,7 @@ export default function MyAvailabilityTab({ isMobile = false }: { isMobile?: boo
             ))}
           </Box>
         </CardContent>
-          </Card>
-        </Box>
+        </Card>
       </Box>
     </Box>
   );
