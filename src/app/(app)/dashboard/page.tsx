@@ -29,6 +29,7 @@ import PeopleTab from './components/PeopleTab';
 import MyAvailabilityTab from './components/MyAvailabilityTab';
 import InviteeResponseForm from './components/InviteeResponseForm';
 import TopBar from '../components/TopBar';
+import TimeSettingsScreen from '../settings/time/TimeSettingsScreen';
 
 // DESIGN OPTION 3: Sidebar Navigation
 // Left sidebar navigation with main content area
@@ -346,6 +347,17 @@ export default function DashboardPage() {
                 <ListItemText primary="My Time" />
               </ListItemButton>
             </ListItem>
+
+            <ListItem disablePadding sx={{ mb: 1 }}>
+              <ListItemButton
+                selected={selectedSection === 'time-settings'}
+                onClick={() => setSelectedSection('time-settings')}
+                sx={{ borderRadius: '8px' }}
+              >
+                <ListItemIcon><SettingsIcon /></ListItemIcon>
+                <ListItemText primary="Time Settings" />
+              </ListItemButton>
+            </ListItem>
           </List>
         </Drawer>
 
@@ -354,7 +366,7 @@ export default function DashboardPage() {
         flex: 1,
         bgcolor: '#fafbfc',
       }}>
-        <Box sx={{ maxWidth: selectedSection === 'availability' ? 1400 : 800, mx: 'auto', px: 3, py: 4 }}>
+        <Box sx={{ maxWidth: selectedSection === 'availability' || selectedSection === 'time-settings' ? 1400 : 800, mx: 'auto', px: 3, py: 4 }}>
           {/* Section: Meetings */}
           {selectedSection === 'meetings' && (
             <Box>
@@ -538,6 +550,9 @@ export default function DashboardPage() {
 
           {/* Section: My Time / Availability */}
           {selectedSection === 'availability' && <MyAvailabilityTab />}
+
+          {/* Section: Time Settings */}
+          {selectedSection === 'time-settings' && <TimeSettingsScreen />}
 
         </Box>
       </Box>
