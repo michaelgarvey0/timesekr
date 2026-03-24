@@ -43,8 +43,46 @@ function generateTestData() {
   return { events, avail };
 }
 
+const PASSCODE = "timesekr2026";
+
+function PasswordGate({ onUnlock }) {
+  const [value, setValue] = useState("");
+  const [error, setError] = useState(false);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (value === PASSCODE) {
+      sessionStorage.setItem("ts_auth", "1");
+      onUnlock();
+    } else {
+      setError(true);
+      setTimeout(() => setError(false), 1500);
+    }
+  };
+  return (
+    <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-b from-[#0a0c4d] to-[#10137b]">
+      <form onSubmit={handleSubmit} className="flex flex-col items-center gap-4 bg-white rounded-2xl p-8 shadow-xl w-[340px]">
+        <h1 className="text-xl font-bold text-gray-800">timesēkr</h1>
+        <p className="text-sm text-gray-500 text-center">Enter the password to continue</p>
+        <input
+          type="password"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Password"
+          autoFocus
+          className={`w-full px-4 py-3 rounded-xl border text-base outline-none transition-all ${error ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-[#10137b] focus:border-2"}`}
+        />
+        <button type="submit" className="w-full h-[44px] rounded-xl border-none cursor-pointer text-base text-white font-bold bg-gradient-to-r from-[#e04200] to-[#e77f00] hover:brightness-110 transition-all">
+          Enter
+        </button>
+        {error && <span className="text-sm text-red-500">Wrong password</span>}
+      </form>
+    </div>
+  );
+}
+
 export default function App() {
-  const [activeNav, setActiveNav] = useState("meetings");
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem("ts_auth") === "1");
+  const [activeNav, setActiveNav] = useState(null);
   const [events, setEvents] = useState([]);
   const [availability, setAvailability] = useState([]);
   const [showCreate, setShowCreate] = useState(false);
@@ -257,6 +295,8 @@ export default function App() {
         return null;
     }
   };
+
+  if (!authed) return <PasswordGate onUnlock={() => setAuthed(true)} />;
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-gradient-to-b from-[#0a0c4d] to-[#10137b] p-6">

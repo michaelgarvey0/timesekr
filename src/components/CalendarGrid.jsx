@@ -776,9 +776,6 @@ function AvailBlock({ avail, slotHeight, layout, onDelete, onChangeStatus, onUpd
           padding: "4px 6px",
           background: s.bg,
           borderLeft: `3px dashed ${s.border}`,
-          borderRight: `1px solid ${s.border}`,
-          borderTop: `1px solid ${s.border}`,
-          borderBottom: `1px solid ${s.border}`,
           zIndex: 2,
         }}
       >
